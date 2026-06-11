@@ -13,8 +13,7 @@ var ScannerScreen = lazy(function() { return import("./screens/Scanner"); });
 var AIScreen     = lazy(function() { return import("./screens/AI"); });
 var LearnScreen  = lazy(function() { return import("./screens/Learn"); });
 var NewsScreen   = lazy(function() { return import("./screens/News"); });
-var CandleScreen = lazy(function() { return import("./screens/Candle"); });
-var CandleScreen = lazy(function() { return import("./screens/Candle"); });
+var CandleScreen = lazy(function() { return import("./screens/CandleScreen"); });
 
 function Loader() {
   return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 200, color: G, fontSize: 13, fontWeight: 700 }}>Loading...</div>;

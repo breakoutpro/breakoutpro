@@ -1,26 +1,21 @@
 import { useState, useEffect } from "react";
-import { G, R, DISCLAIMER } from "../utils/helpers";
-import { SECTORS } from "../data/stocks";
-import IndexCard from "../components/IndexCard";
-import StockRow from "../components/StockRow";
 
-// Default fallback data
-var DEFAULT_INDICES = {
-  nifty:     { ltp: 22467.90, pct: 1.35, up: true },
-  sensex:    { ltp: 73863.45, pct: 1.28, up: true },
-  bankNifty: { ltp: 48234.60, pct: 0.86, up: true },
-  midcap:    { ltp: 43876.20, pct: 0.74, up: true },
-};
+var DB = "#0A0E1A";
+var CB = "#0F1629";
+var BD = "#1E2D4A";
+var G = "#00C853";
+var G2 = "#00E676";
+var GOLD = "#F59E0B";
+var BLUE = "#1E90FF";
+var T1 = "#FFFFFF";
+var T2 = "#8899BB";
+var R = "#EF4444";
+var DISCLAIMER = "Educational only. Not SEBI registered. Not investment advice.";
 
-var DEFAULT_STOCKS = [
-  {sym:"RELIANCE", name:"Reliance",   ltp:2845.60, chgPct:1.71,  up:true,  sect:"Energy"},
-  {sym:"TCS",      name:"TCS",        ltp:3654.20, chgPct:-0.97, up:false, sect:"IT"},
-  {sym:"HDFCBANK", name:"HDFC Bank",  ltp:1742.50, chgPct:1.90,  up:true,  sect:"Bank"},
-  {sym:"ICICIBANK",name:"ICICI Bank", ltp:1289.30, chgPct:2.33,  up:true,  sect:"Bank"},
-  {sym:"INFY",     name:"Infosys",    ltp:1567.80, chgPct:-1.40, up:false, sect:"IT"},
-  {sym:"WIPRO",    name:"Wipro",      ltp:478.90,  chgPct:2.99,  up:true,  sect:"IT"},
-  {sym:"SBIN",     name:"SBI",        ltp:812.30,  chgPct:2.18,  up:true,  sect:"Bank"},
-  {sym:"AXISBANK", name:"Axis Bank",  ltp:1156.70, chgPct:1.47,  up:true,  sect:"Bank"},
+var SECTORS = [
+  {name:"IT",chg:1.82},{name:"Bank",chg:1.24},{name:"Auto",chg:0.94},
+  {name:"Pharma",chg:-0.32},{name:"Energy",chg:1.35},{name:"Metal",chg:3.24},
+  {name:"FMCG",chg:0.18},{name:"Realty",chg:2.10},{name:"Infra",chg:0.76},
 ];
 
 function isMktOpen() {
@@ -47,182 +42,264 @@ function parseNSEIndex(data, name) {
   return null;
 }
 
+function Spark(props) {
+  var data = props.data;
+  var color = props.color || G;
+  var w = props.w || 60;
+  var h = props.h || 28;
+  if (!data || data.length < 2) return null;
+  var min = Math.min.apply(null, data);
+  var max = Math.max.apply(null, data);
+  var range = max - min || 1;
+  var pts = data.map(function(v,i){
+    return (i/(data.length-1))*w+","+(h-((v-min)/range)*(h-4)+2);
+  }).join(" ");
+  return (
+    <svg width={w} height={h} style={{display:"block"}}>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function genSpark(base) {
+  var a=[]; var p=base;
+  for(var i=0;i<14;i++){p=p+(Math.random()-0.48)*base*0.004;a.push(p);}
+  return a;
+}
+
+function IndexCard(props) {
+  var d = props.d;
+  var spark = genSpark(d.ltp);
+  return (
+    <div style={{background:CB,border:"1px solid "+BD,borderRadius:14,padding:"12px 14px",cursor:"pointer",position:"relative",overflow:"hidden"}} onClick={props.onClick}>
+      <div style={{position:"absolute",top:0,right:0,width:60,height:"100%",opacity:0.15}}>
+        <Spark data={spark} color={d.up?G:R} w={60} h={70}/>
+      </div>
+      <div style={{fontSize:8,color:T2,fontWeight:600,marginBottom:4,letterSpacing:0.5}}>{d.label}</div>
+      <div style={{fontFamily:"monospace",fontSize:15,fontWeight:900,color:T1,marginBottom:4}}>
+        {d.ltp.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2})}
+      </div>
+      <div style={{display:"flex",alignItems:"center",gap:4}}>
+        <span style={{fontSize:9,fontWeight:700,color:d.up?G2:R}}>{d.up?"":""}</span>
+        <span style={{fontSize:10,fontWeight:700,color:d.up?G2:R}}>{d.up?"+":""}{d.pct.toFixed(2)}%</span>
+      </div>
+    </div>
+  );
+}
+
+function StockRow(props) {
+  var s = props.s;
+  var spark = genSpark(s.ltp);
+  return (
+    <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",borderBottom:"1px solid "+BD,cursor:"pointer"}} onClick={props.onClick}>
+      <div style={{width:36,height:36,borderRadius:10,background:"rgba(30,144,255,0.1)",border:"1px solid rgba(30,144,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+        <span style={{fontSize:8,fontWeight:800,color:BLUE}}>{s.sym.slice(0,3)}</span>
+      </div>
+      <div style={{flex:1}}>
+        <div style={{fontSize:12,fontWeight:700,color:T1}}>{s.sym}</div>
+        <div style={{fontSize:8,color:T2,marginTop:1}}>{s.sect}</div>
+      </div>
+      <Spark data={spark} color={s.up?G:R} w={44} h={20}/>
+      <div style={{textAlign:"right",minWidth:76}}>
+        <div style={{fontFamily:"monospace",fontSize:12,fontWeight:800,color:T1}}>
+          Rs{s.ltp>=1000?(s.ltp/1000).toFixed(1)+"K":s.ltp.toFixed(2)}
+        </div>
+        <div style={{background:s.up?"rgba(0,200,83,0.15)":"rgba(239,68,68,0.15)",borderRadius:5,padding:"1px 6px",fontSize:8,fontWeight:700,color:s.up?G2:R,marginTop:2}}>
+          {s.up?"+":""}{s.chgPct.toFixed(2)}%
+        </div>
+      </div>
+    </div>
+  );
+}
+
+var DEFAULT_STOCKS = [
+  {sym:"RELIANCE",name:"Reliance",  ltp:2845.60,chgPct:1.71,up:true, sect:"Energy"},
+  {sym:"TCS",     name:"TCS",       ltp:3654.20,chgPct:-0.97,up:false,sect:"IT"},
+  {sym:"HDFCBANK",name:"HDFC Bank", ltp:1742.50,chgPct:1.90,up:true, sect:"Bank"},
+  {sym:"ICICIBANK",name:"ICICI",    ltp:1289.30,chgPct:2.33,up:true, sect:"Bank"},
+  {sym:"INFY",    name:"Infosys",   ltp:1567.80,chgPct:-1.40,up:false,sect:"IT"},
+  {sym:"WIPRO",   name:"Wipro",     ltp:478.90, chgPct:2.99,up:true, sect:"IT"},
+  {sym:"SBIN",    name:"SBI",       ltp:812.30, chgPct:2.18,up:true, sect:"Bank"},
+  {sym:"AXISBANK",name:"Axis Bank", ltp:1156.70,chgPct:1.47,up:true, sect:"Bank"},
+];
+
+var DEFAULT_INDICES = {
+  nifty:    {ltp:23622.90,pct:0.00,up:true},
+  sensex:   {ltp:73863.45,pct:1.28,up:true},
+  bankNifty:{ltp:56814.80,pct:0.00,up:true},
+  midcap:   {ltp:17265.90,pct:0.00,up:true},
+};
+
 export default function HomeScreen(props) {
-  var nifty = props.nifty || DEFAULT_INDICES.nifty;
-  var sensex = props.sensex || DEFAULT_INDICES.sensex;
-  var bankNifty = props.bankNifty || DEFAULT_INDICES.bankNifty;
-  var midcap = props.midcap || DEFAULT_INDICES.midcap;
   var setTab = props.setTab;
   var user = props.user;
-  var glTab = props.glTab;
+  var glTab = props.glTab || "gainers";
   var setGlTab = props.setGlTab;
   var briefing = props.briefing;
   var briefingLoading = props.briefingLoading;
 
-  var [liveNifty, setLiveNifty] = useState(nifty);
-  var [liveSensex, setLiveSensex] = useState(sensex);
-  var [liveBankNifty, setLiveBankNifty] = useState(bankNifty);
-  var [liveMidcap, setLiveMidcap] = useState(midcap);
-  var [liveStocks, setLiveStocks] = useState(DEFAULT_STOCKS);
-  var [lastUpdated, setLastUpdated] = useState("");
-  var [isLive, setIsLive] = useState(false);
-  var [loading, setLoading] = useState(false);
+  var [liveNifty,    setLiveNifty]    = useState(props.nifty    || DEFAULT_INDICES.nifty);
+  var [liveSensex,   setLiveSensex]   = useState(props.sensex   || DEFAULT_INDICES.sensex);
+  var [liveBankNifty,setLiveBankNifty]= useState(props.bankNifty|| DEFAULT_INDICES.bankNifty);
+  var [liveMidcap,   setLiveMidcap]   = useState(props.midcap   || DEFAULT_INDICES.midcap);
+  var [liveStocks,   setLiveStocks]   = useState(DEFAULT_STOCKS);
+  var [lastUpdated,  setLastUpdated]  = useState("");
+  var [isLive,       setIsLive]       = useState(false);
+  var [loading,      setLoading]      = useState(false);
+  var [time,         setTime]         = useState(new Date());
 
-  function fetchLiveData() {
-    if (loading) return;
+  useEffect(function(){
+    var t = setInterval(function(){setTime(new Date());},1000);
+    return function(){clearInterval(t);};
+  },[]);
+
+  function fetchLive() {
+    if(loading) return;
     setLoading(true);
     fetch("/api/nse?path=allIndices")
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        var n = parseNSEIndex(data, "nifty 50");
-        var s = parseNSEIndex(data, "sensex");
-        var bn = parseNSEIndex(data, "nifty bank");
-        var mc = parseNSEIndex(data, "nifty midcap");
-        if (n && n.ltp > 0) { setLiveNifty(n); setIsLive(true); }
-        if (s && s.ltp > 0) setLiveSensex(s);
-        if (bn && bn.ltp > 0) setLiveBankNifty(bn);
-        if (mc && mc.ltp > 0) setLiveMidcap(mc);
-        var now = new Date();
-        setLastUpdated(now.toLocaleTimeString("en-IN", {hour:"2-digit", minute:"2-digit"}));
+      .then(function(r){return r.json();})
+      .then(function(data){
+        var n  = parseNSEIndex(data,"nifty 50");
+        var s  = parseNSEIndex(data,"sensex");
+        var bn = parseNSEIndex(data,"nifty bank");
+        var mc = parseNSEIndex(data,"nifty midcap");
+        if(n&&n.ltp>0){setLiveNifty(n);setIsLive(true);}
+        if(s&&s.ltp>0) setLiveSensex(s);
+        if(bn&&bn.ltp>0) setLiveBankNifty(bn);
+        if(mc&&mc.ltp>0) setLiveMidcap(mc);
+        setLastUpdated(new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"}));
         setLoading(false);
       })
-      .catch(function() {
-        setLoading(false);
-        setIsLive(false);
-      });
+      .catch(function(){setLoading(false);setIsLive(false);});
   }
 
-  function fetchTopStocks() {
+  function fetchStocks() {
     fetch("/api/nse?path=equity-stockIndices&index=NIFTY%2050")
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        var arr = (data.data || []).slice(1, 13);
-        if (arr.length > 0) {
-          var mapped = arr.map(function(s) {
-            var chg = parseFloat(s.pChange || 0);
-            return {
-              sym: s.symbol || "",
-              name: s.symbol || "",
-              ltp: parseFloat(s.lastPrice || 0),
-              chgPct: Math.abs(chg),
-              up: chg >= 0,
-              sect: "NSE",
-              vol: s.totalTradedVolume || "0"
-            };
-          }).filter(function(s) { return s.ltp > 0; });
-          if (mapped.length > 0) setLiveStocks(mapped);
+      .then(function(r){return r.json();})
+      .then(function(data){
+        var arr=(data.data||[]).slice(1,13);
+        if(arr.length>0){
+          var mapped=arr.map(function(s){
+            var chg=parseFloat(s.pChange||0);
+            return {sym:s.symbol||"",name:s.symbol||"",ltp:parseFloat(s.lastPrice||0),chgPct:Math.abs(chg),up:chg>=0,sect:"NSE",vol:s.totalTradedVolume||"0"};
+          }).filter(function(s){return s.ltp>0;});
+          if(mapped.length>0) setLiveStocks(mapped);
         }
       })
-      .catch(function() {});
+      .catch(function(){});
   }
 
-  useEffect(function() {
-    // Fetch on load
-    fetchLiveData();
-    fetchTopStocks();
+  useEffect(function(){
+    fetchLive(); fetchStocks();
+    var t=setInterval(function(){if(isMktOpen()){fetchLive();fetchStocks();}},15000);
+    return function(){clearInterval(t);};
+  },[]);
 
-    // Auto refresh every 15 seconds if market open
-    var t = setInterval(function() {
-      if (isMktOpen()) {
-        fetchLiveData();
-        fetchTopStocks();
-      }
-    }, 15000);
+  var hour = time.getHours();
+  var greeting = hour<12?"Good Morning":hour<17?"Good Afternoon":"Good Evening";
+  var uname = user?user.name.split(" ")[0]:"Trader";
+  var timeStr = time.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
 
-    return function() { clearInterval(t); };
-  }, []);
-
-  var hour = new Date().getHours();
-  var greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
-  var uname = user ? user.name.split(" ")[0] : "Trader";
-
-  var indices = [
-    { label: "NIFTY 50",   ltp: liveNifty.ltp,     pct: liveNifty.pct,     up: liveNifty.up },
-    { label: "SENSEX",     ltp: liveSensex.ltp,     pct: liveSensex.pct,    up: liveSensex.up },
-    { label: "BANK NIFTY", ltp: liveBankNifty.ltp,  pct: liveBankNifty.pct, up: liveBankNifty.up },
-    { label: "MIDCAP",     ltp: liveMidcap.ltp,     pct: liveMidcap.pct,    up: liveMidcap.up },
+  var indices=[
+    {label:"NIFTY 50",   ltp:liveNifty.ltp,     pct:liveNifty.pct,     up:liveNifty.up},
+    {label:"SENSEX",     ltp:liveSensex.ltp,     pct:liveSensex.pct,    up:liveSensex.up},
+    {label:"BANK NIFTY", ltp:liveBankNifty.ltp,  pct:liveBankNifty.pct, up:liveBankNifty.up},
+    {label:"MIDCAP",     ltp:liveMidcap.ltp,     pct:liveMidcap.pct,    up:liveMidcap.up},
   ];
 
-  var quick = [
-    {label:"OI Chain",  tab:"oi"},      {label:"Scanner",   tab:"scanner"},
-    {label:"Scalper",   tab:"scalper"},  {label:"Chart",     tab:"chart"},
-    {label:"Analysis",  tab:"analysis"}, {label:"AI Chat",   tab:"ai"},
-    {label:"Learn",     tab:"learn"},    {label:"News",      tab:"news"},
+  var quick=[
+    {label:"OI Chain",id:"oi"},{label:"Scanner",id:"scanner"},
+    {label:"Scalper",id:"scalper"},{label:"Chart",id:"chart"},
+    {label:"Analysis",id:"analysis"},{label:"AI Chat",id:"ai"},
+    {label:"Learn",id:"learn"},{label:"Quiz",id:"quiz"},
   ];
 
-  var sorted = liveStocks.slice().sort(function(a, b) {
-    return glTab == "gainers" ? b.chgPct - a.chgPct : a.chgPct - b.chgPct;
-  }).slice(0, 5);
+  var sorted = liveStocks.slice().sort(function(a,b){
+    return glTab=="gainers"?b.chgPct-a.chgPct:a.chgPct-b.chgPct;
+  }).slice(0,5);
+
+  var mktOpen = isMktOpen();
 
   return (
-    <div style={{background:"#F8F9FA", minHeight:"100%", paddingBottom:80}}>
+    <div style={{background:DB,minHeight:"100%",paddingBottom:80,color:T1,fontFamily:"Inter,Arial,sans-serif"}}>
 
-      {/* Greeting */}
-      <div style={{background:"#fff", padding:"12px 16px", borderBottom:"1px solid #F0F0F0", display:"flex", alignItems:"center", justifyContent:"space-between"}}>
-        <div style={{display:"flex", alignItems:"center", gap:10}}>
-          <div style={{width:40, height:40, borderRadius:"50%", background:"linear-gradient(135deg,#00C853,#00A040)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, fontWeight:900, color:"#fff"}}>{uname[0].toUpperCase()}</div>
+      {/* Header */}
+      <div style={{background:CB,padding:"12px 16px",borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <div style={{width:42,height:42,borderRadius:12,background:"linear-gradient(135deg,"+G+",#00A040)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:900,color:"#fff",boxShadow:"0 2px 12px rgba(0,200,83,0.3)"}}>{uname[0].toUpperCase()}</div>
           <div>
-            <div style={{fontSize:9, color:"#9CA3AF"}}>{greeting}</div>
-            <div style={{fontSize:16, color:"#111827", fontWeight:800}}>{uname}</div>
+            <div style={{fontSize:9,color:T2}}>{greeting}</div>
+            <div style={{fontSize:16,color:T1,fontWeight:800}}>{uname}</div>
           </div>
         </div>
-        <div style={{display:"flex", alignItems:"center", gap:6}}>
-          {isLive ? (
-            <div style={{display:"flex", alignItems:"center", gap:4, background:"#DCFCE7", borderRadius:20, padding:"3px 8px"}}>
-              <div style={{width:6, height:6, borderRadius:"50%", background:G}}></div>
-              <span style={{fontSize:7, fontWeight:700, color:"#166534"}}>LIVE {lastUpdated}</span>
-            </div>
-          ) : (
-            <button onClick={fetchLiveData} style={{background:"#F3F4F6", border:"none", borderRadius:20, padding:"3px 8px", fontSize:7, color:"#6B7280", cursor:"pointer", fontFamily:"inherit"}}>
-              {loading ? "Loading..." : "Refresh"}
-            </button>
-          )}
-          <button style={{background:"#F9FAFB", border:"1px solid #E5E7EB", borderRadius:10, width:36, height:36, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", fontSize:14}} onClick={function(){ setTab("news"); }}>&#128276;</button>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <div style={{textAlign:"right"}}>
+            <div style={{fontSize:11,fontFamily:"monospace",fontWeight:700,color:mktOpen?G2:T2}}>{timeStr}</div>
+            {isLive?(
+              <div style={{display:"flex",alignItems:"center",gap:3,justifyContent:"flex-end"}}>
+                <div style={{width:5,height:5,borderRadius:"50%",background:G2}}></div>
+                <span style={{fontSize:7,fontWeight:700,color:G2}}>LIVE {lastUpdated}</span>
+              </div>
+            ):(
+              <button onClick={fetchLive} style={{background:"none",border:"none",fontSize:7,color:T2,cursor:"pointer",fontFamily:"inherit"}}>{loading?"...":"Refresh"}</button>
+            )}
+          </div>
+          <button style={{background:"rgba(255,255,255,0.06)",border:"1px solid "+BD,borderRadius:10,width:36,height:36,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:14,color:T1}} onClick={function(){setTab("news");}}>&#128276;</button>
         </div>
       </div>
 
       <div style={{padding:"14px 14px 0"}}>
 
+        {/* Market Status Banner */}
+        <div style={{background:mktOpen?"rgba(0,200,83,0.08)":"rgba(30,144,255,0.08)",border:"1px solid "+(mktOpen?"rgba(0,200,83,0.2)":"rgba(30,144,255,0.2)"),borderRadius:12,padding:"8px 14px",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{display:"flex",alignItems:"center",gap:6}}>
+            <div style={{width:7,height:7,borderRadius:"50%",background:mktOpen?G2:BLUE}}></div>
+            <span style={{fontSize:10,fontWeight:700,color:mktOpen?G2:BLUE}}>{mktOpen?"Market Open  Live Data":"Market Closed  Opens 9:15 AM"}</span>
+          </div>
+          <span style={{fontSize:8,color:T2}}>NSE/BSE</span>
+        </div>
+
         {/* AI Briefing */}
-        <div style={{background:"linear-gradient(135deg,#F0FDF4,#DCFCE7)", border:"1px solid #BBF7D0", borderRadius:16, padding:16, marginBottom:14}}>
-          <div style={{display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8}}>
-            <div style={{display:"flex", alignItems:"center", gap:8}}>
-              <div style={{width:36, height:36, borderRadius:10, background:"linear-gradient(135deg,#00C853,#00A040)", display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontSize:13, fontWeight:900}}>AI</div>
+        <div style={{background:"linear-gradient(135deg,rgba(0,200,83,0.08),rgba(0,230,118,0.05))",border:"1px solid rgba(0,200,83,0.2)",borderRadius:16,padding:16,marginBottom:14}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,"+G+",#00A040)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:13,fontWeight:900}}>AI</div>
               <div>
-                <div style={{fontSize:12, fontWeight:700, color:"#111827"}}>AI Market Briefing</div>
-                <div style={{fontSize:8, color:"#6B7280"}}>{new Date().toLocaleDateString("en-IN", {weekday:"long", day:"numeric", month:"short"})}</div>
+                <div style={{fontSize:12,fontWeight:700,color:T1}}>AI Market Briefing</div>
+                <div style={{fontSize:8,color:T2}}>{new Date().toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"short"})}</div>
               </div>
             </div>
-            <button onClick={props.onBriefing} style={{background:briefing?"transparent":G, border:briefing?"1px solid #BBF7D0":"none", borderRadius:20, padding:"6px 14px", color:briefing?"#166534":"#fff", fontSize:9, fontWeight:700, cursor:"pointer", fontFamily:"inherit"}}>
-              {briefingLoading ? "Loading..." : briefing ? "Refresh" : "Get Briefing"}
+            <button onClick={props.onBriefing} style={{background:briefing?"transparent":G,border:briefing?"1px solid rgba(0,200,83,0.3)":"none",borderRadius:20,padding:"6px 14px",color:briefing?G2:"#fff",fontSize:9,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
+              {briefingLoading?"Loading...":briefing?"Refresh":"Get Briefing"}
             </button>
           </div>
-          {briefingLoading ? (
-            <div style={{padding:"8px 0", textAlign:"center", fontSize:10, color:"#374151"}}>AI analyzing markets...</div>
-          ) : briefing ? (
-            <div style={{background:"rgba(255,255,255,0.8)", borderRadius:10, padding:10, fontSize:10, color:"#374151", lineHeight:1.7}}>{briefing}</div>
-          ) : (
-            <div style={{background:"rgba(255,255,255,0.7)", borderRadius:12, padding:12, textAlign:"center"}}>
-              <div style={{fontSize:11, color:"#374151", fontWeight:600}}>Your Daily Market Briefing</div>
-              <div style={{fontSize:9, color:"#6B7280", marginTop:3}}>Tap Get Briefing for AI analysis</div>
+          {briefingLoading?(
+            <div style={{padding:"8px 0",textAlign:"center",fontSize:10,color:T2}}>AI analyzing markets...</div>
+          ):briefing?(
+            <div style={{background:"rgba(255,255,255,0.04)",borderRadius:10,padding:10,fontSize:10,color:T2,lineHeight:1.7}}>{briefing}</div>
+          ):(
+            <div style={{background:"rgba(255,255,255,0.03)",borderRadius:12,padding:12,textAlign:"center"}}>
+              <div style={{fontSize:11,color:T1,fontWeight:600}}>Your Daily Market Briefing</div>
+              <div style={{fontSize:9,color:T2,marginTop:3}}>Tap Get Briefing for AI analysis</div>
             </div>
           )}
         </div>
 
         {/* Index Cards */}
-        <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:14}}>
-          {indices.map(function(d) {
-            return <IndexCard key={d.label} d={d} onClick={function(){ setTab("markets"); }}/>;
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+          {indices.map(function(d){
+            return <IndexCard key={d.label} d={d} onClick={function(){setTab("markets");}}/>;
           })}
         </div>
 
         {/* Quick Access */}
         <div style={{marginBottom:14}}>
-          <div style={{display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8}}>
-            {quick.map(function(q) {
+          <div style={{fontSize:11,fontWeight:700,color:T1,marginBottom:8}}>Quick Access</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
+            {quick.map(function(q){
               return (
-                <button key={q.label} style={{background:"#fff", border:"1px solid #F0F0F0", borderRadius:12, padding:"10px 6px", display:"flex", flexDirection:"column", alignItems:"center", gap:4, cursor:"pointer", fontFamily:"inherit", boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}} onClick={function(){ setTab(q.tab); }}>
-                  <span style={{fontSize:8, color:"#374151", fontWeight:600, textAlign:"center"}}>{q.label}</span>
+                <button key={q.label} style={{background:CB,border:"1px solid "+BD,borderRadius:12,padding:"10px 6px",display:"flex",flexDirection:"column",alignItems:"center",gap:4,cursor:"pointer",fontFamily:"inherit"}} onClick={function(){setTab(q.id);}}>
+                  <span style={{fontSize:8,color:T2,fontWeight:600,textAlign:"center"}}>{q.label}</span>
                 </button>
               );
             })}
@@ -231,32 +308,30 @@ export default function HomeScreen(props) {
 
         {/* Gainers / Losers */}
         <div style={{marginBottom:14}}>
-          <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8}}>
-            <div style={{display:"flex", background:"#F3F4F6", borderRadius:20, padding:3}}>
-              {["gainers","losers"].map(function(t) {
-                var act = glTab == t;
-                return <button key={t} style={{background:act?"#fff":"transparent", border:"none", borderRadius:17, padding:"5px 12px", color:act?"#111827":"#6B7280", fontSize:9, fontWeight:act?700:500, cursor:"pointer", fontFamily:"inherit", boxShadow:act?"0 1px 4px rgba(0,0,0,0.08)":"none"}} onClick={function(){ setGlTab(t); }}>{t=="gainers"?"Gainers":"Losers"}</button>;
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+            <div style={{display:"flex",background:"rgba(255,255,255,0.05)",borderRadius:20,padding:3,border:"1px solid "+BD}}>
+              {["gainers","losers"].map(function(t){
+                var act=glTab==t;
+                return <button key={t} style={{background:act?G:"transparent",border:"none",borderRadius:17,padding:"5px 12px",color:act?"#fff":T2,fontSize:9,fontWeight:act?700:500,cursor:"pointer",fontFamily:"inherit"}} onClick={function(){setGlTab(t);}}>{t=="gainers"?"Gainers":"Losers"}</button>;
               })}
             </div>
-            <button style={{background:"none", border:"none", color:G, fontSize:9, fontWeight:600, cursor:"pointer", fontFamily:"inherit"}} onClick={function(){ setTab("markets"); }}>View All</button>
+            <button style={{background:"none",border:"none",color:G,fontSize:9,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}} onClick={function(){setTab("markets");}}>View All</button>
           </div>
-          <div style={{background:"#fff", borderRadius:12, border:"1px solid #F0F0F0", overflow:"hidden"}}>
-            {sorted.map(function(s) {
-              return <StockRow key={s.sym} s={s} onClick={function(){ setTab("markets"); }}/>;
-            })}
+          <div style={{background:CB,borderRadius:12,border:"1px solid "+BD,overflow:"hidden"}}>
+            {sorted.map(function(s){return <StockRow key={s.sym} s={s} onClick={function(){setTab("markets");}}/>;  })}
           </div>
         </div>
 
         {/* Sectors */}
         <div style={{marginBottom:14}}>
-          <div style={{fontSize:11, fontWeight:700, color:"#111827", marginBottom:8}}>Sector Performance</div>
-          <div style={{display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6}}>
-            {SECTORS.map(function(s) {
-              var up = s.chg >= 0;
+          <div style={{fontSize:11,fontWeight:700,color:T1,marginBottom:8}}>Sector Performance</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6}}>
+            {SECTORS.map(function(s){
+              var up=s.chg>=0;
               return (
-                <div key={s.name} style={{background:up?"#F0FDF4":"#FFF1F2", border:"1px solid "+(up?"#BBF7D0":"#FECDD3"), borderRadius:10, padding:"8px", textAlign:"center"}}>
-                  <div style={{fontSize:9, fontWeight:600, color:"#374151"}}>{s.name}</div>
-                  <div style={{fontSize:10, fontWeight:700, color:up?G:R, marginTop:2}}>{up?"+":""}{s.chg.toFixed(2)}%</div>
+                <div key={s.name} style={{background:CB,border:"1px solid "+(up?"rgba(0,200,83,0.2)":"rgba(239,68,68,0.2)"),borderRadius:10,padding:"8px",textAlign:"center"}}>
+                  <div style={{fontSize:9,fontWeight:600,color:T2}}>{s.name}</div>
+                  <div style={{fontSize:11,fontWeight:700,color:up?G2:R,marginTop:2}}>{up?"+":""}{s.chg.toFixed(2)}%</div>
                 </div>
               );
             })}
@@ -264,11 +339,11 @@ export default function HomeScreen(props) {
         </div>
 
         {/* Disclaimer */}
-        <div style={{background:"#FFF7ED", border:"1px solid #FED7AA", borderRadius:10, padding:"9px 12px", marginBottom:6}}>
-          <div style={{fontSize:7.5, color:"#92400E"}}>! {DISCLAIMER}</div>
+        <div style={{background:"rgba(249,115,22,0.08)",border:"1px solid rgba(249,115,22,0.2)",borderRadius:10,padding:"9px 12px",marginBottom:6}}>
+          <div style={{fontSize:7.5,color:"#F97316"}}>! {DISCLAIMER}</div>
         </div>
 
       </div>
     </div>
   );
-      }
+              }

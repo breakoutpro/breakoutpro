@@ -18,6 +18,7 @@ var ChartEngine    = lazy(function(){ return import("./screens/Chart"); });
 var CandleDetector = lazy(function(){ return import("./screens/CandleDetector"); });
 var MarketAnalysis = lazy(function(){ return import("./screens/MarketAnalysis"); });
 var ScalperMode    = lazy(function(){ return import("./screens/ScalperMode"); });
+var QuizScreen     = lazy(function(){ return import("./screens/QuizScreen"); });
 
 function Loader() {
   return (
@@ -103,6 +104,7 @@ function MoreScreen(props) {
     {label:"Journal",           id:"journal",  sub:"Track trades and P&L"},
     {label:"Challenges",        id:"challenges",sub:"Quiz and XP badges"},
     {label:"Premium",           id:"sub",      sub:"Upgrade for unlimited"},
+    {label:"Daily Quiz",        id:"quiz",     sub:"Earn XP and badges"},
     {label:"Tools",             id:"tools",    sub:"R:R and Position size"},
   ];
   return (
@@ -184,7 +186,7 @@ export default function App() {
     {label:"Chart Engine",id:"chart"},{label:"Scalper Mode",id:"scalper"},
     {label:"Candle Detector",id:"detector"},{label:"Market Analysis",id:"analysis"},
     {label:"Learn",id:"learn"},{label:"AI Chat",id:"ai"},
-    {label:"News",id:"news"},{label:"More",id:"more"},
+    {label:"News",id:"news"},{label:"Quiz",id:"quiz"},{label:"More",id:"more"},
   ];
 
   var hp={nifty:nifty,sensex:sensex,bankNifty:bankNifty,midcap:midcap,
@@ -206,9 +208,10 @@ export default function App() {
         {tab=="analysis" ? <MarketAnalysis/> : null}
         {tab=="scalper"  ? <ScalperMode/> : null}
         {tab=="more"     ? <MoreScreen setTab={setTab}/> : null}
+        {tab=="quiz"     ? <QuizScreen/> : null}
         {tab=="oi"       ? <div style={{background:"#0B0B0B",minHeight:"100%",padding:20,color:"#fff",paddingBottom:80}}><div style={{fontSize:14,fontWeight:700,marginBottom:10}}>OI Chain</div><div style={{fontSize:10,color:"#666"}}>Coming soon  Live NIFTY Options Chain</div></div> : null}
         {tab=="tools"    ? <div style={{background:"#F8F9FA",minHeight:"100%",padding:20,paddingBottom:80}}><div style={{fontSize:14,fontWeight:700,color:"#111827"}}>Tools</div><div style={{fontSize:10,color:"#6B7280",marginTop:4}}>R:R Calculator, Position Size coming soon</div></div> : null}
-        {tab!="home"&&tab!="markets"&&tab!="scanner"&&tab!="learn"&&tab!="ai"&&tab!="news"&&tab!="candle"&&tab!="chart"&&tab!="detector"&&tab!="analysis"&&tab!="scalper"&&tab!="more"&&tab!="oi"&&tab!="tools" ? <MoreScreen setTab={setTab}/> : null}
+        {tab!="home"&&tab!="markets"&&tab!="scanner"&&tab!="learn"&&tab!="ai"&&tab!="news"&&tab!="candle"&&tab!="chart"&&tab!="detector"&&tab!="analysis"&&tab!="scalper"&&tab!="more"&&tab!="oi"&&tab!="tools"&&tab!="quiz" ? <MoreScreen setTab={setTab}/> : null}
       </Suspense>
     );
   }
@@ -269,4 +272,4 @@ export default function App() {
       ):null}
     </div>
   );
-}
+    }

@@ -227,14 +227,108 @@ function StockDetail(props) {
   );
 }
 
+
+function SectorDetail(props) {
+  var s = props.sector;
+  var up = s.chg >= 0;
+  var spark = genSpark(22000 + s.chg * 100);
+
+  var sectorStocks = {
+    IT:     [{sym:"TCS",ltp:3654,chgPct:0.97,up:false},{sym:"INFY",ltp:1567,chgPct:1.40,up:false},{sym:"WIPRO",ltp:478,chgPct:2.99,up:true},{sym:"HCL",ltp:1876,chgPct:1.82,up:true}],
+    Bank:   [{sym:"HDFCBANK",ltp:1742,chgPct:1.90,up:true},{sym:"ICICIBANK",ltp:1289,chgPct:2.33,up:true},{sym:"SBIN",ltp:812,chgPct:2.18,up:true},{sym:"AXISBANK",ltp:1156,chgPct:1.47,up:true}],
+    Auto:   [{sym:"MARUTI",ltp:13240,chgPct:1.07,up:true},{sym:"TATAMOTORS",ltp:945,chgPct:2.23,up:true},{sym:"BAJAJ-AUTO",ltp:8934,chgPct:0.84,up:true},{sym:"HEROMOTOCO",ltp:4123,chgPct:0.62,up:true}],
+    Pharma: [{sym:"SUNPHARMA",ltp:1678,chgPct:0.98,up:false},{sym:"DRREDDY",ltp:5432,chgPct:0.45,up:false},{sym:"CIPLA",ltp:1543,chgPct:0.12,up:false},{sym:"DIVISLAB",ltp:4321,chgPct:0.78,up:true}],
+    Energy: [{sym:"RELIANCE",ltp:2845,chgPct:1.71,up:true},{sym:"ONGC",ltp:287,chgPct:1.23,up:true},{sym:"NTPC",ltp:398,chgPct:0.94,up:true},{sym:"POWERGRID",ltp:334,chgPct:0.67,up:true}],
+    Metal:  [{sym:"TATASTEEL",ltp:165,chgPct:3.24,up:true},{sym:"HINDALCO",ltp:678,chgPct:2.87,up:true},{sym:"JSWSTEEL",ltp:934,chgPct:2.54,up:true},{sym:"SAIL",ltp:134,chgPct:1.98,up:true}],
+    FMCG:   [{sym:"ITC",ltp:467,chgPct:0.34,up:true},{sym:"HUL",ltp:2345,chgPct:0.18,up:true},{sym:"NESTLEIND",ltp:2456,chgPct:0.45,up:false},{sym:"BRITANNIA",ltp:5678,chgPct:0.23,up:false}],
+    Realty: [{sym:"DLF",ltp:876,chgPct:2.10,up:true},{sym:"GODREJPROP",ltp:2345,chgPct:1.87,up:true},{sym:"OBEROIRLTY",ltp:1876,chgPct:1.65,up:true},{sym:"PRESTIGE",ltp:1543,chgPct:1.43,up:true}],
+    Infra:  [{sym:"LT",ltp:3456,chgPct:0.76,up:true},{sym:"ADANIPORTS",ltp:1234,chgPct:0.54,up:true},{sym:"SIEMENS",ltp:6789,chgPct:0.98,up:true},{sym:"ABB",ltp:7654,chgPct:0.87,up:true}],
+  };
+
+  var stocks = sectorStocks[s.name] || [];
+
+  return (
+    <div style={{background:DB,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:20,animation:"slideIn 0.15s ease-out"}}>
+      <div style={{background:CB,padding:"12px 16px",borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",gap:10}}>
+        <button onClick={props.onBack} style={{background:"rgba(255,255,255,0.08)",border:"none",borderRadius:8,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:16,color:T1}}>&#8592;</button>
+        <div style={{flex:1}}>
+          <div style={{fontSize:16,fontWeight:900,color:T1}}>{s.name} Sector</div>
+          <div style={{fontSize:9,color:T2}}>{stocks.length} stocks</div>
+        </div>
+        <div style={{background:up?"rgba(0,200,83,0.15)":"rgba(239,68,68,0.15)",borderRadius:8,padding:"6px 12px"}}>
+          <div style={{fontSize:14,fontWeight:900,color:up?G2:R}}>{up?"+":""}{s.chg.toFixed(2)}%</div>
+        </div>
+      </div>
+
+      <div style={{padding:14}}>
+        <div style={{background:CB,border:"1px solid "+BD,borderRadius:14,padding:14,marginBottom:14}}>
+          <div style={{fontSize:10,color:T2,marginBottom:6}}>Sector Performance</div>
+          <MiniChart data={spark} color={up?G:R} w={340} h={60}/>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginTop:10}}>
+            {[["Today",(up?"+":"")+s.chg.toFixed(2)+"%",up?G2:R],["Trend",up?"Bullish":"Bearish",up?G2:R],["Stocks",stocks.length+" active","#8899BB"]].map(function(r){
+              return (
+                <div key={r[0]} style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"8px",textAlign:"center"}}>
+                  <div style={{fontSize:7,color:T2,marginBottom:2}}>{r[0]}</div>
+                  <div style={{fontSize:11,fontWeight:700,color:r[2]}}>{r[1]}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{fontSize:12,fontWeight:700,color:T1,marginBottom:10}}>Top Stocks</div>
+        <div style={{background:CB,border:"1px solid "+BD,borderRadius:12,overflow:"hidden"}}>
+          {stocks.map(function(st){
+            var sp = genSpark(st.ltp);
+            return (
+              <div key={st.sym} style={{display:"flex",alignItems:"center",gap:10,padding:"11px 14px",borderBottom:"1px solid "+BD}}>
+                <div style={{width:36,height:36,borderRadius:10,background:"rgba(30,144,255,0.1)",border:"1px solid rgba(30,144,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <span style={{fontSize:7,fontWeight:800,color:"#1E90FF"}}>{st.sym.slice(0,3)}</span>
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:12,fontWeight:700,color:T1}}>{st.sym}</div>
+                </div>
+                <MiniChart data={sp} color={st.up?G:R} w={44} h={20}/>
+                <div style={{textAlign:"right",minWidth:76}}>
+                  <div style={{fontFamily:"monospace",fontSize:11,fontWeight:700,color:T1}}>Rs{st.ltp>=1000?(st.ltp/1000).toFixed(1)+"K":st.ltp}</div>
+                  <div style={{background:st.up?"rgba(0,200,83,0.15)":"rgba(239,68,68,0.15)",borderRadius:4,padding:"1px 6px",fontSize:8,fontWeight:700,color:st.up?G2:R}}>{st.up?"+":""}{st.chgPct.toFixed(2)}%</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{background:"rgba(249,115,22,0.08)",border:"1px solid rgba(249,115,22,0.2)",borderRadius:10,padding:10,marginTop:12}}>
+          <div style={{fontSize:8,color:"#F97316"}}>Educational only. Not SEBI registered. Not investment advice.</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function MarketsScreen(props) {
-  var stocks = props.stocks || [];
+  var DEMO_STOCKS = [
+    {sym:"RELIANCE", name:"Reliance Industries", ltp:2845.60, chgPct:1.71, up:true,  sect:"Energy"},
+    {sym:"TCS",      name:"Tata Consultancy",    ltp:3654.20, chgPct:0.97, up:false, sect:"IT"},
+    {sym:"HDFCBANK", name:"HDFC Bank",           ltp:1742.50, chgPct:1.90, up:true,  sect:"Bank"},
+    {sym:"ICICIBANK",name:"ICICI Bank",          ltp:1289.30, chgPct:2.33, up:true,  sect:"Bank"},
+    {sym:"INFY",     name:"Infosys",             ltp:1567.80, chgPct:1.40, up:false, sect:"IT"},
+    {sym:"WIPRO",    name:"Wipro",               ltp:478.90,  chgPct:2.99, up:true,  sect:"IT"},
+    {sym:"TATAMOTORS",name:"Tata Motors",        ltp:945.60,  chgPct:2.23, up:true,  sect:"Auto"},
+    {sym:"SBIN",     name:"State Bank India",    ltp:812.30,  chgPct:2.18, up:true,  sect:"Bank"},
+    {sym:"AXISBANK", name:"Axis Bank",           ltp:1156.70, chgPct:1.47, up:true,  sect:"Bank"},
+    {sym:"BAJFINANCE",name:"Bajaj Finance",      ltp:7234.50, chgPct:1.90, up:true,  sect:"NBFC"},
+    {sym:"MARUTI",   name:"Maruti Suzuki",       ltp:13240,   chgPct:1.07, up:true,  sect:"Auto"},
+    {sym:"SUNPHARMA",name:"Sun Pharma",          ltp:1678.40, chgPct:0.98, up:false, sect:"Pharma"},
+  ];
+  var stocks = (props.stocks && props.stocks.length > 0) ? props.stocks : DEMO_STOCKS;
   var [search, setSearch] = useState("");
   var [sort, setSort] = useState("pct");
   var [view, setView] = useState("markets");
   var [selIdx, setSelIdx] = useState(null);
   var [activeTab, setActiveTab] = useState("stocks");
   var [selStock, setSelStock] = useState(null);
+  var [selSector, setSelSector] = useState(null);
 
   // Inject animation CSS once
   useEffect(function(){
@@ -247,6 +341,7 @@ export default function MarketsScreen(props) {
   },[]);
 
   if(selStock) return <StockDetail stock={selStock} onBack={function(){setSelStock(null);}}/>;
+  if(selSector) return <SectorDetail sector={selSector} onBack={function(){setSelSector(null);}}/>;
 
   var indices = [
     {label:"NIFTY 50",   ltp:23622.90, pct:0.00, up:true},
@@ -255,105 +350,4 @@ export default function MarketsScreen(props) {
     {label:"MIDCAP",     ltp:17265.90, pct:0.00, up:true},
   ];
 
-  if (selIdx) return <IndexDetail idx={selIdx} onBack={function(){setSelIdx(null);}}/>;
-
-  var filtered = stocks.filter(function(s){
-    return !search || s.sym.toLowerCase().indexOf(search.toLowerCase()) != -1;
-  }).sort(function(a,b){
-    return sort=="pct" ? b.chgPct-a.chgPct : b.ltp-a.ltp;
-  });
-
-  function SRow(props) {
-    var s = props.s;
-    var spark = genSpark(s.ltp);
-    return (
-      <div style={{display:"flex", alignItems:"center", gap:10, padding:"11px 14px", borderBottom:"1px solid "+BD, cursor:"pointer"}} onClick={props.onClick}>
-        <div style={{flex:1}}>
-          <div style={{fontSize:12, fontWeight:700, color:T1}}>{s.sym}</div>
-          <div style={{fontSize:8, color:T2, marginTop:1}}>{s.sect}</div>
-        </div>
-        <MiniChart data={spark} color={s.up?G:R} w={50} h={22}/>
-        <div style={{textAlign:"right", minWidth:80}}>
-          <div style={{fontFamily:"monospace", fontSize:12, fontWeight:800, color:T1}}>Rs{s.ltp >= 1000 ? (s.ltp/1000).toFixed(1)+"K" : s.ltp.toFixed(2)}</div>
-          <div style={{background:s.up?"rgba(0,200,83,0.15)":"rgba(239,68,68,0.15)", borderRadius:5, padding:"1px 6px", fontSize:8, fontWeight:700, color:s.up?G2:R, marginTop:2}}>{s.up?"+":""}{s.chgPct.toFixed(2)}%</div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{background:DB, minHeight:"100%", paddingBottom:80, color:T1, fontFamily:"Inter,Arial,sans-serif"}}>
-      <div style={{background:CB, padding:"12px 14px", borderBottom:"1px solid "+BD}}>
-        <div style={{display:"flex", alignItems:"center", gap:8, background:"rgba(255,255,255,0.05)", border:"1px solid "+BD, borderRadius:10, padding:"8px 12px", marginBottom:10}}>
-          <span style={{color:T2}}>&#128269;</span>
-          <input style={{flex:1, background:"none", border:"none", outline:"none", fontSize:12, color:T1, fontFamily:"inherit"}} placeholder="Search stocks..." value={search} onChange={function(e){setSearch(e.target.value);}}/>
-          {search ? <button onClick={function(){setSearch("");}} style={{background:"none", border:"none", cursor:"pointer", color:T2, fontSize:12}}>X</button> : null}
-        </div>
-        <div style={{display:"flex", gap:6}}>
-          {[["stocks","Stocks"],["indices","Indices"],["sectors","Sectors"]].map(function(t){
-            var act = activeTab==t[0];
-            return <button key={t[0]} onClick={function(){setActiveTab(t[0]);}} style={{background:act?G:"rgba(255,255,255,0.06)", border:"1px solid "+(act?G:BD), borderRadius:20, padding:"5px 14px", color:act?"#fff":T2, fontSize:9, fontWeight:act?700:500, cursor:"pointer", fontFamily:"inherit"}}>{t[1]}</button>;
-          })}
-          <div style={{flex:1}}></div>
-          {activeTab=="stocks" ? [["pct","% Chg"],["ltp","Price"]].map(function(s){
-            var act=sort==s[0];
-            return <button key={s[0]} onClick={function(){setSort(s[0]);}} style={{background:act?"rgba(0,200,83,0.15)":"rgba(255,255,255,0.06)", border:"1px solid "+(act?G:BD), borderRadius:20, padding:"5px 12px", color:act?G:T2, fontSize:9, cursor:"pointer", fontFamily:"inherit"}}>{s[1]}</button>;
-          }) : null}
-        </div>
-      </div>
-
-      {activeTab=="stocks" ? (
-        <div style={{background:CB, margin:"10px 14px", borderRadius:12, border:"1px solid "+BD, overflow:"hidden"}}>
-          {filtered.length==0 ? <div style={{padding:24, textAlign:"center", color:T2, fontSize:12}}>No stocks found</div> :
-            filtered.map(function(s){return <SRow key={s.sym} s={s} onClick={function(){setSelStock(s);}}/>;})
-          }
-        </div>
-      ) : null}
-
-      {activeTab=="indices" ? (
-        <div style={{padding:"10px 14px"}}>
-          {indices.map(function(idx){
-            var spark = genSpark(idx.ltp);
-            return (
-              <div key={idx.label} style={{background:CB, border:"1px solid "+BD, borderRadius:14, padding:16, marginBottom:10, cursor:"pointer"}} onClick={function(){setSelIdx(idx.label);}}>
-                <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-                  <div>
-                    <div style={{fontSize:11, color:T2, marginBottom:2}}>{idx.label}</div>
-                    <div style={{fontSize:24, fontWeight:900, fontFamily:"monospace", color:idx.up?G2:R}}>{idx.ltp.toLocaleString("en-IN",{minimumFractionDigits:2})}</div>
-                    <div style={{marginTop:4}}>
-                      <span style={{background:idx.up?"rgba(0,200,83,0.15)":"rgba(239,68,68,0.15)", color:idx.up?G2:R, borderRadius:6, padding:"2px 8px", fontSize:10, fontWeight:700}}>{idx.up?"+":""}{idx.pct.toFixed(2)}%</span>
-                    </div>
-                  </div>
-                  <MiniChart data={spark} color={idx.up?G:R} w={90} h={45}/>
-                </div>
-                <div style={{marginTop:8, fontSize:8, color:T2}}>Tap for details, OI, constituents</div>
-              </div>
-            );
-          })}
-        </div>
-      ) : null}
-
-      {activeTab=="sectors" ? (
-        <div style={{padding:"10px 14px"}}>
-          {SECTORS.map(function(s){
-            var up = s.chg >= 0;
-            var spark = genSpark(1000 + s.chg*10);
-            return (
-              <div key={s.name} style={{background:CB, border:"1px solid "+BD, borderRadius:12, padding:"12px 14px", marginBottom:8, display:"flex", alignItems:"center", gap:12}}>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:13, fontWeight:700, color:T1}}>{s.name}</div>
-                  <div style={{fontSize:9, color:T2, marginTop:2}}>{s.stocks.slice(0,3).join(", ")}</div>
-                </div>
-                <MiniChart data={spark} color={up?G:R} w={60} h={28}/>
-                <div style={{background:up?"rgba(0,200,83,0.15)":"rgba(239,68,68,0.15)", borderRadius:8, padding:"6px 12px", textAlign:"center"}}>
-                  <div style={{fontSize:13, fontWeight:900, color:up?G2:R}}>{up?"+":""}{s.chg.toFixed(2)}%</div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : null}
-    </div>
-  );
-          }
-                    
+  if (selIdx) return <IndexDetail idx={se

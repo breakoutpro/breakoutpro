@@ -88,3 +88,4 @@ export var LESSONS = [
   "High PCR above 1.3 = oversold. Low PCR below 0.7 = overbought.",
   "Trade in the direction of the larger timeframe trend.",
 ];
+  

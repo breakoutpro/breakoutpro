@@ -212,5 +212,4 @@ export default function LearnScreen() {
       </div>
     </div>
   );
-                        }
-                
+        }

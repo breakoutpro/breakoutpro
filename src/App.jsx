@@ -6,13 +6,15 @@ import { SUB_PLANS } from "./data/globals";
 import TopBar from "./components/TopBar";
 import TabBar from "./components/TabBar";
 
-// Lazy load all screens
-var HomeScreen     = lazy(function(){ return import("./screens/Home"); });
-var MarketsScreen  = lazy(function(){ return import("./screens/Markets"); });
-var ScannerScreen  = lazy(function(){ return import("./screens/Scanner"); });
-var AIScreen       = lazy(function(){ return import("./screens/AI"); });
-var LearnScreen    = lazy(function(){ return import("./screens/Learn"); });
-var NewsScreen     = lazy(function(){ return import("./screens/News"); });
+// Direct imports for core screens (faster - no lazy delay)
+import HomeScreen   from "./screens/Home";
+import MarketsScreen from "./screens/Markets";
+import ScannerScreen from "./screens/Scanner";
+import AIScreen     from "./screens/AI";
+import LearnScreen  from "./screens/Learn";
+import NewsScreen   from "./screens/News";
+
+// Lazy load for heavy/less-used screens
 var CandleScreen   = lazy(function(){ return import("./screens/CandleScreen"); });
 var ChartEngine    = lazy(function(){ return import("./screens/Chart"); });
 var CandleDetector = lazy(function(){ return import("./screens/CandleDetector"); });
@@ -152,6 +154,18 @@ export default function App() {
     return function(){clearTimeout(t);};
   },[]);
 
+  // Browser back button support
+  useEffect(function(){
+    function onBack(e){
+      if(tab!="home"){
+        e.preventDefault();
+        setTab("home");
+      }
+    }
+    window.addEventListener("popstate", onBack);
+    return function(){window.removeEventListener("popstate", onBack);};
+  },[tab]);
+
   useEffect(function(){
     if(!document.getElementById("bp-css")){
       var el=document.createElement("style");
@@ -160,6 +174,13 @@ export default function App() {
       document.head.appendChild(el);
     }
   },[]);
+
+  function goTo(newTab){
+    if(newTab != tab){
+      window.history.pushState({tab: newTab}, "", "");
+    }
+    setTab(newTab);
+  }
 
   function login(u){
     if(!u.trialStart)u.trialStart=Date.now();
@@ -239,7 +260,7 @@ export default function App() {
         <TopBar isPrem={isPrem} trialDays={trialDays} onMenu={function(){setSidebar(true);}} onSub={function(){setTab("sub");}}/>
         {renderScreen()}
       </div>
-      <TabBar tab={tab} setTab={setTab}/>
+      <TabBar tab={tab} setTab={goTo}/>
       {sidebar?(
         <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,zIndex:200,display:"flex"}}>
           <div style={{width:260,background:"#fff",borderRight:"1px solid #E5E7EB",display:"flex",flexDirection:"column",boxShadow:"4px 0 24px rgba(0,0,0,0.1)"}}>
@@ -272,5 +293,5 @@ export default function App() {
       ):null}
     </div>
   );
-          }
-
+      }
+        

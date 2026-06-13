@@ -26,14 +26,37 @@ export function getSpark(ltp) {
   return a;
 }
 export function localAI(q, AI_KB, CANDLES) {
-  var ql = q.toLowerCase();
+  var ql = q.toLowerCase().trim();
+  var SUFFIX = " --- Educational only | Not SEBI registered";
+
+  // 1. Direct key match
   var keys = Object.keys(AI_KB);
   for (var i = 0; i < keys.length; i++) {
-    if (ql.indexOf(keys[i]) !== -1) return AI_KB[keys[i]] + " --- Educational only | Not SEBI registered";
+    if (ql.indexOf(keys[i]) != -1) return AI_KB[keys[i]] + SUFFIX;
   }
-  for (var j = 0; j < CANDLES.length; j++) {
-    if (ql.indexOf(CANDLES[j].name.toLowerCase()) !== -1)
-      return CANDLES[j].name + " (" + CANDLES[j].type + "): " + CANDLES[j].desc;
+
+  // 2. Keyword extraction - "explain X" or "what is X" -> search for X
+  var stripped = ql
+    .replace("explain ", "")
+    .replace("what is ", "")
+    .replace("what are ", "")
+    .replace("tell me about ", "")
+    .replace("define ", "")
+    .trim();
+
+  for (var j = 0; j < keys.length; j++) {
+    var keyWord = keys[j].replace("what is ", "").replace("explain ", "");
+    if (stripped.indexOf(keyWord) != -1 || keyWord.indexOf(stripped) != -1) {
+      return AI_KB[keys[j]] + SUFFIX;
+    }
   }
+
+  // 3. Candle pattern match
+  for (var k = 0; k < CANDLES.length; k++) {
+    if (ql.indexOf(CANDLES[k].name.toLowerCase()) != -1) {
+      return CANDLES[k].name + " (" + CANDLES[k].type + "): " + CANDLES[k].desc + SUFFIX;
+    }
+  }
+
   return null;
 }

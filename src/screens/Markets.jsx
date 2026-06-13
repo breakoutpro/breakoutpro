@@ -166,6 +166,67 @@ function IndexDetail(props) {
   );
 }
 
+
+function StockDetail(props) {
+  var s = props.stock;
+  var bull = s.up;
+  var spark = genSpark(s.ltp);
+  var details = {
+    RELIANCE:{pe:28.4,pb:2.1,mcap:"19.2L Cr",high52:"3024",low52:"2220"},
+    TCS:{pe:31.2,pb:13.4,mcap:"13.2L Cr",high52:"4592",low52:"3056"},
+    HDFCBANK:{pe:19.8,pb:2.8,mcap:"13.1L Cr",high52:"1880",low52:"1363"},
+    ICICIBANK:{pe:18.4,pb:3.2,mcap:"9.1L Cr",high52:"1362",low52:"972"},
+    INFY:{pe:24.6,pb:7.8,mcap:"6.5L Cr",high52:"1974",low52:"1307"},
+    WIPRO:{pe:22.1,pb:4.2,mcap:"2.5L Cr",high52:"571",low52:"378"},
+    TATAMOTORS:{pe:8.2,pb:3.1,mcap:"3.5L Cr",high52:"1179",low52:"724"},
+    SBIN:{pe:11.2,pb:1.8,mcap:"7.2L Cr",high52:"912",low52:"543"},
+    AXISBANK:{pe:14.8,pb:2.4,mcap:"3.6L Cr",high52:"1340",low52:"882"},
+    BAJFINANCE:{pe:32.4,pb:6.8,mcap:"4.5L Cr",high52:"7830",low52:"5924"},
+    MARUTI:{pe:26.1,pb:4.8,mcap:"4.0L Cr",high52:"13680",low52:"9832"},
+  };
+  var d = details[s.sym] || {pe:"N/A",pb:"N/A",mcap:"N/A",high52:"N/A",low52:"N/A"};
+  return (
+    <div style={{background:DB,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:20,animation:"slideIn 0.15s ease-out"}}>
+      <div style={{background:CB,padding:"12px 16px",borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",gap:10}}>
+        <button onClick={props.onBack} style={{background:"rgba(255,255,255,0.08)",border:"none",borderRadius:8,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:16,color:T1}}>&#8592;</button>
+        <div style={{flex:1}}>
+          <div style={{fontSize:16,fontWeight:900,color:T1}}>{s.sym}</div>
+          <div style={{fontSize:9,color:T2}}>{s.name || s.sym} - {s.sect}</div>
+        </div>
+        <div style={{textAlign:"right"}}>
+          <div style={{fontSize:18,fontWeight:900,fontFamily:"monospace",color:bull?G2:R}}>Rs{s.ltp>=1000?(s.ltp/1000).toFixed(2)+"K":s.ltp.toFixed(2)}</div>
+          <div style={{fontSize:10,fontWeight:700,color:bull?G2:R}}>{bull?"+":""}{s.chgPct.toFixed(2)}%</div>
+        </div>
+      </div>
+      <div style={{padding:14}}>
+        <div style={{background:CB,border:"1px solid "+BD,borderRadius:14,padding:14,marginBottom:12}}>
+          <MiniChart data={spark} color={bull?G:R} w={340} h={80}/>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12}}>
+          {[["52W High","Rs"+d.high52],["52W Low","Rs"+d.low52],["Market Cap",d.mcap],["P/E Ratio",d.pe],["P/B Ratio",d.pb],["Sector",s.sect]].map(function(r){
+            return (
+              <div key={r[0]} style={{background:CB,border:"1px solid "+BD,borderRadius:10,padding:"10px 8px",textAlign:"center"}}>
+                <div style={{fontSize:7,color:T2,marginBottom:3}}>{r[0]}</div>
+                <div style={{fontSize:11,fontWeight:700,color:T1}}>{r[1]}</div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{background:CB,border:"1px solid "+BD,borderRadius:12,padding:14,marginBottom:12}}>
+          <div style={{fontSize:11,fontWeight:700,color:T1,marginBottom:8}}>Price Analysis</div>
+          <div style={{background:bull?"rgba(0,200,83,0.08)":"rgba(239,68,68,0.08)",border:"1px solid "+(bull?"rgba(0,200,83,0.2)":"rgba(239,68,68,0.2)"),borderRadius:10,padding:12}}>
+            <div style={{fontSize:11,color:bull?G2:R,fontWeight:700,marginBottom:4}}>{bull?"Bullish":"Bearish"} - {Math.abs(s.chgPct).toFixed(2)}% change</div>
+            <div style={{fontSize:10,color:T2,lineHeight:1.7}}>{bull?"Price showing positive momentum. Watch for continuation above current levels with volume confirmation.":"Price showing negative pressure. Watch for support levels and potential reversal signals."}</div>
+          </div>
+        </div>
+        <div style={{background:"rgba(249,115,22,0.08)",border:"1px solid rgba(249,115,22,0.2)",borderRadius:10,padding:10}}>
+          <div style={{fontSize:8,color:"#F97316",lineHeight:1.6}}>Educational only. Not SEBI registered. Not investment advice. Do your own research.</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function MarketsScreen(props) {
   var stocks = props.stocks || [];
   var [search, setSearch] = useState("");
@@ -173,6 +234,19 @@ export default function MarketsScreen(props) {
   var [view, setView] = useState("markets");
   var [selIdx, setSelIdx] = useState(null);
   var [activeTab, setActiveTab] = useState("stocks");
+  var [selStock, setSelStock] = useState(null);
+
+  // Inject animation CSS once
+  useEffect(function(){
+    if(!document.getElementById("mkt-css")){
+      var el=document.createElement("style");
+      el.id="mkt-css";
+      el.textContent="@keyframes slideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}";
+      document.head.appendChild(el);
+    }
+  },[]);
+
+  if(selStock) return <StockDetail stock={selStock} onBack={function(){setSelStock(null);}}/>;
 
   var indices = [
     {label:"NIFTY 50",   ltp:23622.90, pct:0.00, up:true},
@@ -231,7 +305,7 @@ export default function MarketsScreen(props) {
       {activeTab=="stocks" ? (
         <div style={{background:CB, margin:"10px 14px", borderRadius:12, border:"1px solid "+BD, overflow:"hidden"}}>
           {filtered.length==0 ? <div style={{padding:24, textAlign:"center", color:T2, fontSize:12}}>No stocks found</div> :
-            filtered.map(function(s){return <SRow key={s.sym} s={s} onClick={function(){}}/>;})
+            filtered.map(function(s){return <SRow key={s.sym} s={s} onClick={function(){setSelStock(s);}}/>;})
           }
         </div>
       ) : null}
@@ -281,4 +355,5 @@ export default function MarketsScreen(props) {
       ) : null}
     </div>
   );
-}
+          }
+                    

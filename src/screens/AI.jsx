@@ -19,7 +19,7 @@ export default function AIScreen() {
     setMsgs(nm); setInput(""); setLoading(true);
     var loc = localAI(q, AI_KB, CANDLE_PATTERNS);
     if (loc) { setMsgs(nm.concat([{ role: "ai", text: loc, time: nowT() }]).slice(-20)); setLoading(false); return; }
-    var KEY = (typeof window !== "undefined" && window.GEMINI_KEY) ? window.GEMINI_KEY : "";
+    var KEY = (typeof window != "undefined" && window.GEMINI_KEY) ? window.GEMINI_KEY : "";
     function finish(txt) { setMsgs(nm.concat([{ role: "ai", text: txt, time: nowT() }]).slice(-20)); setLoading(false); }
     fetch(GEMINI_URL + KEY, {
       method: "POST",
@@ -41,7 +41,7 @@ export default function AIScreen() {
         <span style={{ fontSize: 7.5, color: "#92694A", fontWeight: 600 }}>! Educational Only | Not SEBI Registered Investment Advice</span>
       </div>
       <div style={{ flex: 1, overflowY: "auto", padding: 12 }}>
-        {msgs.length === 0
+        {msgs.length == 0
           ? <div style={{ textAlign: "center", paddingTop: 20 }}>
               <div style={{ fontSize: 32, fontWeight: 900, color: G, marginBottom: 10 }}>BP AI</div>
               <div style={{ fontSize: 11, color: "#fff", marginBottom: 4 }}>Ask me about stock market education</div>
@@ -52,7 +52,7 @@ export default function AIScreen() {
           : null
         }
         {msgs.map(function(m, i) {
-          var isu = m.role === "user";
+          var isu = m.role == "user";
           return (
             <div key={i} style={{ marginBottom: 12, display: "flex", flexDirection: "column", alignItems: isu ? "flex-end" : "flex-start" }}>
               <div style={{ maxWidth: "88%", background: isu ? "#1E3A5F" : "#161616", border: isu ? "1px solid #1E4080" : "1px solid #222", borderRadius: isu ? "14px 14px 4px 14px" : "4px 14px 14px 14px", padding: "10px 13px" }}>
@@ -70,7 +70,7 @@ export default function AIScreen() {
           {chips.map(function(q) { return <button key={q} disabled={loading} onClick={function() { send(q); }} style={{ background: "#161616", border: "1px solid #222", borderRadius: 20, padding: "4px 10px", color: loading ? "#333" : "#3B82F6", fontSize: 8, cursor: loading ? "not-allowed" : "pointer", whiteSpace: "nowrap", flexShrink: 0, fontFamily: "inherit", fontWeight: 600 }}>{q}</button>; })}
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
-          <textarea value={input} onChange={function(e) { setInput(e.target.value); }} onKeyDown={function(e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }} placeholder="Ask about any market concept..." rows={1} disabled={loading} style={{ flex: 1, background: "#161616", border: "1px solid #222", borderRadius: 11, padding: "10px 12px", color: "#fff", fontSize: 11, fontFamily: "inherit", outline: "none", resize: "none", lineHeight: 1.5, maxHeight: 80, overflowY: "auto", opacity: loading ? 0.6 : 1 }} />
+          <textarea value={input} onChange={function(e) { setInput(e.target.value); }} onKeyDown={function(e) { if (e.key == "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }} placeholder="Ask about any market concept..." rows={1} disabled={loading} style={{ flex: 1, background: "#161616", border: "1px solid #222", borderRadius: 11, padding: "10px 12px", color: "#fff", fontSize: 11, fontFamily: "inherit", outline: "none", resize: "none", lineHeight: 1.5, maxHeight: 80, overflowY: "auto", opacity: loading ? 0.6 : 1 }} />
           <button onClick={function() { send(input); }} disabled={!input.trim() || loading} style={{ background: (!input.trim() || loading) ? "#1A1A1A" : "linear-gradient(135deg,#3B82F6,#1D4ED8)", border: "none", borderRadius: 11, width: 42, height: 42, display: "flex", alignItems: "center", justifyContent: "center", cursor: (!input.trim() || loading) ? "not-allowed" : "pointer", fontSize: 14, color: "#fff", flexShrink: 0 }}>&#10148;</button>
         </div>
       </div>

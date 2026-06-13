@@ -345,4 +345,5 @@ export default function CandleDetector() {
 
     </div>
   );
-}
+      }
+                 

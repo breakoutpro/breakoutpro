@@ -156,19 +156,18 @@ export default function HomeScreen(props) {
   function fetchLive() {
     if(loading) return;
     setLoading(true);
-    fetch("/api/yahoo?type=indices")
+    fetch("/api/upstox?type=indices")
       .then(function(r){return r.json();})
       .then(function(data){
-        if(!data.success) throw new Error("Yahoo failed");
+        if(!data.success) throw new Error("Upstox failed");
         var quotes = data.data || [];
         quotes.forEach(function(q){
           var ltp = q.price;
-          var pct = Math.abs(q.changePct);
-          var up = q.changePct >= 0;
-          if(q.symbol=="^NSEI")        {setLiveNifty({ltp:ltp,pct:pct,up:up});setIsLive(true);}
-          if(q.symbol=="^BSESN")       setLiveSensex({ltp:ltp,pct:pct,up:up});
-          if(q.symbol=="^NSEBANK")     setLiveBankNifty({ltp:ltp,pct:pct,up:up});
-          if(q.symbol=="NIFTY_MIDCAP50.NS") setLiveMidcap({ltp:ltp,pct:pct,up:up});
+          var up = true;
+          if(q.symbol=="Nifty 50")       {setLiveNifty({ltp:ltp,pct:0,up:up});setIsLive(true);}
+          if(q.symbol=="SENSEX")          setLiveSensex({ltp:ltp,pct:0,up:up});
+          if(q.symbol=="Nifty Bank")      setLiveBankNifty({ltp:ltp,pct:0,up:up});
+          if(q.symbol=="Nifty Midcap 50") setLiveMidcap({ltp:ltp,pct:0,up:up});
         });
         setLastUpdated(new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"}));
         setLoading(false);
@@ -177,16 +176,14 @@ export default function HomeScreen(props) {
   }
 
   function fetchStocks() {
-    fetch("/api/yahoo?type=stocks")
+    fetch("/api/upstox?type=stocks")
       .then(function(r){return r.json();})
       .then(function(data){
         if(!data.success) return;
         var mapped = (data.data||[]).map(function(q){
-          var sym = q.symbol.replace(".NS","");
           return {
-            sym:sym, name:q.name, ltp:q.price,
-            chgPct:Math.abs(q.changePct), up:q.changePct>=0,
-            sect:"NSE", vol:q.volume
+            sym:q.symbol, name:q.name, ltp:q.price,
+            chgPct:0, up:true, sect:"NSE", vol:0
           };
         }).filter(function(s){return s.ltp>0;});
         if(mapped.length>0) setLiveStocks(mapped);
@@ -351,5 +348,5 @@ export default function HomeScreen(props) {
       </div>
     </div>
   );
-    }
-      
+            }
+                          

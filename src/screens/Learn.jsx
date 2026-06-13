@@ -91,6 +91,27 @@ function TopicCard(props) {
   );
 }
 
+
+function CandleCard(props) {
+  var p = props.pattern;
+  var [open, setOpen] = useState(false);
+  var tc = p.type=="Bullish"?G:p.type=="Bearish"?R:GOLD;
+  return (
+    <div style={{background:CB,border:"1px solid "+BD,borderRadius:12,marginBottom:8,overflow:"hidden"}}>
+      <div style={{padding:"12px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer"}} onClick={function(){setOpen(!open);}}>
+        <div>
+          <div style={{fontSize:12,fontWeight:700,color:T1}}>{p.name}</div>
+          <span style={{background:tc+"22",color:tc,borderRadius:4,padding:"1px 7px",fontSize:8,fontWeight:700}}>{p.type}</span>
+        </div>
+        <span style={{color:G,fontSize:14,flexShrink:0}}>{open?"v":">"}</span>
+      </div>
+      {open ? (
+        <div style={{padding:"0 14px 12px",fontSize:11,color:T2,lineHeight:1.8}}>{p.desc}</div>
+      ) : null}
+    </div>
+  );
+}
+
 export default function LearnScreen() {
   var [sec, setSec] = useState("home");
 
@@ -100,22 +121,7 @@ export default function LearnScreen() {
       <BackHeader onBack={function(){setSec("home");}} title="Candlestick Patterns" sub={CANDLE_PATTERNS.length+" patterns  tap to expand"}/>
       <div style={{padding:14}}>
         {CANDLE_PATTERNS.map(function(p){
-          var tc = p.type=="Bullish"?G:p.type=="Bearish"?R:GOLD;
-          var [open, setOpen] = useState(false);
-          return (
-            <div key={p.name} style={{background:CB,border:"1px solid "+BD,borderRadius:12,marginBottom:8,overflow:"hidden"}}>
-              <div style={{padding:"12px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer"}} onClick={function(){setOpen(!open);}}>
-                <div>
-                  <div style={{fontSize:12,fontWeight:700,color:T1}}>{p.name}</div>
-                  <span style={{background:tc+"22",color:tc,borderRadius:4,padding:"1px 7px",fontSize:8,fontWeight:700}}>{p.type}</span>
-                </div>
-                <span style={{color:G,fontSize:14,flexShrink:0}}>{open?"v":">"}</span>
-              </div>
-              {open ? (
-                <div style={{padding:"0 14px 12px",fontSize:11,color:T2,lineHeight:1.8}}>{p.desc}</div>
-              ) : null}
-            </div>
-          );
+          return <CandleCard key={p.name} pattern={p}/>;
         })}
       </div>
     </div>
@@ -206,5 +212,5 @@ export default function LearnScreen() {
       </div>
     </div>
   );
-                }
-
+                        }
+                

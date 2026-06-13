@@ -6,7 +6,7 @@ export default function LearnScreen() {
   var [sec, setSec] = useState("home");
   var pg = { background: "#F8F9FA", minHeight: "100%", paddingBottom: 80 };
 
-  if (sec === "candles") return (
+  if (sec == "candles") return (
     <div style={pg}>
       <div style={{ background: "#fff", padding: "12px 14px", borderBottom: "1px solid #F0F0F0", display: "flex", alignItems: "center", gap: 10 }}>
         <button onClick={function() { setSec("home"); }} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: "#374151" }}>&#8592;</button>
@@ -14,7 +14,7 @@ export default function LearnScreen() {
       </div>
       <div style={{ padding: 14 }}>
         {CANDLE_PATTERNS.map(function(p) {
-          var up = p.type === "Bullish"; var neu = p.type === "Neutral";
+          var up = p.type == "Bullish"; var neu = p.type == "Neutral";
           return (
             <div key={p.name} style={{ background: "#fff", border: "1px solid #F0F0F0", borderRadius: 12, padding: "12px", marginBottom: 8 }}>
               <div style={{ background: up ? "#DCFCE7" : neu ? "#FEF3C7" : "#FEE2E2", color: up ? "#166534" : neu ? "#D97706" : "#991B1B", borderRadius: 6, padding: "2px 8px", fontSize: 8, fontWeight: 700, display: "inline-block", marginBottom: 6 }}>{p.type}</div>
@@ -53,3 +53,4 @@ export default function LearnScreen() {
     </div>
   );
 }
+

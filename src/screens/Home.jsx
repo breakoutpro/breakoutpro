@@ -156,17 +156,20 @@ export default function HomeScreen(props) {
   function fetchLive() {
     if(loading) return;
     setLoading(true);
-    fetch("/api/nse?path=allIndices")
+    fetch("/api/yahoo?type=indices")
       .then(function(r){return r.json();})
       .then(function(data){
-        var n  = parseNSEIndex(data,"nifty 50");
-        var s  = parseNSEIndex(data,"sensex");
-        var bn = parseNSEIndex(data,"nifty bank");
-        var mc = parseNSEIndex(data,"nifty midcap");
-        if(n&&n.ltp>0){setLiveNifty(n);setIsLive(true);}
-        if(s&&s.ltp>0) setLiveSensex(s);
-        if(bn&&bn.ltp>0) setLiveBankNifty(bn);
-        if(mc&&mc.ltp>0) setLiveMidcap(mc);
+        if(!data.success) throw new Error("Yahoo failed");
+        var quotes = data.data || [];
+        quotes.forEach(function(q){
+          var ltp = q.price;
+          var pct = Math.abs(q.changePct);
+          var up = q.changePct >= 0;
+          if(q.symbol=="^NSEI")        {setLiveNifty({ltp:ltp,pct:pct,up:up});setIsLive(true);}
+          if(q.symbol=="^BSESN")       setLiveSensex({ltp:ltp,pct:pct,up:up});
+          if(q.symbol=="^NSEBANK")     setLiveBankNifty({ltp:ltp,pct:pct,up:up});
+          if(q.symbol=="NIFTY_MIDCAP50.NS") setLiveMidcap({ltp:ltp,pct:pct,up:up});
+        });
         setLastUpdated(new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"}));
         setLoading(false);
       })
@@ -174,17 +177,19 @@ export default function HomeScreen(props) {
   }
 
   function fetchStocks() {
-    fetch("/api/nse?path=equity-stockIndices&index=NIFTY%2050")
+    fetch("/api/yahoo?type=stocks")
       .then(function(r){return r.json();})
       .then(function(data){
-        var arr=(data.data||[]).slice(1,13);
-        if(arr.length>0){
-          var mapped=arr.map(function(s){
-            var chg=parseFloat(s.pChange||0);
-            return {sym:s.symbol||"",name:s.symbol||"",ltp:parseFloat(s.lastPrice||0),chgPct:Math.abs(chg),up:chg>=0,sect:"NSE",vol:s.totalTradedVolume||"0"};
-          }).filter(function(s){return s.ltp>0;});
-          if(mapped.length>0) setLiveStocks(mapped);
-        }
+        if(!data.success) return;
+        var mapped = (data.data||[]).map(function(q){
+          var sym = q.symbol.replace(".NS","");
+          return {
+            sym:sym, name:q.name, ltp:q.price,
+            chgPct:Math.abs(q.changePct), up:q.changePct>=0,
+            sect:"NSE", vol:q.volume
+          };
+        }).filter(function(s){return s.ltp>0;});
+        if(mapped.length>0) setLiveStocks(mapped);
       })
       .catch(function(){});
   }
@@ -346,4 +351,5 @@ export default function HomeScreen(props) {
       </div>
     </div>
   );
-              }
+    }
+      

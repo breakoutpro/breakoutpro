@@ -295,5 +295,5 @@ export default function QuizScreen() {
 
     </div>
   );
-             }
-                
+}
+  

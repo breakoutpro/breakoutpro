@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import PatternSVG from "./PatternSVG";
 
 var DB = "#0A0E1A";
 var CB = "#0F1629";
@@ -214,137 +215,109 @@ var PATTERNS = [
    svg:"fw"},
 ];
 
-// SVG pattern drawings
-function PatternSVG(props) {
-  var name = props.name;
-  var w = 280, h = 120;
-  var G2c = "#00E676", Rc = "#EF4444", GOLDc = "#F59E0B", T2c = "#8899BB";
 
-  var drawings = {
-    flag: (
-      <svg width={w} height={h}>
-        <line x1="60" y1="100" x2="130" y2="20" stroke={G2c} strokeWidth="2.5"/>
-        {[0,1,2,3].map(function(i){
-          return <g key={i}>
-            <line x1={130+i*30} y1={20+i*8} x2={130+(i+1)*30} y2={30+i*8} stroke={Rc} strokeWidth="1.5"/>
-            <line x1={130+i*30} y1={35+i*8} x2={130+(i+1)*30} y2={45+i*8} stroke={Rc} strokeWidth="1.5"/>
-          </g>;
-        })}
-        <line x1="250" y1="52" x2="250" y2="15" stroke={G2c} strokeWidth="2" strokeDasharray="4,3"/>
-        <text x="90" y="115" fill={T2c} fontSize="9">Pole</text>
-        <text x="165" y="115" fill={Rc} fontSize="9">Flag</text>
-        <text x="240" y="115" fill={G2c} fontSize="9">Breakout</text>
-      </svg>
-    ),
-    pennant: (
-      <svg width={w} height={h}>
-        <line x1="50" y1="100" x2="120" y2="15" stroke={G2c} strokeWidth="2.5"/>
-        <polygon points="120,15 120,45 200,30" fill="none" stroke={GOLDc} strokeWidth="1.5"/>
-        <line x1="200" y1="30" x2="200" y2="10" stroke={G2c} strokeWidth="2" strokeDasharray="4,3"/>
-        <text x="75" y="115" fill={T2c} fontSize="9">Pole</text>
-        <text x="145" y="115" fill={GOLDc} fontSize="9">Pennant</text>
-        <text x="190" y="115" fill={G2c} fontSize="9">Break</text>
-      </svg>
-    ),
-    hs: (
-      <svg width={w} height={h}>
-        <polyline points="20,90 60,50 90,75 130,15 170,75 210,50 250,90" fill="none" stroke={Rc} strokeWidth="2"/>
-        <line x1="20" y1="90" x2="260" y2="90" stroke={GOLDc} strokeWidth="1.5" strokeDasharray="5,3"/>
-        <text x="55" y="115" fill={T2c} fontSize="8">L Shoulder</text>
-        <text x="118" y="10" fill={Rc} fontSize="9">Head</text>
-        <text x="195" y="115" fill={T2c} fontSize="8">R Shoulder</text>
-        <text x="95" y="105" fill={GOLDc} fontSize="8">Neckline</text>
-      </svg>
-    ),
-    ihs: (
-      <svg width={w} height={h}>
-        <polyline points="20,20 60,60 90,35 130,95 170,35 210,60 250,20" fill="none" stroke={G2c} strokeWidth="2"/>
-        <line x1="20" y1="20" x2="260" y2="20" stroke={GOLDc} strokeWidth="1.5" strokeDasharray="5,3"/>
-        <text x="55" y="115" fill={T2c} fontSize="8">L Shoulder</text>
-        <text x="118" y="115" fill={Rc} fontSize="9">Head</text>
-        <text x="195" y="115" fill={T2c} fontSize="8">R Shoulder</text>
-        <text x="95" y="15" fill={GOLDc} fontSize="8">Neckline</text>
-      </svg>
-    ),
-    dtop: (
-      <svg width={w} height={h}>
-        <polyline points="20,90 80,20 140,90 200,20 260,90" fill="none" stroke={Rc} strokeWidth="2"/>
-        <line x1="20" y1="90" x2="270" y2="90" stroke={GOLDc} strokeWidth="1.5" strokeDasharray="5,3"/>
-        <text x="60" y="15" fill={Rc} fontSize="8">Top 1</text>
-        <text x="185" y="15" fill={Rc} fontSize="8">Top 2</text>
-        <text x="95" y="108" fill={GOLDc} fontSize="8">Neckline - Sell Here</text>
-      </svg>
-    ),
-    dbot: (
-      <svg width={w} height={h}>
-        <polyline points="20,20 80,90 140,20 200,90 260,20" fill="none" stroke={G2c} strokeWidth="2"/>
-        <line x1="20" y1="20" x2="270" y2="20" stroke={GOLDc} strokeWidth="1.5" strokeDasharray="5,3"/>
-        <text x="60" y="108" fill={G2c} fontSize="8">Bottom 1</text>
-        <text x="185" y="108" fill={G2c} fontSize="8">Bottom 2</text>
-        <text x="95" y="15" fill={GOLDc} fontSize="8">Neckline - Buy Here</text>
-      </svg>
-    ),
-    hammer: (
-      <svg width={w} height={h}>
-        <line x1="140" y1="30" x2="140" y2="90" stroke={G2c} strokeWidth="1.5"/>
-        <rect x="120" y="30" width="40" height="20" fill={G2c} rx="2"/>
-        <text x="170" y="55" fill={G2c} fontSize="9">Small body</text>
-        <text x="170" y="90" fill={T2c} fontSize="9">Long lower wick</text>
-        <line x1="155" y1="50" x2="165" y2="50" stroke={G2c} strokeWidth="1"/>
-        <line x1="155" y1="85" x2="165" y2="85" stroke={T2c} strokeWidth="1"/>
-        <text x="90" y="115" fill={T2c} fontSize="9">At support - Very Bullish</text>
-      </svg>
-    ),
-    shoot: (
-      <svg width={w} height={h}>
-        <line x1="140" y1="20" x2="140" y2="80" stroke={Rc} strokeWidth="1.5"/>
-        <rect x="120" y="65" width="40" height="20" fill={Rc} rx="2"/>
-        <text x="170" y="30" fill={T2c} fontSize="9">Long upper wick</text>
-        <text x="170" y="80" fill={Rc} fontSize="9">Small body</text>
-        <text x="90" y="115" fill={T2c} fontSize="9">At resistance - Very Bearish</text>
-      </svg>
-    ),
-    bull_eng: (
-      <svg width={w} height={h}>
-        <rect x="80" y="40" width="50" height="45" fill={Rc} rx="2"/>
-        <rect x="145" y="25" width="60" height="70" fill={G2c} rx="2"/>
-        <text x="85" y="105" fill={Rc} fontSize="9">Day 1 Red</text>
-        <text x="148" y="105" fill={G2c} fontSize="9">Day 2 Green</text>
-        <text x="70" y="15" fill={T2c} fontSize="9">Green engulfs red completely</text>
-      </svg>
-    ),
-    bear_eng: (
-      <svg width={w} height={h}>
-        <rect x="80" y="25" width="50" height="70" fill={G2c} rx="2"/>
-        <rect x="145" y="20" width="60" height="80" fill={Rc} rx="2"/>
-        <text x="85" y="110" fill={G2c} fontSize="9">Day 1 Green</text>
-        <text x="148" y="110" fill={Rc} fontSize="9">Day 2 Red</text>
-        <text x="70" y="15" fill={T2c} fontSize="9">Red engulfs green completely</text>
-      </svg>
-    ),
-    morning: (
-      <svg width={w} height={h}>
-        <rect x="40" y="20" width="55" height="65" fill={Rc} rx="2"/>
-        <rect x="118" y="60" width="30" height="25" fill={GOLDc} rx="2"/>
-        <rect x="170" y="15" width="55" height="70" fill={G2c} rx="2"/>
-        <text x="42" y="110" fill={Rc} fontSize="9">Big Red</text>
-        <text x="108" y="110" fill={GOLDc} fontSize="9">Small</text>
-        <text x="170" y="110" fill={G2c} fontSize="9">Big Green</text>
-      </svg>
-    ),
-    evening: (
-      <svg width={w} height={h}>
-        <rect x="40" y="15" width="55" height="70" fill={G2c} rx="2"/>
-        <rect x="118" y="25" width="30" height="25" fill={GOLDc} rx="2"/>
-        <rect x="170" y="20" width="55" height="65" fill={Rc} rx="2"/>
-        <text x="42" y="110" fill={G2c} fontSize="9">Big Green</text>
-        <text x="108" y="110" fill={GOLDc} fontSize="9">Small</text>
-        <text x="170" y="110" fill={Rc} fontSize="9">Big Red</text>
-      </svg>
-    ),
-    doji: (
-      <svg width={w} height={h}>
-        <line x1="140" y1="20" x2="140" y2="90" stroke={GOLDc} strokeWidth="1.5"/>
-        <line x1="110" y1="55" x2="170" y2="55" stroke={GOLDc} strokeWidth="3"/>
-        <text x="80" y="115" fill={T2c} fontSize="9">Open = Close = Indecision</text>
-    
+function QuizCard(props) {
+  var p = props.pattern;
+  var [sel,setSel] = useState(null);
+  var questions = [
+    {q:"What type of signal does "+p.name+" give?", opts:[p.type=="Bullish"?"Bullish":"Bearish",p.type=="Bullish"?"Bearish":"Bullish","Neutral","No signal"], ans:0},
+    {q:"What is the success rate of "+p.name+"?", opts:[p.prob+"%",(p.prob-10)+"%",(p.prob+15)+"%","100%"], ans:0},
+    {q:"Where to place stop loss for "+p.name+"?", opts:[p.sl.slice(0,30),(p.type=="Bullish"?"Above entry":"Below entry"),"No SL needed","At entry point"], ans:0},
+  ];
+  var [qIdx,setQIdx] = useState(0);
+  var q = questions[qIdx];
+  return (
+    <div style={{background:CB,border:"1px solid "+BD,borderRadius:14,padding:14}}>
+      <div style={{fontSize:10,fontWeight:700,color:GOLD,marginBottom:8}}>Quick Quiz</div>
+      <div style={{fontSize:12,fontWeight:600,color:T1,lineHeight:1.5,marginBottom:12}}>{q.q}</div>
+      {q.opts.map(function(opt,i){
+        var bg=sel==null?"rgba(255,255,255,0.04)":i==q.ans?"rgba(0,200,83,0.2)":i==sel?"rgba(239,68,68,0.2)":"rgba(255,255,255,0.04)";
+        var bd=sel==null?BD:i==q.ans?G:i==sel?R:BD;
+        return <button key={i} onClick={function(){if(sel==null)setSel(i);}} disabled={sel!=null} style={{width:"100%",background:bg,border:"1px solid "+bd,borderRadius:10,padding:"10px 12px",marginBottom:6,textAlign:"left",cursor:sel!=null?"default":"pointer",fontFamily:"inherit",fontSize:11,color:T1}}>{opt}</button>;
+      })}
+      {sel!=null?(
+        <div style={{textAlign:"center",marginTop:8}}>
+          <div style={{fontSize:12,fontWeight:700,color:sel==q.ans?G2:R,marginBottom:8}}>{sel==q.ans?"Correct!":"Wrong!"}</div>
+          {qIdx<questions.length-1?<button onClick={function(){setQIdx(qIdx+1);setSel(null);}} style={{background:G,border:"none",borderRadius:10,padding:"8px 20px",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>Next Question</button>:
+          <div style={{fontSize:10,color:G2,fontWeight:700}}>Quiz Complete!</div>}
+        </div>
+      ):null}
+    </div>
+  );
+}
+
+function PatternDetail(props) {
+  var p = props.p;
+  var [quizOpen,setQuizOpen] = useState(false);
+  var typeColor = p.type=="Bullish"?G2:p.type=="Bearish"?R:GOLD;
+  var typeBg = p.type=="Bullish"?"rgba(0,200,83,0.1)":p.type=="Bearish"?"rgba(239,68,68,0.1)":"rgba(245,158,11,0.1)";
+
+  function InfoCard(ip) {
+    return (
+      <div style={{background:CB,border:"1px solid "+BD,borderRadius:12,padding:14,marginBottom:10}}>
+        <div style={{fontSize:9,color:T2,fontWeight:700,marginBottom:6,letterSpacing:0.5}}>{ip.title}</div>
+        <div style={{fontSize:11,color:T1,lineHeight:1.8}}>{ip.text}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{background:DB,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:80}}>
+      <div style={{background:CB,padding:"12px 14px",borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",gap:10}}>
+        <button onClick={props.onBack} style={{background:"rgba(255,255,255,0.08)",border:"none",borderRadius:8,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:16,color:T1}}>&#8592;</button>
+        <div style={{flex:1}}>
+          <div style={{fontSize:16,fontWeight:900,color:T1}}>{p.name}</div>
+          <div style={{fontSize:9,color:T2}}>{p.cat} Pattern</div>
+        </div>
+        <span style={{background:typeBg,color:typeColor,borderRadius:20,padding:"4px 12px",fontSize:10,fontWeight:700}}>{p.type}</span>
+      </div>
+
+      <div style={{padding:"14px 14px 0"}}>
+        <PatternSVG name={p.svg}/>
+
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:14}}>
+          {[["Success Rate",p.prob+"%",p.prob>=70?G2:GOLD],["Category",p.cat,BLUE],["Best For",p.best.split(",")[0],GOLD]].map(function(r){
+            return (
+              <div key={r[0]} style={{background:CB,border:"1px solid "+BD,borderRadius:10,padding:"10px 8px",textAlign:"center"}}>
+                <div style={{fontSize:7,color:T2,marginBottom:3}}>{r[0]}</div>
+                <div style={{fontSize:10,fontWeight:700,color:r[2]}}>{r[1]}</div>
+              </div>
+            );
+          })}
+        </div>
+
+        <InfoCard title="PSYCHOLOGY" text={p.psych}/>
+        <InfoCard title="HOW IT FORMS" text={p.formation}/>
+
+        <div style={{background:CB,border:"1px solid "+BD,borderRadius:12,padding:14,marginBottom:10}}>
+          <div style={{fontSize:9,color:T2,fontWeight:700,marginBottom:10,letterSpacing:0.5}}>TRADING SETUP</div>
+          {[["Entry",p.entry,G2],["Stop Loss",p.sl,R],["Target",p.target,GOLD],["Risk Reward",p.rr,BLUE]].map(function(r){
+            return (
+              <div key={r[0]} style={{display:"flex",gap:8,marginBottom:8,alignItems:"flex-start"}}>
+                <div style={{width:55,flexShrink:0,fontSize:8,fontWeight:700,color:r[2]}}>{r[0]}</div>
+                <div style={{fontSize:10,color:T1,lineHeight:1.6,flex:1}}>{r[1]}</div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{background:"rgba(0,200,83,0.06)",border:"1px solid rgba(0,200,83,0.2)",borderRadius:12,padding:14,marginBottom:10}}>
+          <div style={{fontSize:9,color:G2,fontWeight:700,marginBottom:6}}>BEST TIMEFRAMES</div>
+          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+            {p.tf.split(",").map(function(t){return <span key={t} style={{background:"rgba(0,200,83,0.1)",border:"1px solid rgba(0,200,83,0.2)",borderRadius:20,padding:"3px 10px",fontSize:9,color:G2,fontWeight:600}}>{t.trim()}</span>;})}
+          </div>
+          <div style={{marginTop:8,fontSize:9,color:T2}}>Best strategy: <span style={{color:GOLD,fontWeight:700}}>{p.best}</span></div>
+        </div>
+
+        <div style={{background:"rgba(245,158,11,0.06)",border:"1px solid rgba(245,158,11,0.2)",borderRadius:12,padding:14,marginBottom:10}}>
+          <div style={{fontSize:9,color:GOLD,fontWeight:700,marginBottom:6}}>PRO TIP</div>
+          <div style={{fontSize:11,color:T1,lineHeight:1.8}}>{p.tip}</div>
+        </div>
+
+        <button onClick={function(){setQuizOpen(!quizOpen);}} style={{width:"100%",background:"rgba(245,158,11,0.1)",border:"1px solid rgba(245,158,11,0.3)",borderRadius:12,padding:12,color:GOLD,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",marginBottom:10}}>
+          {quizOpen?"Hide Quiz":"Take Pattern Quiz"}
+        </button>
+        {quizOpen?<QuizCard pattern={p}/>:null}
+
+        <div style={{background:"rgba(249,115,22,0.08)",border:"1px solid rgba(249,115,22,0.2)",borderRadius:10,padding:10,marginBottom:10}}>
+          <div style={{fontSize:8,color:"#F97316",lineHeight:1.7}}>Educational only. Not SEBI registered. Not investment advice. Chart patterns have hist

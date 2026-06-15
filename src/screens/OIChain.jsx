@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { LTPRows, OIRows, GreeksRows } from "./OIChainRows";
 
 var DB = "#0A0E1A";
 var CB = "#0F1629";
@@ -37,56 +38,7 @@ var EXPIRIES = {
   MIDCPNIFTY:["16 Jun","23 Jun","28 Jul","25 Aug"],
 };
 
-function getExpiries(sym) {
-  return EXPIRIES[sym] || ["26 Jun","31 Jul","28 Aug"];
-}
-
-function genChain(spot, step, count) {
-  var atm = Math.round(spot/step)*step;
-  var rows = [];
-  for(var i=-(count);i<=(count);i++) {
-    var strike = atm + i*step;
-    var isATM = i==0;
-    var dist = Math.abs(i);
-    var intrinsicC = Math.max(0, spot-strike);
-    var intrinsicP = Math.max(0, strike-spot);
-    var timeVal = Math.max(5, spot*0.008/(dist*0.8+1));
-    var callLTP = parseFloat((intrinsicC + timeVal + (Math.random()-0.3)*timeVal*0.2).toFixed(2));
-    var putLTP  = parseFloat((intrinsicP + timeVal + (Math.random()-0.3)*timeVal*0.2).toFixed(2));
-    var baseVol = Math.floor(spot*15);
-    var callVol = Math.floor((baseVol/(dist*1.4+1)) * (0.8+Math.random()*0.4));
-    var putVol  = Math.floor((baseVol/(dist*1.4+1)) * (0.8+Math.random()*0.4));
-    var callOI  = Math.floor(callVol * (2+Math.random()*3));
-    var putOI   = Math.floor(putVol  * (2+Math.random()*3));
-    var prevCallLTP = callLTP * (0.4 + Math.random()*0.5);
-    var prevPutLTP  = putLTP  * (1.5 + Math.random()*1.0);
-    var callChgPct = parseFloat(((callLTP-prevCallLTP)/prevCallLTP*100).toFixed(2));
-    var putChgPct  = parseFloat(((putLTP-prevPutLTP)/prevPutLTP*100).toFixed(2));
-    var iv = parseFloat((14 + dist*1.2 + Math.random()*3).toFixed(1));
-    var callDelta  = parseFloat(Math.max(0.01, Math.min(0.99, 0.5 - i*0.07)).toFixed(2));
-    var putDelta   = parseFloat((callDelta - 1).toFixed(2));
-    var gamma  = parseFloat((0.003/(dist*0.5+1)+Math.random()*0.001).toFixed(4));
-    var theta  = parseFloat((-callLTP*0.008 - Math.random()*2).toFixed(2));
-    var vega   = parseFloat((callLTP*0.12 + Math.random()*2).toFixed(2));
-    rows.push({
-      strike:strike, isATM:isATM, dist:i,
-      callLTP:callLTP, putLTP:putLTP,
-      callVol:callVol, putVol:putVol,
-      callOI:callOI, putOI:putOI,
-      callChgPct:callChgPct, putChgPct:putChgPct,
-      iv:iv, callDelta:callDelta, putDelta:putDelta,
-      gamma:gamma, theta:theta, vega:vega,
-    });
-  }
-  return {rows:rows, atm:atm};
-}
-
-function fmtVol(n) {
-  if(n>=10000000) return (n/10000000).toFixed(2)+"Cr";
-  if(n>=100000)   return (n/100000).toFixed(2)+"L";
-  if(n>=1000)     return (n/1000).toFixed(1)+"K";
-  return n;
-}
+function getExpiries(sym) { return EXPIRIES[sym]||["26 Jun","31 Jul","28 Aug"]; }
 
 function fmtOI(n) {
   if(n>=10000000) return (n/10000000).toFixed(2)+"Cr";
@@ -95,66 +47,91 @@ function fmtOI(n) {
   return n;
 }
 
+function genChain(spot, step) {
+  var atm=Math.round(spot/step)*step;
+  var rows=[];
+  for(var i=-8;i<=8;i++){
+    var strike=atm+i*step;
+    var dist=Math.abs(i);
+    var intrC=Math.max(0,spot-strike);
+    var intrP=Math.max(0,strike-spot);
+    var tVal=Math.max(5,spot*0.008/(dist*0.8+1));
+    var cLTP=parseFloat((intrC+tVal+(Math.random()-0.3)*tVal*0.2).toFixed(2));
+    var pLTP=parseFloat((intrP+tVal+(Math.random()-0.3)*tVal*0.2).toFixed(2));
+    var bVol=Math.floor(spot*15);
+    var cVol=Math.floor((bVol/(dist*1.4+1))*(0.8+Math.random()*0.4));
+    var pVol=Math.floor((bVol/(dist*1.4+1))*(0.8+Math.random()*0.4));
+    var cOI=Math.floor(cVol*(2+Math.random()*3));
+    var pOI=Math.floor(pVol*(2+Math.random()*3));
+    var pCLTP=cLTP*(0.4+Math.random()*0.5);
+    var pPLTP=pLTP*(1.5+Math.random()*1.0);
+    var iv=parseFloat((14+dist*1.2+Math.random()*3).toFixed(1));
+    var cDelta=parseFloat(Math.max(0.01,Math.min(0.99,0.5-i*0.07)).toFixed(2));
+    rows.push({
+      strike:strike, isATM:i==0, dist:i,
+      callLTP:cLTP, putLTP:pLTP,
+      callVol:cVol, putVol:pVol,
+      callOI:cOI, putOI:pOI,
+      callChgPct:parseFloat(((cLTP-pCLTP)/pCLTP*100).toFixed(2)),
+      putChgPct:parseFloat(((pLTP-pPLTP)/pPLTP*100).toFixed(2)),
+      iv:iv, callDelta:cDelta, putDelta:parseFloat((cDelta-1).toFixed(2)),
+      gamma:parseFloat((0.003/(dist*0.5+1)+Math.random()*0.001).toFixed(4)),
+      theta:parseFloat((-cLTP*0.008-Math.random()*2).toFixed(2)),
+      vega:parseFloat((cLTP*0.12+Math.random()*2).toFixed(2)),
+    });
+  }
+  return {rows:rows, atm:atm};
+}
+
 export default function OptionChain() {
-  var [selSym, setSelSym] = useState("NIFTY");
-  var [expiry, setExpiry] = useState(getExpiries("NIFTY")[0]);
-  var [viewTab, setViewTab] = useState("LTP");
-  var [chain, setChain] = useState(null);
-  var [symData, setSymData] = useState(SYMBOLS[0]);
+  var [selSym,setSelSym] = useState("NIFTY");
+  var [expiry,setExpiry] = useState("19 Jun");
+  var [viewTab,setViewTab] = useState("LTP");
+  var [chain,setChain] = useState(null);
+  var [symData,setSymData] = useState(SYMBOLS[0]);
 
   function buildChain(sym) {
-    var sd = SYMBOLS.find(function(s){return s.sym==sym;})||SYMBOLS[0];
+    var sd=SYMBOLS.find(function(s){return s.sym==sym;})||SYMBOLS[0];
     setSymData(sd);
-    setChain(genChain(sd.spot, sd.step, 8));
+    setChain(genChain(sd.spot,sd.step));
   }
 
   useEffect(function(){buildChain("NIFTY");},[]);
 
-  function changeSym(sym) {
-    setSelSym(sym);
-    setExpiry(getExpiries(sym)[0]);
-    buildChain(sym);
-  }
-
-  // Refresh prices
   useEffect(function(){
-    var t = setInterval(function(){
+    var t=setInterval(function(){
       setChain(function(prev){
         if(!prev) return prev;
-        return genChain(symData.spot*(1+(Math.random()-0.49)*0.001), symData.step, 8);
+        return genChain(symData.spot*(1+(Math.random()-0.49)*0.001),symData.step);
       });
-    }, 5000);
+    },5000);
     return function(){clearInterval(t);};
   },[symData]);
 
-  if(!chain) return <div style={{background:DB,minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",color:T1,fontFamily:"Inter,sans-serif"}}>Loading...</div>;
+  function changeSym(sym){setSelSym(sym);setExpiry(getExpiries(sym)[0]);buildChain(sym);}
 
-  var totalCallOI = chain.rows.reduce(function(s,r){return s+r.callOI;},0);
-  var totalPutOI  = chain.rows.reduce(function(s,r){return s+r.putOI;},0);
-  var pcr = (totalPutOI/totalCallOI).toFixed(2);
-  var pcrColor = parseFloat(pcr)>1.2?G2:parseFloat(pcr)<0.8?R:GOLD;
-  var pcrLabel = parseFloat(pcr)>1.2?"Bullish":parseFloat(pcr)<0.8?"Bearish":"Neutral";
-  var maxCallOI = Math.max.apply(null, chain.rows.map(function(r){return r.callOI;}));
-  var maxPutOI  = Math.max.apply(null, chain.rows.map(function(r){return r.putOI;}));
-  var atmRow = chain.rows.find(function(r){return r.isATM;});
-  var atmSignal = symData.change>=0?"Long Buildup":"Short Covering";
-  var atmSignalColor = symData.change>=0?G2:GOLD;
-  var expiries = getExpiries(selSym);
+  if(!chain) return <div style={{background:DB,minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",color:T1}}>Loading...</div>;
+
+  var totalCOI=chain.rows.reduce(function(s,r){return s+r.callOI;},0);
+  var totalPOI=chain.rows.reduce(function(s,r){return s+r.putOI;},0);
+  var pcr=(totalPOI/totalCOI).toFixed(2);
+  var pcrC=parseFloat(pcr)>1.2?G2:parseFloat(pcr)<0.8?R:GOLD;
+  var pcrL=parseFloat(pcr)>1.2?"Bullish":parseFloat(pcr)<0.8?"Bearish":"Neutral";
+  var expiries=getExpiries(selSym);
 
   return (
     <div style={{background:DB,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:80}}>
 
-      {/* Top index ticker */}
+      {/* Top ticker */}
       <div style={{background:CB,borderBottom:"1px solid "+BD,overflowX:"auto",whiteSpace:"nowrap"}}>
-        <div style={{display:"inline-flex",gap:0}}>
+        <div style={{display:"inline-flex"}}>
           {SYMBOLS.slice(0,5).map(function(s){
-            var up=s.change>=0;
-            var act=selSym==s.sym;
+            var up=s.change>=0; var act=selSym==s.sym;
             return (
-              <button key={s.sym} onClick={function(){changeSym(s.sym);}} style={{background:act?"rgba(0,200,83,0.1)":"none",borderRight:"1px solid "+BD,border:"none",borderRight:"1px solid "+BD,padding:"10px 16px",cursor:"pointer",fontFamily:"inherit",textAlign:"left",flexShrink:0,borderBottom:act?"2px solid "+G:"2px solid transparent"}}>
-                <div style={{fontSize:10,fontWeight:700,color:act?G2:T1}}>{s.sym}</div>
-                <div style={{fontFamily:"monospace",fontSize:12,fontWeight:900,color:up?G2:R}}>{s.spot.toLocaleString("en-IN",{minimumFractionDigits:2})}</div>
-                <div style={{fontSize:8,color:up?G2:R}}>{up?"+":""}{s.change} ({up?"+":""}{s.changePct}%)</div>
+              <button key={s.sym} onClick={function(){changeSym(s.sym);}} style={{background:act?"rgba(0,200,83,0.1)":"none",borderRight:"1px solid "+BD,border:"none",borderRight:"1px solid "+BD,padding:"10px 14px",cursor:"pointer",fontFamily:"inherit",textAlign:"left",flexShrink:0,borderBottom:act?"2px solid "+G:"2px solid transparent"}}>
+                <div style={{fontSize:9,fontWeight:700,color:act?G2:T1}}>{s.sym}</div>
+                <div style={{fontFamily:"monospace",fontSize:11,fontWeight:900,color:up?G2:R}}>{s.spot.toLocaleString("en-IN",{minimumFractionDigits:2})}</div>
+                <div style={{fontSize:7,color:up?G2:R}}>{up?"+":""}{s.change} ({up?"+":""}{s.changePct}%)</div>
               </button>
             );
           })}
@@ -162,16 +139,13 @@ export default function OptionChain() {
       </div>
 
       {/* Controls */}
-      <div style={{background:CB,padding:"10px 12px",borderBottom:"1px solid "+BD}}>
-        {/* Symbol row */}
-        <div style={{display:"flex",gap:5,overflowX:"auto",marginBottom:8,paddingBottom:2}}>
+      <div style={{background:CB,padding:"8px 12px",borderBottom:"1px solid "+BD}}>
+        <div style={{display:"flex",gap:4,overflowX:"auto",marginBottom:8,paddingBottom:2}}>
           {SYMBOLS.map(function(s){
             var act=selSym==s.sym;
-            return <button key={s.sym} onClick={function(){changeSym(s.sym);}} style={{background:act?G:"rgba(255,255,255,0.05)",border:"1px solid "+(act?G:BD),borderRadius:20,padding:"4px 10px",color:act?"#fff":T2,fontSize:8,fontWeight:act?700:400,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{s.sym}</button>;
+            return <button key={s.sym} onClick={function(){changeSym(s.sym);}} style={{background:act?G:"rgba(255,255,255,0.05)",border:"1px solid "+(act?G:BD),borderRadius:20,padding:"3px 8px",color:act?"#fff":T2,fontSize:8,fontWeight:act?700:400,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{s.sym}</button>;
           })}
         </div>
-
-        {/* View + Expiry row */}
         <div style={{display:"flex",gap:6,alignItems:"center"}}>
           {["LTP","OI","Greeks"].map(function(v){
             var act=viewTab==v;
@@ -185,104 +159,31 @@ export default function OptionChain() {
       </div>
 
       {/* PCR Stats */}
-      <div style={{background:CB,borderBottom:"1px solid "+BD,padding:"8px 12px",display:"flex",gap:12,alignItems:"center"}}>
-        <div style={{display:"flex",gap:10,flex:1}}>
-          <div style={{textAlign:"center"}}>
-            <div style={{fontSize:7,color:T2}}>PCR</div>
-            <div style={{fontSize:12,fontWeight:900,color:pcrColor}}>{pcr}</div>
-            <div style={{fontSize:7,color:pcrColor}}>{pcrLabel}</div>
-          </div>
-          <div style={{textAlign:"center"}}>
-            <div style={{fontSize:7,color:T2}}>Total Call OI</div>
-            <div style={{fontSize:10,fontWeight:700,color:R}}>{fmtOI(totalCallOI)}</div>
-          </div>
-          <div style={{textAlign:"center"}}>
-            <div style={{fontSize:7,color:T2}}>Total Put OI</div>
-            <div style={{fontSize:10,fontWeight:700,color:G2}}>{fmtOI(totalPutOI)}</div>
-          </div>
-          <div style={{textAlign:"center"}}>
-            <div style={{fontSize:7,color:T2}}>ATM Strike</div>
-            <div style={{fontSize:10,fontWeight:700,color:GOLD}}>{chain.atm}</div>
-          </div>
-          <div style={{textAlign:"center"}}>
-            <div style={{fontSize:7,color:T2}}>Lot Size</div>
-            <div style={{fontSize:10,fontWeight:700,color:BLUE}}>{symData.lot}</div>
-          </div>
-        </div>
+      <div style={{background:CB,borderBottom:"1px solid "+BD,padding:"7px 12px",display:"flex",gap:14,alignItems:"center"}}>
+        {[["PCR",pcr,pcrC,pcrL],["Call OI",fmtOI(totalCOI),R,null],["Put OI",fmtOI(totalPOI),G2,null],["ATM",chain.atm,GOLD,null],["Lot",symData.lot,BLUE,null]].map(function(r){
+          return (
+            <div key={r[0]} style={{textAlign:"center"}}>
+              <div style={{fontSize:7,color:T2}}>{r[0]}</div>
+              <div style={{fontSize:11,fontWeight:700,color:r[2]}}>{r[1]}</div>
+              {r[3]?<div style={{fontSize:7,color:r[2]}}>{r[3]}</div>:null}
+            </div>
+          );
+        })}
       </div>
 
-      {/* LTP View */}
+      {/* LTP View Headers */}
       {viewTab=="LTP"?(
         <div>
-          {/* Column headers */}
-          <div style={{display:"grid",gridTemplateColumns:"0.8fr 0.9fr 0.9fr 0.8fr 0.8fr 0.9fr 0.8fr",gap:1,padding:"6px 6px",background:"rgba(255,255,255,0.04)"}}>
-            {["Volume","Call LTP","Chg%","Strike Price","Chg%","Put LTP","Volume"].map(function(h,i){
-              var isStrike=i==3;
-              var isCall=i<3;
-              return <div key={i} style={{fontSize:7,fontWeight:700,color:isStrike?GOLD:isCall?G2:R,textAlign:"center"}}>{h}</div>;
+          <div style={{display:"grid",gridTemplateColumns:"0.8fr 0.9fr 0.9fr 0.8fr 0.8fr 0.9fr 0.8fr",gap:1,padding:"6px",background:"rgba(255,255,255,0.04)"}}>
+            {["Volume","Call LTP","Chg%","Strike","Chg%","Put LTP","Volume"].map(function(h,i){
+              return <div key={i} style={{fontSize:7,fontWeight:700,color:i==3?GOLD:i<3?G2:R,textAlign:"center"}}>{h}</div>;
             })}
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:0,padding:"2px 6px",background:"rgba(255,255,255,0.02)"}}>
             <div style={{fontSize:8,fontWeight:700,color:G2,textAlign:"center"}}>CALLS</div>
             <div style={{fontSize:8,fontWeight:700,color:R,textAlign:"center"}}>PUTS</div>
           </div>
-
-          {chain.rows.map(function(row){
-            var callPct=(row.callOI/maxCallOI)*100;
-            var putPct=(row.putOI/maxPutOI)*100;
-            var isATM=row.isATM;
-            var itmCall=row.dist<0;
-            var itmPut=row.dist>0;
-            return (
-              <div key={row.strike}>
-                {isATM?(
-                  <div style={{background:"rgba(0,200,83,0.08)",borderTop:"1px solid rgba(0,200,83,0.2)",borderBottom:"1px solid rgba(0,200,83,0.2)",padding:"4px 12px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                    <div style={{display:"flex",alignItems:"center",gap:6}}>
-                      <span style={{fontSize:9,fontWeight:700,color:atmSignalColor}}>{atmSignal}</span>
-                      <span style={{fontSize:7,color:T2}}>|</span>
-                    </div>
-                    <div style={{display:"flex",alignItems:"center",gap:4}}>
-                      <span style={{fontFamily:"monospace",fontSize:11,fontWeight:900,color:symData.change>=0?G2:R}}>{symData.spot.toLocaleString("en-IN",{minimumFractionDigits:2})}</span>
-                      <span style={{fontSize:8,color:symData.change>=0?G2:R}}>{symData.change>=0?"":""} {Math.abs(symData.changePct)}%</span>
-                    </div>
-                  </div>
-                ):null}
-                <div style={{display:"grid",gridTemplateColumns:"0.8fr 0.9fr 0.9fr 0.8fr 0.8fr 0.9fr 0.8fr",gap:1,padding:"7px 6px",background:itmCall?"rgba(0,200,83,0.04)":itmPut?"rgba(239,68,68,0.04)":"transparent",borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
-                  {/* Call Volume */}
-                  <div style={{position:"relative",overflow:"hidden"}}>
-                    <div style={{position:"absolute",right:0,top:0,height:"100%",width:callPct+"%",background:"rgba(0,200,83,0.15)"}}></div>
-                    <div style={{fontSize:9,fontWeight:600,color:G2,textAlign:"center",position:"relative"}}>{fmtVol(row.callVol)}</div>
-                  </div>
-                  {/* Call LTP */}
-                  <div style={{textAlign:"center"}}>
-                    <div style={{fontSize:10,fontWeight:700,color:G2}}>Rs{row.callLTP}</div>
-                  </div>
-                  {/* Call Chg% */}
-                  <div style={{textAlign:"center"}}>
-                    <div style={{fontSize:8,fontWeight:600,color:row.callChgPct>=0?G2:R}}>{row.callChgPct>=0?"+":""}{row.callChgPct}%</div>
-                  </div>
-                  {/* Strike */}
-                  <div style={{textAlign:"center",background:isATM?"rgba(245,158,11,0.15)":"transparent",borderRadius:4,padding:"2px"}}>
-                    <div style={{fontSize:11,fontWeight:900,color:isATM?GOLD:T1}}>{row.strike}</div>
-                    {isATM?<div style={{fontSize:6,color:GOLD,fontWeight:700}}>ATM</div>:null}
-                  </div>
-                  {/* Put Chg% */}
-                  <div style={{textAlign:"center"}}>
-                    <div style={{fontSize:8,fontWeight:600,color:row.putChgPct>=0?G2:R}}>{row.putChgPct>=0?"+":""}{row.putChgPct}%</div>
-                  </div>
-                  {/* Put LTP */}
-                  <div style={{textAlign:"center"}}>
-                    <div style={{fontSize:10,fontWeight:700,color:R}}>Rs{row.putLTP}</div>
-                  </div>
-                  {/* Put Volume */}
-                  <div style={{position:"relative",overflow:"hidden"}}>
-                    <div style={{position:"absolute",left:0,top:0,height:"100%",width:putPct+"%",background:"rgba(239,68,68,0.15)"}}></div>
-                    <div style={{fontSize:9,fontWeight:600,color:R,textAlign:"center",position:"relative"}}>{fmtVol(row.putVol)}</div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          <LTPRows chain={chain} symData={symData}/>
         </div>
       ):null}
 
@@ -290,39 +191,11 @@ export default function OptionChain() {
       {viewTab=="OI"?(
         <div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 0.8fr 1fr 1fr",gap:1,padding:"6px",background:"rgba(255,255,255,0.04)"}}>
-            {["Call OI","Call Chg OI","STRIKE","Put Chg OI","Put OI"].map(function(h,i){
-              var isStrike=i==2;
-              return <div key={i} style={{fontSize:7,fontWeight:700,color:isStrike?GOLD:i<2?G2:R,textAlign:"center"}}>{h}</div>;
+            {["Call OI","Call Chg","STRIKE","Put Chg","Put OI"].map(function(h,i){
+              return <div key={i} style={{fontSize:7,fontWeight:700,color:i==2?GOLD:i<2?G2:R,textAlign:"center"}}>{h}</div>;
             })}
           </div>
-          {chain.rows.map(function(row){
-            var callPct=(row.callOI/maxCallOI)*100;
-            var putPct=(row.putOI/maxPutOI)*100;
-            var callChgOI=Math.floor(row.callOI*(Math.random()-0.4)*0.3);
-            var putChgOI=Math.floor(row.putOI*(Math.random()-0.4)*0.3);
-            return (
-              <div key={row.strike} style={{display:"grid",gridTemplateColumns:"1fr 1fr 0.8fr 1fr 1fr",gap:1,padding:"7px 6px",borderBottom:"1px solid rgba(255,255,255,0.04)",background:row.isATM?"rgba(245,158,11,0.08)":"transparent"}}>
-                <div style={{position:"relative",overflow:"hidden"}}>
-                  <div style={{position:"absolute",right:0,top:0,height:"100%",width:callPct+"%",background:"rgba(0,200,83,0.2)"}}></div>
-                  <div style={{fontSize:9,fontWeight:600,color:G2,textAlign:"center",position:"relative"}}>{fmtOI(row.callOI)}</div>
-                </div>
-                <div style={{textAlign:"center"}}>
-                  <div style={{fontSize:9,color:callChgOI>=0?G2:R}}>{callChgOI>=0?"+":""}{fmtOI(Math.abs(callChgOI))}</div>
-                </div>
-                <div style={{textAlign:"center",background:row.isATM?"rgba(245,158,11,0.15)":"transparent",borderRadius:4,padding:"1px"}}>
-                  <div style={{fontSize:11,fontWeight:900,color:row.isATM?GOLD:T1}}>{row.strike}</div>
-                  {row.isATM?<div style={{fontSize:6,color:GOLD}}>ATM</div>:null}
-                </div>
-                <div style={{textAlign:"center"}}>
-                  <div style={{fontSize:9,color:putChgOI>=0?G2:R}}>{putChgOI>=0?"+":""}{fmtOI(Math.abs(putChgOI))}</div>
-                </div>
-                <div style={{position:"relative",overflow:"hidden"}}>
-                  <div style={{position:"absolute",left:0,top:0,height:"100%",width:putPct+"%",background:"rgba(239,68,68,0.2)"}}></div>
-                  <div style={{fontSize:9,fontWeight:600,color:R,textAlign:"center",position:"relative"}}>{fmtOI(row.putOI)}</div>
-                </div>
-              </div>
-            );
-          })}
+          <OIRows chain={chain}/>
         </div>
       ):null}
 
@@ -330,30 +203,24 @@ export default function OptionChain() {
       {viewTab=="Greeks"?(
         <div>
           <div style={{display:"grid",gridTemplateColumns:"0.8fr 0.8fr 0.8fr 0.7fr 0.8fr 0.8fr 0.8fr 0.8fr",gap:1,padding:"6px",background:"rgba(255,255,255,0.04)"}}>
-            {["C.Delta","C.IV%","C.Vega","STRIKE","P.Delta","P.IV%","Gamma","Theta"].map(function(h,i){
-              var isStrike=i==3;
-              return <div key={i} style={{fontSize:7,fontWeight:700,color:isStrike?GOLD:i<3?G2:i==6?GOLD:i==7?R:R,textAlign:"center"}}>{h}</div>;
+            {["C.Delta","C.IV","C.Vega","STRIKE","P.Delta","P.IV","Gamma","Theta"].map(function(h,i){
+              return <div key={i} style={{fontSize:7,fontWeight:700,color:i==3?GOLD:i<3?G2:i==6?GOLD:R,textAlign:"center"}}>{h}</div>;
             })}
           </div>
-          {chain.rows.map(function(row){
-            return (
-              <div key={row.strike} style={{display:"grid",gridTemplateColumns:"0.8fr 0.8fr 0.8fr 0.7fr 0.8fr 0.8fr 0.8fr 0.8fr",gap:1,padding:"6px",borderBottom:"1px solid rgba(255,255,255,0.04)",background:row.isATM?"rgba(245,158,11,0.08)":"transparent"}}>
-                <div style={{textAlign:"center",fontSize:9,color:G2,fontWeight:600}}>{row.callDelta}</div>
-                <div style={{textAlign:"center",fontSize:9,color:BLUE}}>{row.iv}%</div>
-                <div style={{textAlign:"center",fontSize:9,color:GOLD}}>{row.vega}</div>
-                <div style={{textAlign:"center",background:row.isATM?"rgba(245,158,11,0.15)":"transparent",borderRadius:4,padding:"1px"}}>
-                  <div style={{fontSize:11,fontWeight:900,color:row.isATM?GOLD:T1}}>{row.strike}</div>
-                  {row.isATM?<div style={{fontSize:6,color:GOLD}}>ATM</div>:null}
-                </div>
-                <div style={{textAlign:"center",fontSize:9,color:R,fontWeight:600}}>{row.putDelta}</div>
-                <div style={{textAlign:"center",fontSize:9,color:BLUE}}>{row.iv+0.5}%</div>
-                <div style={{textAlign:"center",fontSize:9,color:GOLD}}>{row.gamma}</div>
-                <div style={{textAlign:"center",fontSize:9,color:R}}>{row.theta}</div>
-              </div>
-            );
-          })}
-          <div style={{padding:12,background:CB,borderTop:"1px solid "+BD}}>
-            <div style={{fontSize:9,fontWeight:700,color:GOLD,marginBottom:6}}>Greeks Guide</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
-              {[["Delta","Price change per Re1 move"],["IV","Expected volatility %"],["Vega","Sensitivity to IV change"],["Gamma","Rate of delta change"],["Theta","Daily time decay"]].map(function(r){
- 
+          <GreeksRows chain={chain}/>
+          <div style={{padding:10,background:CB,borderTop:"1px solid "+BD}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:4}}>
+              {[["Delta","Re1 move sensitivity"],["IV","Expected volatility"],["Vega","IV change sensitivity"],["Gamma","Delta change rate"],["Theta","Daily time decay"]].map(function(r){
+                return <div key={r[0]} style={{fontSize:8,color:T2}}><span style={{color:GOLD,fontWeight:700}}>{r[0]}:</span> {r[1]}</div>;
+              })}
+            </div>
+          </div>
+        </div>
+      ):null}
+
+      <div style={{background:"rgba(249,115,22,0.06)",borderTop:"1px solid rgba(249,115,22,0.15)",padding:"8px 12px"}}>
+        <div style={{fontSize:8,color:"#F97316"}}>Demo data  Educational only. Not SEBI registered. Not investment advice.</div>
+      </div>
+    </div>
+  );
+    }

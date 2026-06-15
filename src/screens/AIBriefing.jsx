@@ -24,21 +24,13 @@ function getKey() {
 }
 
 function buildPrompt() {
-  var today = new Date().toLocaleDateString("en-IN", {weekday:"long",day:"numeric",month:"long",year:"numeric"});
-  return "You are an expert Indian stock market analyst. Give a comprehensive market briefing for " + today + " for Indian traders.
-
-Include:
-1. Global Market Mood (US, Asia, Europe)
-2. Indian Market Outlook (NIFTY, BANKNIFTY, SENSEX)
-3. Top 5 News impacting markets today
-4. Sector Analysis (IT, Banking, Auto, Pharma, Energy)
-5. FII/DII Activity
-6. Key Levels to Watch (NIFTY support/resistance)
-7. Top 3 Stocks to Watch
-8. Scalper Note for today
-9. Overall Sentiment: Bullish/Bearish/Neutral with reason
-
-Format with clear sections. Keep it concise but informative. Use Indian market context. End with SEBI disclaimer.";
+  var today = new Date().toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  var p = "You are an expert Indian stock market analyst. Give a comprehensive market briefing for "+today+" for Indian traders.";
+  p += " Include: 1.Global Market Mood (US,Asia,Europe) 2.Indian Market Outlook (NIFTY,BANKNIFTY,SENSEX) 3.Top 5 News impacting markets";
+  p += " 4.Sector Analysis (IT,Banking,Auto,Pharma,Energy) 5.FII/DII Activity 6.Key NIFTY levels support/resistance";
+  p += " 7.Top 3 Stocks to Watch today 8.Scalper Note 9.Overall Sentiment Bullish/Bearish/Neutral with reason.";
+  p += " Format with numbered sections. Be concise. End with SEBI disclaimer that this is educational only.";
+  return p;
 }
 
 export default function AIBriefing() {
@@ -208,5 +200,4 @@ export default function AIBriefing() {
       </div>
     </div>
   );
-    }
-      
+}

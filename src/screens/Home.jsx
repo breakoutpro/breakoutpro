@@ -221,10 +221,14 @@ export default function HomeScreen(props) {
   ];
 
   var quick=[
-    {label:"OI Chain",id:"oi"},{label:"Scanner",id:"scanner"},
-    {label:"Scalper",id:"scalper"},{label:"Chart",id:"chart"},
-    {label:"Analysis",id:"analysis"},{label:"AI Chat",id:"ai"},
-    {label:"Learn",id:"learn"},{label:"Briefing",id:"briefing"},
+    {label:"OI Chain",id:"oi",     icon:"OI"},
+    {label:"Scanner",id:"scanner", icon:"SC"},
+    {label:"Paper Trade",id:"paper",icon:"PT"},
+    {label:"Chart",id:"chart",     icon:"CH"},
+    {label:"Analysis",id:"analysis",icon:"AN"},
+    {label:"AI Chat",id:"ai",      icon:"AI"},
+    {label:"Patterns",id:"patterns",icon:"PA"},
+    {label:"Briefing",id:"briefing",icon:"BR"},
   ];
 
   var sorted = liveStocks.slice().sort(function(a,b){
@@ -311,7 +315,8 @@ export default function HomeScreen(props) {
           <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
             {quick.map(function(q){
               return (
-                <button key={q.label} style={{background:CB,border:"1px solid "+BD,borderRadius:12,padding:"10px 6px",display:"flex",flexDirection:"column",alignItems:"center",gap:4,cursor:"pointer",fontFamily:"inherit"}} onClick={function(){setTab(q.id);}}>
+                <button key={q.label} style={{background:CB,border:"1px solid "+BD,borderRadius:12,padding:"10px 6px",display:"flex",flexDirection:"column",alignItems:"center",gap:3,cursor:"pointer",fontFamily:"inherit"}} onClick={function(){setTab(q.id);}}>
+                  <div style={{fontSize:9,fontWeight:900,color:G,letterSpacing:0}}>{q.icon}</div>
                   <span style={{fontSize:8,color:T2,fontWeight:600,textAlign:"center"}}>{q.label}</span>
                 </button>
               );

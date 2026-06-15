@@ -11,7 +11,7 @@ var GOLD = "#F59E0B";
 var T1 = "#FFFFFF";
 var T2 = "#8899BB";
 
-var WATCHLIST = [
+var EQUITY_LIST = [
   {sym:"NIFTY 50",   ltp:23622.90, base:23622.90, sect:"Index"},
   {sym:"BANK NIFTY", ltp:56814.80, base:56814.80, sect:"Index"},
   {sym:"SENSEX",     ltp:73863.45, base:73863.45, sect:"Index"},
@@ -25,6 +25,31 @@ var WATCHLIST = [
   {sym:"TATAMOTORS", ltp:945.60,   base:945.60,   sect:"Auto"},
   {sym:"AXISBANK",   ltp:1156.70,  base:1156.70,  sect:"Bank"},
 ];
+
+var COMMODITY_LIST = [
+  {sym:"GOLD",        ltp:71245,  base:71245,  sect:"MCX"},
+  {sym:"SILVER",      ltp:87654,  base:87654,  sect:"MCX"},
+  {sym:"CRUDEOIL",    ltp:6823,   base:6823,   sect:"MCX"},
+  {sym:"NATURALGAS",  ltp:243,    base:243,    sect:"MCX"},
+  {sym:"COPPER",      ltp:812,    base:812,    sect:"MCX"},
+  {sym:"ZINC",        ltp:289,    base:289,    sect:"MCX"},
+  {sym:"ALUMINIUM",   ltp:234,    base:234,    sect:"MCX"},
+  {sym:"LEAD",        ltp:187,    base:187,    sect:"MCX"},
+  {sym:"NICKEL",      ltp:1456,   base:1456,   sect:"MCX"},
+  {sym:"CRUDEOILM",   ltp:6820,   base:6820,   sect:"MCX"},
+];
+
+function getMarketSession() {
+  var now = new Date();
+  var h = now.getHours();
+  var m = now.getMinutes();
+  var mins = h*60+m;
+  if (mins >= 9*60+15 && mins < 15*60+30) return "equity";
+  if (mins >= 15*60+30 || mins < 2*60) return "commodity";
+  return "global";
+}
+
+var WATCHLIST = getMarketSession()=="commodity" ? COMMODITY_LIST : EQUITY_LIST;
 
 var ALERT_TYPES = [
   {id:"breakout",  label:"Breakout",   color:G2,   icon:"UP"},
@@ -102,6 +127,8 @@ function MiniSpark(props) {
 }
 
 export default function AlertsScreen() {
+  var [session, setSession] = useState(getMarketSession());
+  var [marketList, setMarketList] = useState(getMarketSession()=="commodity"?COMMODITY_LIST:EQUITY_LIST);
   var [stocks, setStocks] = useState(function(){
     return WATCHLIST.map(function(s){
       var candles = [];
@@ -152,6 +179,22 @@ export default function AlertsScreen() {
     }
     return null;
   }
+
+  useEffect(function(){
+    var list = session=="commodity"?COMMODITY_LIST:EQUITY_LIST;
+    setStocks(list.map(function(s){
+      var candles=[];var price=s.base;
+      for(var i=0;i<30;i++){
+        var chg=(Math.random()-0.48)*price*0.004;
+        var o=price,cl=parseFloat((o+chg).toFixed(2));
+        var hi=parseFloat((Math.max(o,cl)+Math.random()*price*0.002).toFixed(2));
+        var lo=parseFloat((Math.min(o,cl)-Math.random()*price*0.002).toFixed(2));
+        candles.push({open:o,close:cl,high:hi,low:lo,vol:Math.floor(50000+Math.random()*300000)});
+        price=cl;
+      }
+      return Object.assign({},s,{candles:candles,ltp:price,alerts:[],spark:candles.map(function(c){return c.close;})});
+    }));
+  },[session]);
 
   useEffect(function() {
     if (!scanning) return;
@@ -242,11 +285,27 @@ export default function AlertsScreen() {
 
         {/* Live watchlist */}
         <div style={{background:CB,border:"1px solid "+BD,borderRadius:14,overflow:"hidden",marginBottom:12}}>
-          <div style={{padding:"10px 14px",borderBottom:"1px solid "+BD,display:"flex",justifyContent:"space-between"}}>
-            <div style={{fontSize:11,fontWeight:700,color:T1}}>Watchlist ({stocks.length})</div>
-            <div style={{display:"flex",alignItems:"center",gap:4}}>
-              {scanning ? <div style={{width:6,height:6,borderRadius:"50%",background:G2}}></div> : null}
-              <span style={{fontSize:8,color:scanning?G2:T2}}>{scanning?"Live scanning...":"Paused"}</span>
+          <div style={{padding:"10px 14px",borderBottom:"1px solid "+BD}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+              <div style={{fontSize:11,fontWeight:700,color:T1}}>Watchlist ({stocks.length})</div>
+              <div style={{fontSize:8,color:session=="equity"?G2:session=="commodity"?GOLD:"#3B82F6",fontWeight:700}}>{session=="equity"?"Equity Market":"MCX Commodity"}</div>
+            </div>
+            <div style={{display:"flex",gap:6}}>
+              <button onClick={function(){setSession("equity");}} style={{flex:1,background:session=="equity"?"rgba(0,200,83,0.15)":"rgba(255,255,255,0.04)",border:"1px solid "+(session=="equity"?G:BD),borderRadius:8,padding:"5px",color:session=="equity"?G2:T2,fontSize:8,fontWeight:session=="equity"?700:400,cursor:"pointer",fontFamily:"inherit"}}>Equity</button>
+              <button onClick={function(){setSession("commodity");}} style={{flex:1,background:session=="commodity"?"rgba(245,158,11,0.15)":"rgba(255,255,255,0.04)",border:"1px solid "+(session=="commodity"?GOLD:BD),borderRadius:8,padding:"5px",color:session=="commodity"?GOLD:T2,fontSize:8,fontWeight:session=="commodity"?700:400,cursor:"pointer",fontFamily:"inherit"}}>MCX</button>
+              <button onClick={function(){setSession("global");}} style={{flex:1,background:session=="global"?"rgba(59,130,246,0.15)":"rgba(255,255,255,0.04)",border:"1px solid "+(session=="global"?"#3B82F6":BD),borderRadius:8,padding:"5px",color:session=="global"?"#3B82F6":T2,fontSize:8,fontWeight:session=="global"?700:400,cursor:"pointer",fontFamily:"inherit"}}>Global</button>
+            </div>
+          </div>
+          <div style={{padding:"0",borderBottom:"1px solid "+BD,display:"flex",justifyContent:"space-between",display:"none"}}>
+            <div></div>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <div style={{background:session=="equity"?"rgba(0,200,83,0.15)":session=="commodity"?"rgba(245,158,11,0.15)":"rgba(59,130,246,0.15)",border:"1px solid "+(session=="equity"?"rgba(0,200,83,0.3)":session=="commodity"?"rgba(245,158,11,0.3)":"rgba(59,130,246,0.3)"),borderRadius:20,padding:"2px 8px"}}>
+                <span style={{fontSize:8,fontWeight:700,color:session=="equity"?G2:session=="commodity"?GOLD:"#3B82F6"}}>{session=="equity"?"NSE/BSE":session=="commodity"?"MCX":"GLOBAL"}</span>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:3}}>
+                {scanning?<div style={{width:5,height:5,borderRadius:"50%",background:G2}}></div>:null}
+                <span style={{fontSize:8,color:scanning?G2:T2}}>{scanning?"Live":"Paused"}</span>
+              </div>
             </div>
           </div>
           {stocks.map(function(s){
@@ -291,29 +350,4 @@ export default function AlertsScreen() {
               {alerts.slice(0,20).map(function(al){
                 return (
                   <div key={al.id} style={{background:CB,border:"1px solid "+BD,borderRadius:12,padding:"12px 14px",marginBottom:8,borderLeft:"3px solid "+al.color}}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:4}}>
-                      <div style={{display:"flex",alignItems:"center",gap:8}}>
-                        <span style={{background:al.color+"22",color:al.color,borderRadius:6,padding:"2px 8px",fontSize:9,fontWeight:800}}>{al.type}</span>
-                        <span style={{fontSize:13,fontWeight:800,color:T1}}>{al.sym}</span>
-                      </div>
-                      <span style={{fontSize:8,color:T2,flexShrink:0}}>{al.time}</span>
-                    </div>
-                    <div style={{fontSize:10,color:T2,lineHeight:1.6,marginBottom:4}}>{al.msg}</div>
-                    <div style={{fontSize:9,fontWeight:700,color:al.color}}>LTP: Rs{al.ltp>=1000?(al.ltp/1000).toFixed(2)+"K":al.ltp.toFixed(2)}</div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Disclaimer */}
-        <div style={{background:"rgba(249,115,22,0.08)",border:"1px solid rgba(249,115,22,0.2)",borderRadius:10,padding:10}}>
-          <div style={{fontSize:8,color:"#F97316",lineHeight:1.7}}>Educational alerts only. Not SEBI registered. Not buy/sell recommendations. Demo scanning - live data requires market hours connection. Always do your own analysis before trading.</div>
-        </div>
-
-      </div>
-    </div>
-  );
-                                                    }
-              
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-sta

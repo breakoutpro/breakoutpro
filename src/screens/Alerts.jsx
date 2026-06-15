@@ -258,5 +258,5 @@ export default function AlertsScreen(){
       </div>
     </div>
   );
-              }
-        
+      }
+          

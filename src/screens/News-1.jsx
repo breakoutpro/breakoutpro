@@ -117,4 +117,4 @@ export default function NewsScreen(props) {
       </div>
     </div>
   );
-}
+                  }

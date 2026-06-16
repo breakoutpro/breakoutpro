@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import LanguageSelector from "../components/LanguageSelector";
+import { getLang, LANGUAGES } from "../i18n/translations";
 
 var DB = "#0A0E1A";
 var CB = "#0F1629";
@@ -72,6 +74,8 @@ export default function SettingsScreen(props) {
     reminderTime: "9:00 AM",
   };
 
+  var [showLang, setShowLang] = useState(false);
+  var [curLang, setCurLang] = useState(getLang());
   var [st, setSt] = useState(function() {
     var saved = loadSettings();
     return Object.assign({}, defaults, saved);
@@ -165,7 +169,10 @@ export default function SettingsScreen(props) {
       {/* APP SETTINGS */}
       <SectionHeader title="APP SETTINGS"/>
       <div style={{background:CB,border:"1px solid "+BD,borderRadius:14,margin:"0 14px",overflow:"hidden"}}>
-        <SettingRow icon="&#127760;" label="Language" sub="App display language" value={st.language} arrow={true} iconBg="rgba(59,130,246,0.1)" iconBorder="rgba(59,130,246,0.2)"/>
+        <div onClick={function(){setShowLang(true);}} style={{cursor:"pointer"}}>
+          <SettingRow icon="&#127760;" label="Language" sub="App display language" value={(LANGUAGES.find(function(l){return l.code==curLang;})||LANGUAGES[0]).native} arrow={true} iconBg="rgba(59,130,246,0.1)" iconBorder="rgba(59,130,246,0.2)"/>
+        </div>
+        {showLang?<LanguageSelector onClose={function(){setShowLang(false);}} onChange={function(c){setCurLang(c);}}/>:null}
         <SettingRow icon="&#127760;" label="Alert Frequency" sub="How often to show alerts" value={st.alertFreq} arrow={true} iconBg="rgba(0,200,83,0.1)" iconBorder="rgba(0,200,83,0.2)"/>
         <div style={{padding:"13px 14px",borderBottom:"1px solid "+BD}}>
           <div style={{fontSize:12,fontWeight:600,color:T1,marginBottom:8}}>Alert Frequency</div>
@@ -196,4 +203,4 @@ export default function SettingsScreen(props) {
 
     </div>
   );
-              }
+}

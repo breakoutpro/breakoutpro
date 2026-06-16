@@ -49,7 +49,8 @@ export default function HomeBottom(props) {
             <div><div style={{fontSize:11,fontWeight:700,color:T1}}>Morning AI Pulse</div><div style={{fontSize:8,color:T2}}>Full market analysis</div></div>
           </div>
           <button onClick={function(){setTab("morning");}} style={{background:"linear-gradient(135deg,"+PURPLE+","+PURPLE2+")",border:"none",borderRadius:10,padding:"8px 14px",color:"#fff",fontSize:10,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>Get Pulse</button>
-        
+        </div>
+
     </div>
   );
 }

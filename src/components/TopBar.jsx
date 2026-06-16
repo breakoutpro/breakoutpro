@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import LanguageSelector from "./LanguageSelector";
+import { getLang, LANGUAGES } from "../i18n/translations";
 
 var BG = "#07111F";
 var CARD = "#101B2E";
@@ -21,6 +23,8 @@ export default function TopBar(props) {
   var onMenu = props.onMenu || function(){};
 
   var [time, setTime] = useState(new Date());
+  var [showLang, setShowLang] = useState(false);
+  var [lang, setCurLang] = useState(getLang());
   var [mktOpen, setMktOpen] = useState(false);
 
   useEffect(function(){
@@ -96,6 +100,18 @@ export default function TopBar(props) {
         <div style={{fontSize:7,color:T3}}>{dateStr}</div>
       </div>
 
+      {/* Language Globe */}
+      <button onClick={function(){setShowLang(true);}} style={{
+        background:"rgba(30,58,95,0.6)",border:"1px solid "+BD,
+        borderRadius:8,padding:"6px 8px",cursor:"pointer",
+        display:"flex",alignItems:"center",gap:3,
+      }}>
+        <span style={{fontSize:9}}>&#127760;</span>
+        <span style={{fontSize:8,fontWeight:700,color:T2}}>{(LANGUAGES.find(function(l){return l.code==lang;})||LANGUAGES[0]).flag}</span>
+      </button>
+
+      {showLang?<LanguageSelector onClose={function(){setShowLang(false);}} onChange={function(c){setCurLang(c);if(props.onLangChange)props.onLangChange(c);}}/>:null}
+
       {/* Menu */}
       <button onClick={onMenu} style={{
         background:"rgba(30,58,95,0.6)",border:"1px solid "+BD,
@@ -108,3 +124,4 @@ export default function TopBar(props) {
     </div>
   );
 }
+

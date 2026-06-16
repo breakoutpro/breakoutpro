@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import IndexDetail from "./IndexDetail";
 
 var DB = "#050816";
 var CB = "#0B1224";
@@ -66,6 +67,7 @@ export default function EquityHome(props) {
   var setTab = props.setTab || function(){};
   var user = props.user || {};
   var news = props.news || [];
+  var [selIdx, setSelIdx] = useState(null);
   var [sparks, setSparks] = useState(function(){
     var s={};
     EQUITY_IDX.forEach(function(x){s[x.label]=genSpark(x.ltp);});
@@ -100,6 +102,10 @@ export default function EquityHome(props) {
   var greeting=props.greeting||(hour<12?"Good Morning":hour<17?"Good Afternoon":"Good Evening");
   var isMorning=props.session=="morning";
   var timeStr=time.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+
+  if (selIdx) {
+    return <IndexDetail idx={selIdx} onBack={function(){setSelIdx(null);}} setTab={setTab}/>;
+  }
 
   return (
     <div style={{background:DB,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:80}}>
@@ -138,7 +144,7 @@ export default function EquityHome(props) {
           {indices.map(function(idx){
             var sp=sparks[idx.label]||[];
             return (
-              <div key={idx.label} style={{background:CB,border:"1px solid "+BD,borderRadius:20,padding:"12px 14px",position:"relative",overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.3)"}}>
+              <div key={idx.label} onClick={function(){setSelIdx(idx);}} style={{background:CB,border:"1px solid "+BD,borderRadius:20,padding:"12px 14px",position:"relative",overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.3)",cursor:"pointer"}}>
                 <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:idx.up?"linear-gradient(90deg,"+G+",transparent)":"linear-gradient(90deg,"+R+",transparent)"}}></div>
                 <div style={{fontSize:9,color:T2,marginBottom:4,fontWeight:600}}>{idx.label}</div>
                 <div style={{fontFamily:"monospace",fontSize:16,fontWeight:900,color:T1,marginBottom:2}}>{idx.ltp.toLocaleString("en-IN",{minimumFractionDigits:2})}</div>
@@ -221,4 +227,4 @@ export default function EquityHome(props) {
       </div>
     </div>
   );
-}
+        }

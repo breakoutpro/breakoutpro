@@ -73,7 +73,7 @@ export default function GlobalHome(props) {
               <span style={{fontSize:15,fontWeight:900,color:"#fff"}}>{user.name?user.name[0].toUpperCase():"A"}</span>
             </div>
             <div>
-              <div style={{fontSize:10,color:T2}}>Good Night</div>
+              <div style={{fontSize:10,color:T2}}>{props.greeting||"Good Night"}</div>
               <div style={{fontSize:16,fontWeight:900,color:T1}}>{user.name||"Trader"}</div>
             </div>
           </div>
@@ -163,5 +163,5 @@ export default function GlobalHome(props) {
       </div>
     </div>
   );
-          }
+}
 

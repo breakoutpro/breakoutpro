@@ -97,7 +97,8 @@ export default function EquityHome(props) {
   },[]);
 
   var hour=time.getHours();
-  var greeting=hour<12?"Good Morning":hour<17?"Good Afternoon":"Good Evening";
+  var greeting=props.greeting||(hour<12?"Good Morning":hour<17?"Good Afternoon":"Good Evening");
+  var isMorning=props.session=="morning";
   var timeStr=time.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
 
   return (
@@ -121,12 +122,12 @@ export default function EquityHome(props) {
           </div>
         </div>
         {/* Market status */}
-        <div style={{background:"rgba(0,200,83,0.08)",border:"1px solid rgba(0,200,83,0.2)",borderRadius:12,padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{background:isMorning?"rgba(245,158,11,0.08)":"rgba(0,200,83,0.08)",border:"1px solid "+(isMorning?"rgba(245,158,11,0.2)":"rgba(0,200,83,0.2)"),borderRadius:12,padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div style={{display:"flex",alignItems:"center",gap:6}}>
-            <div style={{width:7,height:7,borderRadius:"50%",background:G2,boxShadow:"0 0 8px "+G2}}></div>
-            <span style={{fontSize:10,fontWeight:700,color:G2}}>NSE/BSE Market Open</span>
+            <div style={{width:7,height:7,borderRadius:"50%",background:isMorning?GOLD:G2,boxShadow:"0 0 8px "+(isMorning?GOLD:G2)}}></div>
+            <span style={{fontSize:10,fontWeight:700,color:isMorning?GOLD:G2}}>{isMorning?"Pre-Market Prep  Opens 9:15 AM":"NSE/BSE Market Open"}</span>
           </div>
-          <span style={{fontSize:8,color:T2}}>9:15 AM - 3:30 PM</span>
+          <span style={{fontSize:8,color:T2}}>{isMorning?"Check Global Cues":"9:15 AM - 3:30 PM"}</span>
         </div>
       </div>
 
@@ -220,4 +221,4 @@ export default function EquityHome(props) {
       </div>
     </div>
   );
-                         }
+}

@@ -184,4 +184,5 @@ export default function EquityHome(props){
       </div>
     </div>
   );
-}
+      }
+                  

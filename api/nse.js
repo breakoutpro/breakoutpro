@@ -50,8 +50,16 @@ export default async function handler(req) {
     var url = new URL(req.url);
     var index = url.searchParams.get("index") || "NIFTY 50";
     var symbol = url.searchParams.get("symbol");
+    var debug = url.searchParams.get("debug");
 
     var cookies = await getCookies();
+
+    if (debug == "1") {
+      return new Response(JSON.stringify({ cookies: cookies, length: cookies.length }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      });
+    }
 
     var endpoint;
     if (symbol) {

@@ -1,5 +1,14 @@
 export const config = { runtime: "edge" };
 
+async function safeJson(r, label) {
+  var text = await r.text();
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    throw new Error(label + " returned non-JSON (status " + r.status + "): " + text.slice(0, 150));
+  }
+}
+
 var scripCache = { data: null, timestamp: 0 };
 
 async function getScripMaster() {
@@ -10,8 +19,8 @@ async function getScripMaster() {
   var r = await fetch("https://margincalculator.angelone.in/OpenAPI_File/files/OpenAPIScripMaster.json", {
     signal: AbortSignal.timeout(15000),
   });
-  if (!r.ok) throw new Error("Failed to fetch scrip master");
-  var all = await r.json();
+  if (!r.ok) throw new Error("Failed to fetch scrip master (status " + r.status + ")");
+  var all = await safeJson(r, "Scrip master");
   var nseEquity = all.filter(function(s) {
     return s.exch_seg == "NSE" && s.symbol && s.symbol.indexOf("-EQ") != -1;
   });
@@ -92,9 +101,9 @@ async function loginToAngelOne() {
     }),
   });
 
-  var data = await r.json();
+  var data = await safeJson(r, "Angel One login");
   if (!data.status || !data.data || !data.data.jwtToken) {
-    throw new Error("Angel One login failed: " + (data.message || "unknown error"));
+    throw new Error("Angel One login failed: " + (data.message || JSON.stringify(data)));
   }
   return data.data;
 }
@@ -157,7 +166,7 @@ export default async function handler(req) {
         }),
       });
 
-      var quoteData = await quoteR.json();
+      var quoteData = await safeJson(quoteR, "Angel One quote");
 
       if (quoteData && quoteData.data && quoteData.data.fetched) {
         quoteData.data.fetched.forEach(function(item) {

@@ -19,9 +19,17 @@ async function getCookies() {
     signal: AbortSignal.timeout(10000),
   });
 
-  var setCookieHeader = r.headers.get("set-cookie") || "";
-  var cookies = setCookieHeader.split(",").map(function(c) {
-    return c.trim().split(";")[0];
+  var cookieList = [];
+  if (typeof r.headers.getSetCookie == "function") {
+    cookieList = r.headers.getSetCookie();
+  }
+  if (cookieList.length == 0) {
+    var single = r.headers.get("set-cookie");
+    if (single) cookieList = [single];
+  }
+
+  var cookies = cookieList.map(function(c) {
+    return c.split(";")[0].trim();
   }).filter(Boolean).join("; ");
 
   cookieCache = { value: cookies, timestamp: now };
@@ -72,7 +80,7 @@ export default async function handler(req) {
 
     if (!res.ok) {
       cookieCache = { value: "", timestamp: 0 };
-      return new Response(JSON.stringify({ error: "NSE returned status " + res.status }), {
+      return new Response(JSON.stringify({ error: "NSE returned status " + res.status, hadCookies: cookies.length > 0, cookieLength: cookies.length }), {
         status: 200,
         headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
       });

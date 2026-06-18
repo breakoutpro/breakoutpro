@@ -1,45 +1,53 @@
 export const config = { runtime: "edge" };
 
-export default async function handler(req) {
-  var url = new URL(req.url);
-  var symbols = url.searchParams.get("symbols") || "^NSEI";
-
+async function fetchOne(sym) {
   try {
     var r = await fetch(
-      "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + encodeURIComponent(symbols),
-      { headers: { "User-Agent": "Mozilla/5.0", "Accept": "application/json" }, signal: AbortSignal.timeout(8000) }
+      "https://query1.finance.yahoo.com/v8/finance/chart/" + sym + "?range=1d&interval=1m",
+      { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" }, signal: AbortSignal.timeout(7000) }
     );
+    if (!r.ok) return null;
+    var data = await r.json();
+    var result = data && data.chart && data.chart.result && data.chart.result[0];
+    if (!result || !result.meta) return null;
+    var meta = result.meta;
+    var price = meta.regularMarketPrice || 0;
+    var prevClose = meta.previousClose || meta.chartPreviousClose || price;
+    var change = price - prevClose;
+    var changePct = prevClose ? (change / prevClose) * 100 : 0;
+    return {
+      symbol: sym,
+      regularMarketPrice: price,
+      regularMarketChange: change,
+      regularMarketChangePercent: changePct,
+      regularMarketPreviousClose: prevClose,
+      regularMarketDayHigh: meta.regularMarketDayHigh || 0,
+      regularMarketDayLow: meta.regularMarketDayLow || 0,
+      regularMarketVolume: meta.regularMarketVolume || 0,
+      marketState: meta.marketState || "CLOSED",
+    };
+  } catch (e) {
+    return null;
+  }
+}
 
-    if (r.ok) {
-      var data = await r.json();
-      var rows = (data && data.quoteResponse && data.quoteResponse.result) || [];
-      var results = rows.map(function(q) {
-        return {
-          symbol: q.symbol,
-          regularMarketPrice: q.regularMarketPrice || 0,
-          regularMarketChange: q.regularMarketChange || 0,
-          regularMarketChangePercent: q.regularMarketChangePercent || 0,
-          regularMarketPreviousClose: q.regularMarketPreviousClose || 0,
-          regularMarketDayHigh: q.regularMarketDayHigh || 0,
-          regularMarketDayLow: q.regularMarketDayLow || 0,
-          regularMarketVolume: q.regularMarketVolume || 0,
-          marketState: q.marketState || "CLOSED",
-        };
-      });
+export default async function handler(req) {
+  var url = new URL(req.url);
+  var symbolsParam = url.searchParams.get("symbols") || "^NSEI";
+  var symbols = symbolsParam.split(",").filter(Boolean).slice(0, 30);
 
-      return new Response(JSON.stringify({ quoteResponse: { result: results, error: null } }), {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          "Cache-Control": "public, max-age=15",
-        },
-      });
-    }
+  try {
+    var promises = symbols.map(fetchOne);
+    var settled = await Promise.all(promises);
+    var results = settled.filter(function(r) { return r != null; });
 
-    return new Response(JSON.stringify({ quoteResponse: { result: [], error: "Yahoo returned " + r.status } }), {
+    return new Response(JSON.stringify({ quoteResponse: { result: results, error: results.length == 0 ? "No symbols resolved" : null } }), {
       status: 200,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "public, max-age=15",
+      },
     });
   } catch (e) {
     return new Response(JSON.stringify({ error: e.message, quoteResponse: { result: [], error: e.message } }), {
@@ -48,3 +56,4 @@ export default async function handler(req) {
     });
   }
 }
+

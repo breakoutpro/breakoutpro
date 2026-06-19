@@ -34,22 +34,41 @@ function loadLWC(cb) {
   document.head.appendChild(s);
 }
 
+var mockCache = {};
+
 function genMock(tf, ltp) {
+  var base = ltp || 23850;
+  var cacheKey = tf + "_" + Math.floor(base);
+  if (mockCache[cacheKey]) {
+    var cached = mockCache[cacheKey];
+    var now = Math.floor(Date.now() / 1000);
+    var cfg2 = TF_CFG[tf] || TF_CFG["15m"];
+    return cached.map(function(c, i) {
+      return Object.assign({}, c, { time: now - (cached.length - i) * cfg2.secs });
+    });
+  }
   var cfg = TF_CFG[tf] || TF_CFG["15m"];
   var now = Math.floor(Date.now() / 1000);
-  var base = ltp || 23850;
   var arr = [];
   var count = 120;
-  for (var i = 0; i < count; i++) {
-    var chg = (Math.random() - 0.48) * base * 0.004;
-    var o = parseFloat(base.toFixed(2));
-    var c = parseFloat((base + chg).toFixed(2));
-    var h = parseFloat((Math.max(o, c) + Math.random() * base * 0.0015).toFixed(2));
-    var l = parseFloat((Math.min(o, c) - Math.random() * base * 0.0015).toFixed(2));
-    arr.push({ time: now - (count - i) * cfg.secs, open: o, high: h, low: l, close: c, volume: Math.floor(50000 + Math.random() * 500000) });
-    base = c;
+  var seed = Math.floor(base * 100);
+  function seededRand(n) {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
   }
-  arr[arr.length - 1].close = ltp || arr[arr.length - 1].close;
+  var cur = base * 0.96;
+  for (var i = 0; i < count; i++) {
+    var chg = (seededRand() - 0.48) * cur * 0.003;
+    var o = parseFloat(cur.toFixed(2));
+    var c = parseFloat((cur + chg).toFixed(2));
+    var h = parseFloat((Math.max(o, c) + seededRand() * cur * 0.001).toFixed(2));
+    var l = parseFloat((Math.min(o, c) - seededRand() * cur * 0.001).toFixed(2));
+    arr.push({ time: now - (count - i) * cfg.secs, open: o, high: h, low: l, close: c, volume: Math.floor(50000 + seededRand() * 500000) });
+    cur = c;
+  }
+  arr[arr.length - 1].close = parseFloat(base.toFixed(2));
+  arr[arr.length - 1].high = Math.max(arr[arr.length - 1].high, base);
+  mockCache[cacheKey] = arr;
   return arr;
 }
 
@@ -133,18 +152,30 @@ export default function NiftyChart() {
         if (d.candles && d.candles.length > 1) {
           var arr = d.candles;
           var last = arr[arr.length - 1];
-          var prev = arr[0];
+          var first = arr[0];
           var liveLtp = last.close;
-          var pc = prev.open;
-          ltpRef.current = liveLtp;
-          setLtp(liveLtp);
-          setPrevClose(pc);
-          return liveLtp;
+          var pc = first.open;
+          if (liveLtp > 1000) {
+            ltpRef.current = liveLtp;
+            setLtp(liveLtp);
+            setPrevClose(pc);
+          }
+          return ltpRef.current || 23850;
         }
-        return ltpRef.current || 23850;
+        if (!ltpRef.current) {
+          ltpRef.current = 23850;
+          setLtp(23850);
+          setPrevClose(23650);
+        }
+        return ltpRef.current;
       })
       .catch(function() {
-        return ltpRef.current || 23850;
+        if (!ltpRef.current) {
+          ltpRef.current = 23850;
+          setLtp(23850);
+          setPrevClose(23650);
+        }
+        return ltpRef.current;
       });
   }
 
@@ -338,4 +369,5 @@ export default function NiftyChart() {
       <style>{"@keyframes ncspin{to{transform:rotate(360deg)}}"}</style>
     </div>
   );
-}
+                                        }
+    

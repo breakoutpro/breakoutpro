@@ -54,6 +54,8 @@ export function AIBriefingCard(props){
     </div>
   );
 }
+
+var NEWS_ITEMS=[
   {headline:"RBI holds repo rate steady, signals dovish stance ahead", source:"ET Markets", time:"12 min ago", tag:"Breaking"},
   {headline:"FIIs turn net buyers for 8th straight session", source:"Moneycontrol", time:"38 min ago", tag:"Market"},
   {headline:"IT sector Q4 earnings beat street estimates", source:"Bloomberg", time:"1 hr ago", tag:"Economic"},

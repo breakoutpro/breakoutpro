@@ -1,0 +1,246 @@
+import { useState, useEffect } from "react";
+import IndexDetail from "./IndexDetail";
+import { MiniChart, genSpark, INDICES, GAINERS, LOSERS, LARGECAP, MIDCAP, SECTORS, getSession, SESSION_META } from "./HomeData";
+import { getLang, setLang } from "../i18n/translations";
+import HomeSearch from "../components/HomeSearch";
+import HomeBottom from "./HomeBottom";
+import MorningPulse from "./MorningPulse";
+import { MarketHeatmapCard, LiveNewsCards, AIBriefingCard } from "../components/HomeNewsHeatmap";
+
+var BG="#050B18", CARD="#0D1B2A", BD="rgba(255,255,255,0.06)";
+var BLUE="#3B82F6", CYAN="#22D3EE";
+var UP="#22C55E", DOWN="#EF4444", GOLD="#F59E0B";
+var T1="#FFFFFF", T2="#9FB0C9", T3="#5B6B85";
+
+var SECTOR_ICONS={"Banking":"&#127974;","IT":"&#128187;","Auto":"&#128663;","Pharma":"&#128138;","FMCG":"&#128722;","Metal":"&#9881;&#65039;","Realty":"&#127968;","Energy":"&#9889;","Infra":"&#127959;&#65039;","Telecom":"&#128241;"};
+
+var QUICK_ACTIONS=[
+  {label:"Top Gainers", id:"gainers", icon:"&#128200;"},
+  {label:"Top Losers",  id:"losers",  icon:"&#128201;"},
+  {label:"Sectors",     id:"markets", icon:"&#127760;"},
+  {label:"Global",      id:"global",  icon:"&#127757;"},
+  {label:"News",        id:"news",    icon:"&#128240;"},
+  {label:"Scanner",     id:"scan",    icon:"&#128269;"},
+];
+
+function GlassButton(props){
+  return (
+    <button onClick={props.onClick} style={{
+      background:"rgba(59,130,246,0.07)",border:"1px solid rgba(59,130,246,0.2)",
+      backdropFilter:"blur(12px)",borderRadius:18,padding:"14px 6px",
+      display:"flex",flexDirection:"column",alignItems:"center",gap:7,
+      cursor:"pointer",fontFamily:"inherit",
+    }}>
+      <span style={{fontSize:19}} dangerouslySetInnerHTML={{__html:props.icon}}/>
+      <span style={{fontSize:10,fontWeight:600,color:T2,textAlign:"center",lineHeight:1.2}}>{props.label}</span>
+    </button>
+  );
+}
+
+export default function EquityHome(props){
+  var setTab=props.setTab||function(){};
+  var [lang,setLangState]=useState(getLang());
+  var [sess,setSess]=useState(getSession());
+  var [indices,setIndices]=useState(function(){
+    return INDICES.map(function(x){return Object.assign({},x,{ltp:x.base,spark:genSpark(x.base)});});
+  });
+  var [selIdx,setSelIdx]=useState(null);
+  var [mood,setMood]=useState({bull:72,fg:"Greed",conf:87});
+  var [showBriefing,setShowBriefing]=useState(false);
+  var [marketTab,setMarketTab]=useState("lgainers");
+
+  useEffect(function(){
+    var t=setInterval(function(){
+      setSess(getSession());
+      setIndices(function(prev){return prev.map(function(idx){var chg=(Math.random()-0.48)*idx.ltp*0.0005;var nl=parseFloat((idx.ltp+chg).toFixed(2));return Object.assign({},idx,{ltp:nl,spark:idx.spark.slice(-19).concat([nl])});});});
+      setMood(function(p){return{bull:Math.max(40,Math.min(85,p.bull+(Math.random()-0.5)*4)),fg:p.bull>60?"Greed":"Fear",conf:Math.floor(75+Math.random()*15)};});
+    },3000);
+    var langT=setInterval(function(){var cur=getLang();if(cur!=lang)setLangState(cur);},1000);
+    return function(){clearInterval(t);clearInterval(langT);};
+  },[lang]);
+
+  var isLive=sess=="live"||sess=="equity";
+
+  var LARGE_GAINERS=LARGECAP.filter(function(s){return s.up;});
+  var LARGE_LOSERS=LARGECAP.filter(function(s){return !s.up;});
+  var MID_GAINERS=MIDCAP.filter(function(s){return s.up;});
+  var MID_LOSERS=MIDCAP.filter(function(s){return !s.up;});
+  var MTABS=[
+    {id:"lgainers",label:"LC Gainers",data:LARGE_GAINERS,col:UP},
+    {id:"llosers", label:"LC Losers", data:LARGE_LOSERS, col:DOWN},
+    {id:"mgainers",label:"MC Gainers",data:MID_GAINERS,  col:UP},
+    {id:"mlosers", label:"MC Losers", data:MID_LOSERS,   col:DOWN},
+  ];
+  var activeMarket=MTABS.find(function(m){return m.id==marketTab;})||MTABS[0];
+
+  function toggleLang(){
+    var next=lang=="te"?"en":"te";
+    setLang(next);
+    setLangState(next);
+  }
+
+  if(selIdx) return <IndexDetail idx={selIdx} onBack={function(){setSelIdx(null);}} setTab={setTab}/>;
+  if(showBriefing) return (
+    <div style={{background:BG,minHeight:"100vh"}}>
+      <div style={{background:CARD,borderBottom:"1px solid "+BD,padding:"16px 16px",display:"flex",alignItems:"center",gap:10}}>
+        <button onClick={function(){setShowBriefing(false);}} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:10,width:34,height:34,color:T1,fontSize:14,cursor:"pointer"}}>&#8592;</button>
+        <span style={{fontSize:18,fontWeight:800,color:T1}}>AI Market Briefing</span>
+      </div>
+      <MorningPulse setTab={setTab}/>
+    </div>
+  );
+
+  return (
+    <div style={{background:BG,minHeight:"100vh",fontFamily:"'Inter',Arial,sans-serif",paddingBottom:84,color:T1}}>
+
+      {/* ===== TOP HEADER (single logo, tagline, PRO, notif, lang) ===== */}
+      <div style={{padding:"22px 18px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{display:"flex",alignItems:"center",gap:11}}>
+          <div style={{width:42,height:42,borderRadius:13,background:"linear-gradient(135deg,"+BLUE+","+CYAN+")",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 18px rgba(59,130,246,0.4)"}}>
+            <span style={{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:-0.5}}>BP</span>
+          </div>
+          <div>
+            <div style={{fontSize:17,fontWeight:800,color:T1,letterSpacing:-0.2}}>Breakout<span style={{color:CYAN}}>Pro</span></div>
+            <div style={{fontSize:9,color:T3,fontWeight:600,letterSpacing:0.3}}>Catch Every Breakout</div>
+          </div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <button onClick={function(){setTab("alerts");}} style={{background:"rgba(255,255,255,0.06)",border:"1px solid "+BD,borderRadius:11,width:38,height:38,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",position:"relative"}}>
+            <span style={{fontSize:15}}>&#128276;</span>
+            <div style={{position:"absolute",top:7,right:8,width:6,height:6,borderRadius:"50%",background:DOWN,border:"1.5px solid "+BG}}/>
+          </button>
+          <button onClick={toggleLang} style={{background:"rgba(255,255,255,0.06)",border:"1px solid "+BD,borderRadius:11,width:38,height:38,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
+            <span style={{fontSize:10,fontWeight:800,color:T2}}>{lang=="te"?"\u0c24\u0c46":"EN"}</span>
+          </button>
+          <button onClick={function(){setTab("sub");}} style={{background:"linear-gradient(135deg,"+GOLD+",#D97706)",border:"none",borderRadius:11,padding:"9px 14px",display:"flex",alignItems:"center",gap:4,cursor:"pointer",boxShadow:"0 3px 14px rgba(245,158,11,0.35)"}}>
+            <span style={{fontSize:11}}>&#11088;</span>
+            <span style={{fontSize:11,fontWeight:800,color:"#1A0F00"}}>PRO</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Market status pill */}
+      <div style={{padding:"0 18px 14px"}}>
+        <div style={{display:"inline-flex",alignItems:"center",gap:6,background:isLive?"rgba(34,197,94,0.1)":"rgba(91,107,133,0.15)",border:"1px solid "+(isLive?"rgba(34,197,94,0.3)":BD),borderRadius:20,padding:"5px 12px"}}>
+          <div style={{width:6,height:6,borderRadius:"50%",background:isLive?UP:T3,boxShadow:isLive?"0 0 6px "+UP:"none"}}/>
+          <span style={{fontSize:10,fontWeight:700,color:isLive?UP:T3}}>{isLive?"Market Live":"Market Closed"}</span>
+        </div>
+      </div>
+
+      {/* Search */}
+      <div style={{padding:"0 18px 16px"}}>
+        <HomeSearch setTab={setTab}/>
+      </div>
+
+      {/* ===== AI MARKET BRIEFING CARD ===== */}
+      <div style={{padding:"0 18px 18px"}}>
+        <AIBriefingCard setShowMorningPulse={setShowBriefing} pulseInfo={{icon:"&#129302;",label:"AI Market Briefing"}} mood={mood}/>
+      </div>
+
+      {/* ===== LIVE MARKET CARDS ===== */}
+      <div style={{padding:"0 0 18px"}}>
+        <div style={{padding:"0 18px",display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:11}}>
+          <span style={{fontSize:15,fontWeight:800,color:T1,letterSpacing:0.2}}>Live Markets</span>
+          <span style={{fontSize:10,color:T3}}>Tap for chart &#8594;</span>
+        </div>
+        <div style={{display:"flex",gap:10,overflowX:"auto",padding:"0 18px 4px",WebkitOverflowScrolling:"touch"}}>
+          {indices.map(function(idx){
+            return (
+              <div key={idx.label} onClick={function(){setSelIdx(idx);}} style={{
+                background:CARD,border:"1px solid "+BD,borderRadius:20,padding:"15px",
+                flexShrink:0,minWidth:134,cursor:"pointer",position:"relative",overflow:"hidden",
+                boxShadow:"0 6px 24px rgba(0,0,0,0.3)",
+              }}>
+                <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,"+(idx.up?UP:DOWN)+",transparent)"}}/>
+                <div style={{fontSize:11,fontWeight:700,color:T3,marginBottom:6}}>{idx.label}</div>
+                <div style={{fontSize:18,fontWeight:900,color:T1,fontFamily:"monospace",marginBottom:5,letterSpacing:-0.3}}>{idx.ltp.toLocaleString("en-IN",{maximumFractionDigits:2})}</div>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <span style={{fontSize:12,fontWeight:700,color:idx.up?UP:DOWN}}>{idx.up?"+":""}{idx.pct}%</span>
+                  <MiniChart d={idx.spark} col={idx.up?UP:DOWN} w={44} h={22}/>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ===== QUICK ACTIONS GRID ===== */}
+      <div style={{padding:"0 18px 18px"}}>
+        <div style={{marginBottom:11}}>
+          <span style={{fontSize:15,fontWeight:800,color:T1,letterSpacing:0.2}}>Quick Actions</span>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:9}}>
+          {QUICK_ACTIONS.map(function(a){
+            return <GlassButton key={a.id} icon={a.icon} label={a.label} onClick={function(){setTab(a.id=="gainers"||a.id=="losers"?"markets":a.id);}}/>;
+          })}
+        </div>
+      </div>
+
+      <div style={{padding:"0 18px"}}>
+
+        {/* ===== SECTOR PERFORMANCE (horizontal cards) ===== */}
+        <div style={{fontSize:15,fontWeight:800,color:T1,letterSpacing:0.2,marginBottom:11}}>Sector Performance</div>
+        <div style={{display:"flex",gap:10,overflowX:"auto",marginBottom:18,paddingBottom:2,WebkitOverflowScrolling:"touch"}}>
+          {SECTORS.slice(0,6).map(function(s){
+            return (
+              <div key={s.name} onClick={function(){setTab("markets");}} style={{background:CARD,border:"1px solid "+BD,borderRadius:18,padding:"14px",minWidth:104,flexShrink:0,cursor:"pointer",boxShadow:"0 4px 18px rgba(0,0,0,0.25)"}}>
+                <span style={{fontSize:18}} dangerouslySetInnerHTML={{__html:SECTOR_ICONS[s.name]||"&#128202;"}}/>
+                <div style={{fontSize:11,fontWeight:700,color:T1,marginTop:8,marginBottom:4}}>{s.name}</div>
+                <div style={{fontSize:13,fontWeight:800,color:s.up?UP:DOWN}}>{s.up?"+":""}{s.pct}%</div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ===== MARKET HEATMAP ===== */}
+        <div style={{fontSize:15,fontWeight:800,color:T1,letterSpacing:0.2,marginBottom:11}}>Market Heatmap</div>
+        <MarketHeatmapCard setTab={setTab} stocks={LARGECAP.concat(MIDCAP)}/>
+
+        {/* ===== MARKET MOVERS ===== */}
+        <div style={{fontSize:15,fontWeight:800,color:T1,letterSpacing:0.2,marginBottom:11}}>Market Movers</div>
+        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:20,overflow:"hidden",marginBottom:18,boxShadow:"0 4px 20px rgba(0,0,0,0.25)"}}>
+          <div style={{display:"flex",overflowX:"auto",borderBottom:"1px solid "+BD}}>
+            {MTABS.map(function(mt){
+              var act=marketTab==mt.id;
+              return (
+                <button key={mt.id} onClick={function(){setMarketTab(mt.id);}} style={{flex:1,minWidth:78,background:act?mt.col+"12":"none",border:"none",borderBottom:act?"2px solid "+mt.col:"2px solid transparent",padding:"12px 4px",color:act?mt.col:T3,fontSize:11,fontWeight:act?800:500,cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}}>{mt.label}</button>
+              );
+            })}
+          </div>
+          {activeMarket.data.length==0?(
+            <div style={{padding:20,textAlign:"center",color:T3,fontSize:12}}>No data available</div>
+          ):(
+            activeMarket.data.map(function(s,i){
+              var up=s.up!=null?s.up:s.pct>=0;
+              return (
+                <div key={s.sym} style={{padding:"13px 16px",borderBottom:i<activeMarket.data.length-1?"1px solid "+BD:"none",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div>
+                    <div style={{fontSize:13,fontWeight:700,color:T1}}>{s.sym}</div>
+                    <div style={{fontSize:10,color:T3,marginTop:2}}>{s.name||""}</div>
+                  </div>
+                  <div style={{textAlign:"right"}}>
+                    <div style={{fontSize:13,fontWeight:700,color:T1,fontFamily:"monospace"}}>{s.ltp?s.ltp.toLocaleString("en-IN",{maximumFractionDigits:2}):"--"}</div>
+                    <div style={{fontSize:11,fontWeight:700,color:up?UP:DOWN}}>{up?"+":""}{s.pct}%</div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* ===== LIVE NEWS ===== */}
+        <div style={{fontSize:15,fontWeight:800,color:T1,letterSpacing:0.2,marginBottom:11}}>Live News</div>
+        <LiveNewsCards setTab={setTab}/>
+
+        {/* ===== BOTTOM TAGLINE ===== */}
+        <div style={{textAlign:"center",padding:"26px 10px",marginBottom:8}}>
+          <div style={{fontSize:15,fontWeight:900,color:T1,letterSpacing:0.5,marginBottom:5}}>ONE APP.</div>
+          <div style={{fontSize:15,fontWeight:900,background:"linear-gradient(90deg,"+BLUE+","+CYAN+")",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text",letterSpacing:0.5,marginBottom:13}}>EVERYTHING YOU NEED.</div>
+          <div style={{fontSize:10,color:T3,letterSpacing:1.5,fontWeight:600}}>ANALYZE &bull; SCAN &bull; PLAN &bull; EXECUTE &bull; SUCCEED</div>
+        </div>
+
+        <HomeBottom setTab={setTab}/>
+      </div>
+    </div>
+  );
+}

@@ -33,6 +33,7 @@ var QUICK_ACTIONS=[
 
 export default function EquityHome(props){
   var setTab=props.setTab||function(){};
+  var isPrem=props.isPrem||false;
   var [sess,setSess]=useState(getSession());
   var [indices,setIndices]=useState(function(){
     return INDICES.map(function(x){return Object.assign({},x,{ltp:x.base,spark:genSpark(x.base)});});
@@ -82,10 +83,11 @@ export default function EquityHome(props){
               <span style={{fontSize:12,fontWeight:900,color:"#fff",letterSpacing:-0.5}}>BP</span>
             </div>
             <div>
-              <div style={{fontSize:17,fontWeight:800,letterSpacing:-0.3}}>
+              <div>
+              <div style={{fontSize:22,fontWeight:900,letterSpacing:-0.5,lineHeight:1}}>
                 <span style={{color:"#FFFFFF"}}>Breakout</span><span style={{color:PROBLUE}}>Pro</span>
               </div>
-              <div style={{fontSize:8,color:T3,fontWeight:600,letterSpacing:1.2,marginTop:1}}>CATCH EVERY BREAKOUT</div>
+              <div style={{fontSize:9,color:T3,fontWeight:600,letterSpacing:1.4,marginTop:3}}>CATCH EVERY BREAKOUT</div>
             </div>
           </div>
           <button onClick={function(){setTab("profile");}} style={{width:36,height:36,borderRadius:"50%",background:"linear-gradient(135deg,"+BLUE+",#6366F1)",border:"2px solid rgba(77,166,255,0.3)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0}}>
@@ -115,7 +117,8 @@ export default function EquityHome(props){
         <AIBriefingCard setShowMorningPulse={setShowBriefing} pulseInfo={{label:"AI Market Briefing"}} mood={mood}/>
       </div>
 
-      {/* ===== UPGRADE BANNER (slim, after AI Briefing) ===== */}
+      {/* ===== UPGRADE BANNER (hidden for premium users) ===== */}
+      {!isPrem&&(
       <div style={{padding:"10px 18px"}}>
         <div onClick={function(){setTab("sub");}} style={{background:"linear-gradient(90deg,rgba(29,78,216,0.4),rgba(124,58,237,0.3))",border:"1px solid rgba(99,102,241,0.4)",borderRadius:12,padding:"10px 14px",display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}>
           <span style={{fontSize:16}}>&#9889;</span>
@@ -128,6 +131,7 @@ export default function EquityHome(props){
           </div>
         </div>
       </div>
+      )}
 
       {/* ===== INDEX CARDS (larger) ===== */}
       <div style={{padding:"0 0 18px"}}>
@@ -221,4 +225,5 @@ export default function EquityHome(props){
       <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}@keyframes ticker-fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}"}</style>
     </div>
   );
-}
+                                                          }
+              

@@ -190,10 +190,10 @@ export default function HomeLower(props){
       <Section title="Global Markets">
         <div style={{display:"flex",gap:9,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
           {global.slice(0,6).map(function(g){return(
-            <div key={g.sym} style={{background:CARD,border:"1px solid "+BD,borderRadius:12,padding:"11px 13px",minWidth:108,flexShrink:0}}>
-              <div style={{fontSize:9.5,color:T2,marginBottom:4,fontWeight:600}}>{g.sym}</div>
+            <div key={g.label} style={{background:CARD,border:"1px solid "+BD,borderRadius:12,padding:"11px 13px",minWidth:108,flexShrink:0}}>
+              <div style={{fontSize:9.5,color:T2,marginBottom:4,fontWeight:600}}>{g.label}</div>
               <div style={{fontSize:13,fontWeight:800,color:T1,fontFamily:"monospace",marginBottom:3}}>{g.val}</div>
-              <div style={{fontSize:10,fontWeight:700,color:g.up?UP:DOWN}}>{g.up?"+":""}{g.pct}%</div>
+              <div style={{fontSize:10,fontWeight:700,color:g.up?UP:DOWN}}>{g.chg}</div>
             </div>
           );})}
         </div>

@@ -91,6 +91,13 @@ export var FIIDII = [
   {label:"DII Net", val:"+1,120 Cr", up:true},
 ];
 
+export var MARKET_SUMMARY = {
+  advances:1693,
+  declines:812,
+  sentiment:"Bullish",
+  sentimentPct:68,
+};
+
 // AI conclusion - bias, probability, risk, message.
 export var AI_CONCLUSION = {
   bias:"Bullish",

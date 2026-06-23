@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { buildPhrase, LANGS } from "../VoiceData";
+import { buildPhrase, LANGS } from "../screens/VoiceData";
 
 // BreakoutPro - useVoiceAlerts
 // Multi-language voice alerts using browser SpeechSynthesis.

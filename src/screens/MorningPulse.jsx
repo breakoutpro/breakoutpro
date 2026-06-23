@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getMarketStatus, GLOBAL } from "./PulseData";
+import { getMarketStatus, GLOBAL, INDICES, MARKET_SUMMARY } from "./PulseData";
 import PulseOverview from "./PulseOverview";
 
 var DB="#050816",CB="#0B1224",BD="#1B2A4D";
@@ -94,27 +94,52 @@ export default function MorningPulse(props){
   }
 
 
+  var nifty=INDICES[0];
+  var summary=MARKET_SUMMARY;
+
   return (
     <div style={{background:DB,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:80}}>
 
       {/* HEADER */}
       <div style={{background:"linear-gradient(135deg,#050816,#0A1020)",padding:"14px 16px",borderBottom:"1px solid "+BD}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
-          <div>
-            <div style={{fontSize:20,fontWeight:900,color:T1}}>AI Market <span style={{color:G}}>Briefing</span></div>
-            <div style={{fontSize:9,color:T2,marginTop:2}}>{dateStr}  {timeStr}</div>
+
+        {/* TITLE ROW - compact */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+          <div style={{display:"flex",alignItems:"center",gap:7}}>
+            <span style={{fontSize:15}} dangerouslySetInnerHTML={{__html:"&#129504;"}}/>
+            <div>
+              <div style={{fontSize:15,fontWeight:900,color:T1}}>Market <span style={{color:G}}>Briefing</span></div>
+              <div style={{fontSize:8.5,color:T2,marginTop:1}}>{dateStr}  {timeStr}</div>
+            </div>
           </div>
-          <button onClick={getPulse} disabled={loading} style={{background:loading?"rgba(0,200,83,0.15)":G,border:"none",borderRadius:12,padding:"10px 16px",color:"#fff",fontSize:11,fontWeight:700,cursor:loading?"default":"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:6}}>
-            {loading?"Loading...":"Get AI Pulse"}
-          </button>
+          <div style={{display:"flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.04)",border:"1px solid "+BD,borderRadius:20,padding:"5px 11px"}}>
+            <div style={{width:7,height:7,borderRadius:"50%",background:status.dot,animation:status.phase=="live"?"pulse-dot 1.4s infinite":"none",flexShrink:0}}></div>
+            <span style={{fontSize:9,fontWeight:800,color:status.col}}>{status.label}</span>
+          </div>
         </div>
 
-        {/* MARKET STATUS - time aware */}
-        <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",border:"1px solid "+BD,borderRadius:10,padding:"8px 12px",marginBottom:10}}>
-          <div style={{width:8,height:8,borderRadius:"50%",background:status.dot,animation:status.phase=="live"?"pulse-dot 1.4s infinite":"none",flexShrink:0}}></div>
-          <div style={{flex:1}}>
-            <div style={{fontSize:11,fontWeight:800,color:status.col}}>{status.label}</div>
-            <div style={{fontSize:8.5,color:T2,marginTop:1}}>{status.sub}</div>
+        {/* MARKET SUMMARY SNAPSHOT - hero card */}
+        <div style={{background:"linear-gradient(135deg,#0A1A0F,#0B1224)",border:"1px solid rgba(0,200,83,0.18)",borderRadius:16,padding:"14px 16px",marginBottom:12}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+            <div>
+              <div style={{fontSize:9,color:T2,fontWeight:600,marginBottom:3}}>{nifty.label}</div>
+              <div style={{fontSize:30,fontWeight:900,color:T1,fontFamily:"monospace",lineHeight:1}}>{nifty.ltp.toLocaleString("en-IN",{maximumFractionDigits:2})}</div>
+              <div style={{fontSize:12,fontWeight:800,color:nifty.up?G2:R,marginTop:5}}>{nifty.up?"+":""}{nifty.pct}% today</div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontSize:8,color:T2,marginBottom:3}}>Sentiment</div>
+              <div style={{fontSize:14,fontWeight:800,color:summary.sentimentPct>=50?G2:R}}>{summary.sentiment}</div>
+              <div style={{fontSize:9,color:T2,marginTop:1}}>{summary.sentimentPct}% Bulls</div>
+            </div>
+          </div>
+          {/* breadth bar */}
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+            <span style={{fontSize:9,color:G2,fontWeight:700}}>Adv {summary.advances}</span>
+            <span style={{fontSize:9,color:R,fontWeight:700}}>Dec {summary.declines}</span>
+          </div>
+          <div style={{height:5,borderRadius:3,overflow:"hidden",display:"flex"}}>
+            <div style={{width:(summary.advances/(summary.advances+summary.declines)*100)+"%",background:G2}}></div>
+            <div style={{flex:1,background:R}}></div>
           </div>
         </div>
 

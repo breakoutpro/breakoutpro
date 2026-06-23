@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { getMarketStatus, GLOBAL, INDICES, MARKET_SUMMARY } from "./PulseData";
+import { getMarketStatus, GLOBAL, INDICES, MARKET_SUMMARY, STOCKS_WATCH } from "./PulseData";
 import PulseOverview from "./PulseOverview";
+import PulseIndexDetail from "./PulseIndexDetail";
 
 var DB="#050816",CB="#0B1224",BD="#1B2A4D";
 var G="#00C853",G2="#00E676",R="#EF4444";
@@ -35,13 +36,6 @@ function buildPrompt(){
   return p;
 }
 
-var STOCKS_WATCH=[
-  {sym:"RELIANCE",reason:"Q4 results today. Strong refining margins expected. Volume buildup seen.",type:"Event",color:BLUE},
-  {sym:"HDFCBANK",reason:"FII buying seen yesterday. Strong support at 1720. Watch breakout above 1760.",type:"Technical",color:G2},
-  {sym:"TATAMOTORS",reason:"EV sales data positive. Global auto sector strong overnight.",type:"Sector",color:GOLD},
-  {sym:"INFY",reason:"US tech sector up overnight. IT sector may see buying. ADR premium.",type:"Global",color:PURPLE},
-  {sym:"SBIN",reason:"RBI policy positive for PSU banks. Strong OI buildup in 820 CE.",type:"OI Data",color:"#EC4899"},
-];
 
 export default function MorningPulse(props){
   var setTab=props.setTab||function(){};
@@ -94,8 +88,10 @@ export default function MorningPulse(props){
   }
 
 
-  var nifty=INDICES[0];
   var summary=MARKET_SUMMARY;
+  var [selIdx,setSelIdx]=useState(null);
+
+  if(selIdx) return <PulseIndexDetail idx={selIdx} onBack={function(){setSelIdx(null);}}/>;
 
   return (
     <div style={{background:DB,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:80}}>
@@ -118,19 +114,25 @@ export default function MorningPulse(props){
           </div>
         </div>
 
-        {/* MARKET SUMMARY SNAPSHOT - hero card */}
-        <div style={{background:"linear-gradient(135deg,#0A1A0F,#0B1224)",border:"1px solid rgba(0,200,83,0.18)",borderRadius:16,padding:"14px 16px",marginBottom:12}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
-            <div>
-              <div style={{fontSize:9,color:T2,fontWeight:600,marginBottom:3}}>{nifty.label}</div>
-              <div style={{fontSize:30,fontWeight:900,color:T1,fontFamily:"monospace",lineHeight:1}}>{nifty.ltp.toLocaleString("en-IN",{maximumFractionDigits:2})}</div>
-              <div style={{fontSize:12,fontWeight:800,color:nifty.up?G2:R,marginTop:5}}>{nifty.up?"+":""}{nifty.pct}% today</div>
-            </div>
-            <div style={{textAlign:"right"}}>
-              <div style={{fontSize:8,color:T2,marginBottom:3}}>Sentiment</div>
-              <div style={{fontSize:14,fontWeight:800,color:summary.sentimentPct>=50?G2:R}}>{summary.sentiment}</div>
-              <div style={{fontSize:9,color:T2,marginTop:1}}>{summary.sentimentPct}% Bulls</div>
-            </div>
+        {/* MARKET SUMMARY SNAPSHOT - horizontal indices + breadth */}
+        <div style={{background:"linear-gradient(135deg,#0A1A0F,#0B1224)",border:"1px solid rgba(0,200,83,0.18)",borderRadius:16,padding:"14px",marginBottom:12}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+            <span style={{fontSize:11,fontWeight:800,color:T1}}>Indices</span>
+            <span style={{fontSize:9,color:summary.sentimentPct>=50?G2:R,fontWeight:700}}>{summary.sentiment} {summary.sentimentPct}%</span>
+          </div>
+          <div style={{display:"flex",gap:9,overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:12}}>
+            {INDICES.map(function(x){
+              return (
+                <div key={x.label} onClick={function(){setSelIdx(x);}} style={{background:"rgba(255,255,255,0.04)",border:"1px solid "+(x.up?"rgba(0,230,118,0.2)":"rgba(239,68,68,0.2)"),borderRadius:12,padding:"11px 13px",minWidth:115,flexShrink:0,cursor:"pointer"}}>
+                  <div style={{fontSize:8.5,color:T2,marginBottom:4,fontWeight:600}}>{x.label}</div>
+                  <div style={{fontSize:16,fontWeight:800,color:T1,fontFamily:"monospace",marginBottom:3}}>{x.ltp.toLocaleString("en-IN",{maximumFractionDigits:2})}</div>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <span style={{fontSize:10,fontWeight:700,color:x.up?G2:R}}>{x.up?"+":""}{x.pct}%</span>
+                    <span style={{fontSize:11,color:T3}}>&#8250;</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
           {/* breadth bar */}
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
@@ -244,4 +246,4 @@ export default function MorningPulse(props){
       <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}"}</style>
     </div>
   );
-}
+        }

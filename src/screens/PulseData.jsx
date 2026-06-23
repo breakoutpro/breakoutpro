@@ -27,11 +27,14 @@ export function getMarketStatus(){
 }
 
 export var INDICES = [
-  {label:"NIFTY 50",   ltp:23982.87, pct:1.47, up:true},
-  {label:"SENSEX",     ltp:76695.34, pct:1.54, up:true},
-  {label:"BANK NIFTY", ltp:52161.30, pct:1.69, up:true},
-  {label:"FIN NIFTY",  ltp:23445.10, pct:0.85, up:true},
-  {label:"INDIA VIX",  ltp:14.20,    pct:-2.75,up:false},
+  {label:"NIFTY 50",   key:"NIFTY",    ltp:23982.87, pct:1.47, up:true,  prevClose:23635.67, dayHigh:24010.20, dayLow:23720.40, res:"24,050 / 24,150", sup:"23,850 / 23,750", desc:"Top 50 large-cap NSE stocks", pe:"22.4", note:"Strong momentum, FII buying support. Watch 24,050 resistance for breakout."},
+  {label:"SENSEX",     key:"SENSEX",   ltp:76695.34, pct:1.54, up:true,  prevClose:75531.84, dayHigh:76780.10, dayLow:75920.60, res:"77,000 / 77,400", sup:"76,200 / 75,800", desc:"Top 30 large-cap BSE stocks", pe:"24.1", note:"Banking and IT heavyweights driving gains. Above all key moving averages."},
+  {label:"BANK NIFTY", key:"BANKNIFTY",ltp:52161.30, pct:1.69, up:true,  prevClose:51294.90, dayHigh:52240.50, dayLow:51610.20, res:"52,500 / 53,000", sup:"51,800 / 51,500", desc:"Top 12 liquid banking stocks", pe:"18.2", note:"Breakout above 52,500 confirms strength. Private banks leading."},
+  {label:"GIFT NIFTY", key:"GIFTNIFTY",ltp:24035.00, pct:0.32, up:true,  prevClose:23958.20, dayHigh:24060.00, dayLow:23980.00, res:"24,100 / 24,200", sup:"23,900 / 23,800", desc:"NSE IX early indicator for Nifty", pe:"N/A", note:"Trades nearly 24 hours. Strong indicator for Nifty opening direction."},
+  {label:"FIN NIFTY",  key:"FINNIFTY", ltp:23445.10, pct:0.85, up:true,  prevClose:23247.60, dayHigh:23490.30, dayLow:23320.10, res:"23,600 / 23,750", sup:"23,300 / 23,150", desc:"Financial services index", pe:"20.1", note:"Banks, NBFCs and insurance. Tracks broader financial sector health."},
+  {label:"MIDCAP 50",  key:"MIDCAP",   ltp:54320.75, pct:-0.26,up:false, prevClose:54462.40, dayHigh:54610.20, dayLow:54180.30, res:"55,000 / 55,400", sup:"54,000 / 53,600", desc:"Mid-cap companies index", pe:"28.5", note:"Mild profit booking after rally. Broader market consolidating."},
+  {label:"NIFTY IT",   key:"NIFTYIT",  ltp:34210.55, pct:0.92, up:true,  prevClose:33898.10, dayHigh:34290.40, dayLow:33950.60, res:"34,500 / 34,800", sup:"34,000 / 33,700", desc:"IT sector index", pe:"29.4", note:"Strong Q4 earnings. US tech sector positive overnight boosts sentiment."},
+  {label:"INDIA VIX",  key:"VIX",      ltp:14.20,    pct:-2.75,up:false, prevClose:14.60,    dayHigh:14.85,    dayLow:14.05,    res:"16.0 / 17.5", sup:"13.0 / 12.5", desc:"Market fear gauge - volatility index", pe:"N/A", note:"Low VIX indicates calm, trending market. Option sellers favoured."},
 ];
 
 export var GAINERS = [
@@ -106,3 +109,11 @@ export var AI_CONCLUSION = {
   risk:"Moderate",
   message:"Markets likely to open positive on strong global cues and sustained FII buying. IT and Banking showing leadership. Nifty faces resistance near 24,050 - a decisive breakout opens the path to 24,400. Maintain a buy-on-dips approach while keeping strict stop losses. Watch India VIX for volatility shifts."
 };
+
+export var STOCKS_WATCH=[
+  {sym:"RELIANCE",reason:"Q4 results today. Strong refining margins expected. Volume buildup seen.",type:"Event",color:"#3B82F6"},
+  {sym:"HDFCBANK",reason:"FII buying seen yesterday. Strong support at 1720. Watch breakout above 1760.",type:"Technical",color:"#00E676"},
+  {sym:"TATAMOTORS",reason:"EV sales data positive. Global auto sector strong overnight.",type:"Sector",color:"#F59E0B"},
+  {sym:"INFY",reason:"US tech sector up overnight. IT sector may see buying. ADR premium.",type:"Global",color:"#8B5CF6"},
+  {sym:"SBIN",reason:"RBI policy positive for PSU banks. Strong OI buildup in 820 CE.",type:"OI Data",color:"#EC4899"},
+];

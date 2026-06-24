@@ -16,12 +16,17 @@ var FRAMES=[
   {id:"D",label:"1D"},
 ];
 
-// Map index names to TradingView symbols, else default to NSE stock.
+// Map symbols to TradingView format that works on the free widget.
+// Indices use NSE index symbols. Stocks use BSE (free widget supports BSE).
 function tvSymbol(sym){
   if(sym=="NIFTY") return "NSE:NIFTY";
   if(sym=="BANKNIFTY") return "NSE:BANKNIFTY";
   if(sym=="FINNIFTY") return "NSE:CNXFINANCE";
-  return "NSE:"+sym;
+  return "BSE:"+sym;
+}
+function exLabel(sym){
+  if(sym=="NIFTY"||sym=="BANKNIFTY"||sym=="FINNIFTY") return "NSE";
+  return "BSE";
 }
 
 export default function SignalChart(props){
@@ -78,7 +83,7 @@ export default function SignalChart(props){
       <div style={{background:CARD2,borderBottom:"1px solid "+BD,padding:"12px 14px",display:"flex",alignItems:"center",gap:11,flexShrink:0}}>
         <button onClick={props.onClose} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:32,height:32,color:T1,fontSize:15,cursor:"pointer",flexShrink:0}}>&#8592;</button>
         <div style={{flex:1}}>
-          <div style={{fontSize:15,fontWeight:900,color:T1}}>{sym} <span style={{fontSize:9,color:T3,fontWeight:600}}>NSE</span></div>
+          <div style={{fontSize:15,fontWeight:900,color:T1}}>{sym} <span style={{fontSize:9,color:T3,fontWeight:600}}>{exLabel(sym)}</span></div>
           <div style={{fontSize:9.5,color:T3,marginTop:1}}>{s.pattern||"Live Chart"}</div>
         </div>
         <div style={{textAlign:"right"}}>

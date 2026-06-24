@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import LanguageSelector from "../components/LanguageSelector";
 import LegalModals from "./LegalModals";
 import { getLang, LANGUAGES } from "../i18n/translations";
+import VoiceAlertWidget from "./VoiceAlertWidget";
+import SettingsAlerts from "./SettingsAlerts";
 
 var DB = "#0A0E1A";
 var CB = "#0F1629";
@@ -36,7 +38,7 @@ function SettingRow(props) {
   return (
     <div style={{display:"flex",alignItems:"center",gap:12,padding:"13px 14px",borderBottom:"1px solid "+BD}}>
       <div style={{width:36,height:36,borderRadius:10,background:props.iconBg||"rgba(59,130,246,0.1)",border:"1px solid "+(props.iconBorder||"rgba(59,130,246,0.2)"),display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-        <span style={{fontSize:16}}>{props.icon}</span>
+        <span style={{fontSize:16}} dangerouslySetInnerHTML={{__html:props.icon}}/>
       </div>
       <div style={{flex:1}}>
         <div style={{fontSize:12,fontWeight:600,color:T1}}>{props.label}</div>
@@ -70,12 +72,9 @@ export default function SettingsScreen(props) {
     volumeAlert: true,
     rsiAlert: false,
     vwapAlert: true,
-    darkMode: true,
-    language: "English",
     alertFreq: "All",
     scanInterval: "5",
     marketReminder: true,
-    reminderTime: "9:00 AM",
     homeOverride: "auto",
   };
 
@@ -142,6 +141,10 @@ export default function SettingsScreen(props) {
         ) : null}
       </div>
 
+      {/* VOICE SMART ALERTS */}
+      <SectionHeader title="VOICE SMART ALERTS"/>
+      <VoiceAlertWidget/>
+
       {/* ALERTS SECTION */}
       <SectionHeader title="ALERT SETTINGS"/>
       <div style={{background:CB,border:"1px solid "+BD,borderRadius:14,margin:"0 14px",overflow:"hidden"}}>
@@ -149,12 +152,12 @@ export default function SettingsScreen(props) {
         <SettingRow icon="&#128243;" label="Vibration" sub="Phone vibrates on alert" toggle={st.alertVibrate} onChange={function(){toggle("alertVibrate");}} iconBg="rgba(59,130,246,0.1)" iconBorder="rgba(59,130,246,0.2)"/>
         <div style={{display:"flex",alignItems:"center",gap:12,padding:"13px 14px",borderBottom:"1px solid "+BD}}>
           <div style={{width:36,height:36,borderRadius:10,background:"rgba(245,158,11,0.1)",border:"1px solid rgba(245,158,11,0.2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-            <span style={{fontSize:16}}>&#128241;</span>
+            <span style={{fontSize:16}} dangerouslySetInnerHTML={{__html:"&#128241;"}}/>
           </div>
           <div style={{flex:1}}>
             <div style={{fontSize:12,fontWeight:600,color:T1}}>Push Notifications</div>
             <div style={{fontSize:9,color:T2,marginTop:2}}>
-              {notifPerm=="granted"?"Enabled  alerts come even when app is closed":notifPerm=="denied"?"Blocked in browser settings":"Tap to enable phone notifications"}
+              {notifPerm=="granted"?"Enabled - alerts come even when app is closed":notifPerm=="denied"?"Blocked in browser settings":"Tap to enable phone notifications"}
             </div>
           </div>
           {notifPerm=="granted"
@@ -167,14 +170,7 @@ export default function SettingsScreen(props) {
 
       {/* ALERT TYPES */}
       <SectionHeader title="ALERT TYPES"/>
-      <div style={{background:CB,border:"1px solid "+BD,borderRadius:14,margin:"0 14px",overflow:"hidden"}}>
-        <SettingRow icon="UP" label="Breakout Alerts" sub="Price breaks above resistance" toggle={st.breakoutAlert} onChange={function(){toggle("breakoutAlert");}} iconBg="rgba(0,200,83,0.1)" iconBorder="rgba(0,200,83,0.2)"/>
-        <SettingRow icon="DN" label="Breakdown Alerts" sub="Price breaks below support" toggle={st.breakdownAlert} onChange={function(){toggle("breakdownAlert");}} iconBg="rgba(239,68,68,0.1)" iconBorder="rgba(239,68,68,0.2)"/>
-        <SettingRow icon="&#128208;" label="Pattern Alerts" sub="Doji, Hammer, Engulfing etc" toggle={st.patternAlert} onChange={function(){toggle("patternAlert");}} iconBg="rgba(245,158,11,0.1)" iconBorder="rgba(245,158,11,0.2)"/>
-        <SettingRow icon="&#128202;" label="Volume Spike" sub="2x+ average volume detected" toggle={st.volumeAlert} onChange={function(){toggle("volumeAlert");}} iconBg="rgba(59,130,246,0.1)" iconBorder="rgba(59,130,246,0.2)"/>
-        <SettingRow icon="VP" label="VWAP Cross Alert" sub="Price crosses VWAP level" toggle={st.vwapAlert} onChange={function(){toggle("vwapAlert");}} iconBg="rgba(139,92,246,0.1)" iconBorder="rgba(139,92,246,0.2)"/>
-        <SettingRow icon="RS" label="RSI Extreme Alert" sub="RSI above 70 or below 30" toggle={st.rsiAlert} onChange={function(){toggle("rsiAlert");}} iconBg="rgba(249,115,22,0.1)" iconBorder="rgba(249,115,22,0.2)"/>
-      </div>
+      <SettingsAlerts st={st} toggle={toggle}/>
 
       {/* APP SETTINGS */}
       <SectionHeader title="APP SETTINGS"/>
@@ -184,8 +180,8 @@ export default function SettingsScreen(props) {
         </div>
         {showLang?<LanguageSelector onClose={function(){setShowLang(false);}} onChange={function(c){setCurLang(c);}}/>:null}
 
-<LegalModals showPrivacy={showPrivacy} showSebi={showSebi} onClosePrivacy={function(){setShowPrivacy(false);}} onCloseSebi={function(){setShowSebi(false);}}/>
-        <SettingRow icon="&#127760;" label="Alert Frequency" sub="How often to show alerts" value={st.alertFreq} arrow={true} iconBg="rgba(59,130,246,0.1)" iconBorder="rgba(59,130,246,0.2)"/>
+        <LegalModals showPrivacy={showPrivacy} showSebi={showSebi} onClosePrivacy={function(){setShowPrivacy(false);}} onCloseSebi={function(){setShowSebi(false);}}/>
+
         <div style={{padding:"13px 14px",borderBottom:"1px solid "+BD}}>
           <div style={{fontSize:12,fontWeight:600,color:T1,marginBottom:8}}>Alert Frequency</div>
           <div style={{display:"flex",gap:6}}>
@@ -251,4 +247,5 @@ export default function SettingsScreen(props) {
 
     </div>
   );
-}
+        }
+

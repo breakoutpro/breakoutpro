@@ -7,7 +7,7 @@ import MarketMood from "./MarketMood";
 // Rules: no backtick, no triple-equals, ASCII only.
 
 var CARD="#101318",CARD2="#0B0E13",BD="#1B2330";
-var UP="#22C55E",DOWN="#EF4444",GOLD="#F59E0B",BLUE="#3B82F6",CYAN="#60A5FA";
+var UP="#15803D",DOWN="#EF4444",GOLD="#F59E0B",BLUE="#3B82F6",CYAN="#60A5FA";
 var T1="#FFFFFF",T2="#A0A7B4",T3="#5B6472";
 
 export default function MarketMoodCard(props){

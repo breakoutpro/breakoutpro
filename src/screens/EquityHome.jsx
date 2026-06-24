@@ -5,7 +5,6 @@ import HomeBottom from "./HomeBottom";
 import MorningPulse from "./MorningPulse";
 import { AIBriefingCard } from "../components/HomeNewsHeatmap";
 import { useStreak } from "../hooks/useStreak";
-import VoiceAlertWidget from "./VoiceAlertWidget";
 import TradingSignals from "./TradingSignals";
 import HomeLower from "../components/HomeLower";
 import ArticlePage from "./ArticlePage";
@@ -162,9 +161,6 @@ export default function EquityHome(props){
           );})}
         </div>
       </div>
-
-      {/* VOICE ALERTS */}
-      <VoiceAlertWidget/>
 
       {/* TRADING SIGNALS */}
       <TradingSignals setTab={setTab}/>

@@ -63,4 +63,3 @@ export default function MarketMoodCard(props){
     </div>
   );
 }
-

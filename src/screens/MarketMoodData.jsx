@@ -13,7 +13,7 @@ export function getPhase(){
   if(day==0||day==6) return {id:"weekend",label:"Weekend",sub:"Markets closed",dot:"#5B6472"};
   if(mins<540) return {id:"premarket",label:"Pre-Market",sub:"Get ready before the open",dot:"#F59E0B"};
   if(mins<555) return {id:"preopen",label:"Pre-Open",sub:"Pre-open session live",dot:"#F59E0B"};
-  if(mins<930) return {id:"live",label:"Market Live",sub:"NSE and BSE are open",dot:"#22C55E"};
+  if(mins<930) return {id:"live",label:"Market Live",sub:"NSE and BSE are open",dot:"#15803D"};
   return {id:"closed",label:"Market Closed",sub:"See you tomorrow at 9:15 AM",dot:"#EF4444"};
 }
 
@@ -46,10 +46,19 @@ export function computeMood(){
   var ups=0,i;
   for(i=0;i<OVERNIGHT.length;i++){ if(OVERNIGHT[i].up) ups=ups+1; }
   var ratio=ups/OVERNIGHT.length;
-  if(ratio>=0.66) return {label:"Bullish",color:"#22C55E",score:Math.round(ratio*100),gapText:"Gap-up opening likely"};
+  if(ratio>=0.66) return {label:"Bullish",color:"#15803D",score:Math.round(ratio*100),gapText:"Gap-up opening likely"};
   if(ratio<=0.34) return {label:"Bearish",color:"#EF4444",score:Math.round(ratio*100),gapText:"Gap-down opening likely"};
   return {label:"Neutral",color:"#F59E0B",score:Math.round(ratio*100),gapText:"Flat to range-bound open"};
 }
+
+// Sentiment metrics merged from AI Briefing (Mood, Fear-Greed, FII, Trend, Confidence).
+export var METRICS = [
+  {label:"Mood",  val:"Bullish", color:"#15803D"},
+  {label:"F&G",   val:"78",      color:"#15803D"},
+  {label:"FII",   val:"Net Buy", color:"#15803D"},
+  {label:"Trend", val:"Up",      color:"#15803D"},
+  {label:"Conf",  val:"86%",     color:"#60A5FA"},
+];
 
 // One-line AI style verdict for the hero card and notification.
 export function getVerdict(){

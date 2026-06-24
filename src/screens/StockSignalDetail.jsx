@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { getPattern } from "./PatternInfo";
+import SignalChart from "./SignalChart";
 
 // BreakoutPro - StockSignalDetail.jsx
 // Full stock analysis page opened from a trading signal.
@@ -45,6 +47,7 @@ export default function StockSignalDetail(props){
   var info=getPattern(s.pattern);
   var bc=biasColor(info.bias);
   var L=buildLevels(s);
+  var [showChart,setShowChart]=useState(false);
 
   return (
     <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:BG,zIndex:300,overflowY:"auto"}}>
@@ -96,7 +99,7 @@ export default function StockSignalDetail(props){
         </div>
 
         {/* OPEN FULL CHART */}
-        <button onClick={function(){setTab("scan");props.onClose();}} style={{width:"100%",background:"rgba(59,130,246,0.12)",border:"1px solid "+BLUE,borderRadius:12,padding:13,color:CYAN,fontSize:12.5,fontWeight:800,cursor:"pointer",fontFamily:"inherit",marginBottom:12}}>Open Live Chart &#8594;</button>
+        <button onClick={function(){setShowChart(true);}} style={{width:"100%",background:"rgba(59,130,246,0.12)",border:"1px solid "+BLUE,borderRadius:12,padding:13,color:CYAN,fontSize:12.5,fontWeight:800,cursor:"pointer",fontFamily:"inherit",marginBottom:12}}>Open Live Chart &#8594;</button>
 
         {/* DISCLAIMER */}
         <div style={{background:"rgba(249,115,22,0.06)",border:"1px solid rgba(249,115,22,0.15)",borderRadius:10,padding:11,marginBottom:20}}>
@@ -104,6 +107,8 @@ export default function StockSignalDetail(props){
         </div>
 
       </div>
+
+      {showChart?<SignalChart s={s} onClose={function(){setShowChart(false);}}/>:null}
     </div>
   );
 }

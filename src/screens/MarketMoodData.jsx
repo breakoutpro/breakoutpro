@@ -72,11 +72,11 @@ export var PLAN = [
 ];
 
 export var METRICS = [
-  {label:"Mood",  val:"Bullish", color:"#15803D"},
-  {label:"F&G",   val:"78",      color:"#15803D"},
-  {label:"FII",   val:"Net Buy", color:"#15803D"},
-  {label:"Trend", val:"Up",      color:"#15803D"},
-  {label:"Conf",  val:"86%",     color:"#3B82F6"},
+  {label:"Mood",  val:"Bullish", color:"#22C55E"},
+  {label:"F&G",   val:"78",      color:"#FFFFFF"},
+  {label:"FII",   val:"Net Buy", color:"#FFFFFF"},
+  {label:"Trend", val:"Up",      color:"#FFFFFF"},
+  {label:"Conf",  val:"86%",     color:"#60A5FA"},
 ];
 
 export function computeMood(){

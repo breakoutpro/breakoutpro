@@ -1,11 +1,11 @@
-import { getPhase, OVERNIGHT, LEVELS, WATCH, computeMood, getVerdict } from "./MarketMoodData";
+import { getPhase, OVERNIGHT, LEVELS, WATCH, METRICS, computeMood, getVerdict } from "./MarketMoodData";
 
 // BreakoutPro - MarketMood.jsx
 // Full 30-second Market Mood screen. Mood gauge + overnight + levels + watch + verdict.
 // Rules: no backtick, no triple-equals, ASCII only.
 
 var BG="#050505",CARD="#101318",CARD2="#0B0E13",BD="#1B2330";
-var UP="#22C55E",DOWN="#EF4444",GOLD="#F59E0B",BLUE="#3B82F6",CYAN="#60A5FA";
+var UP="#15803D",DOWN="#EF4444",GOLD="#F59E0B",BLUE="#3B82F6",CYAN="#60A5FA";
 var T1="#FFFFFF",T2="#A0A7B4",T3="#5B6472";
 
 function Gauge(props){
@@ -89,6 +89,18 @@ export default function MarketMood(props){
             <div style={{fontSize:9,color:mood.color,fontWeight:800,marginBottom:5,letterSpacing:0.4}}>AI MARKET VERDICT</div>
             <div style={{fontSize:12.5,color:T1,lineHeight:1.7}}>{verdict}</div>
           </div>
+
+          {/* SENTIMENT METRICS - merged from AI Briefing */}
+          <div style={{display:"flex",gap:6,marginTop:12}}>
+            {METRICS.map(function(m){
+              return (
+                <div key={m.label} style={{flex:1,background:CARD2,border:"1px solid "+BD,borderRadius:9,padding:"9px 4px",textAlign:"center"}}>
+                  <div style={{fontSize:8,color:T3,marginBottom:3}}>{m.label}</div>
+                  <div style={{fontSize:11,fontWeight:800,color:m.color}}>{m.val}</div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* OVERNIGHT */}
@@ -126,5 +138,4 @@ export default function MarketMood(props){
       </div>
     </div>
   );
-}
-
+                  }

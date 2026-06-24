@@ -52,10 +52,10 @@ export default function MarketMood(props){
       <div style={{padding:"18px 16px 36px"}}>
 
         {/* 1. MOOD GAUGE + VERDICT + METRICS */}
-        <div style={{background:MT.CARD,border:"1px solid "+MT.DGREEN,borderRadius:16,padding:"20px 16px 16px",marginBottom:18}}>
+        <div style={{background:MT.CARD,border:"1px solid "+MT.BD,borderRadius:16,padding:"20px 16px 16px",marginBottom:18}}>
           <Gauge mood={mood}/>
-          <div style={{marginTop:14,background:"#0D1610",border:"1px solid "+MT.DGREEN,borderRadius:12,padding:14}}>
-            <div style={{fontSize:10,color:mood.color,fontWeight:800,marginBottom:6,letterSpacing:0.4}}>AI MARKET VERDICT</div>
+          <div style={{marginTop:14,background:MT.CARD2,border:"1px solid "+MT.BD,borderRadius:12,padding:14}}>
+            <div style={{fontSize:10,color:MT.CYAN||"#60A5FA",fontWeight:800,marginBottom:6,letterSpacing:0.4}}>AI MARKET VERDICT</div>
             <div style={{fontSize:13.5,color:MT.T1,lineHeight:1.7}}>{verdict}</div>
           </div>
           <div style={{display:"flex",gap:6,marginTop:12}}>
@@ -135,4 +135,4 @@ export default function MarketMood(props){
       </div>
     </div>
   );
-}
+      }

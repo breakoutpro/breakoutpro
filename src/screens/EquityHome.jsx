@@ -125,31 +125,6 @@ export default function EquityHome(props){
       {/* TODAY'S GAME PLAN - 30 second market mood */}
       <MarketMoodCard setTab={setTab}/>
 
-      {/* AI MARKET BRIEFING */}
-      <div style={{padding:"12px 14px 0"}}>
-        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:14,padding:"14px"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
-            <div style={{flex:1}}>
-              <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:5}}>
-                <span style={{fontSize:13}}>&#129504;</span>
-                <span style={{fontSize:13,fontWeight:800,color:T1}}>AI Market Briefing</span>
-                <span style={{fontSize:8,color:T3,marginLeft:4}}>{new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})}</span>
-              </div>
-              <div style={{fontSize:11.5,color:T2,lineHeight:1.6}}>Markets likely to open positive. IT and Banking showing strength. Nifty facing resistance near 24,050.</div>
-            </div>
-            <button onClick={function(){setShowBriefing(true);}} style={{background:"none",border:"none",color:PROBLUE,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap",paddingLeft:10}}>Read More &#8594;</button>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr",gap:6}}>
-            {[["Mood","Bullish",UP],["F&G",mood.fg,mood.fg>60?UP:DOWN],["FII","Net Buy",UP],["Trend","Up",UP],["Conf",mood.conf+"%",CYAN]].map(function(r){return(
-              <div key={r[0]} style={{background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"7px 5px",textAlign:"center"}}>
-                <div style={{fontSize:7,color:T3,marginBottom:3}}>{r[0]}</div>
-                <div style={{fontSize:10,fontWeight:700,color:r[2]}}>{r[1]}</div>
-              </div>
-            );})}
-          </div>
-        </div>
-      </div>
-
       {/* MARKET DASHBOARD - index cards scroll */}
       <div style={{padding:"12px 0 0"}}>
         <div style={{display:"flex",gap:10,overflowX:"auto",padding:"0 14px 4px",WebkitOverflowScrolling:"touch"}}>
@@ -211,4 +186,4 @@ export default function EquityHome(props){
       <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}@keyframes ticker-fade{from{opacity:0}to{opacity:1}}"}</style>
     </div>
   );
-}
+      }

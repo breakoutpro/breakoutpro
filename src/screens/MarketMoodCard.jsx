@@ -19,7 +19,7 @@ export default function MarketMoodCard(props){
 
   return (
     <div style={{padding:"14px 14px 0"}}>
-      <div onClick={function(){setOpen(true);}} style={{background:"linear-gradient(135deg,"+mood.color+"14,rgba(11,14,19,0.4))",border:"1px solid "+mood.color+"33",borderRadius:16,padding:15,cursor:"pointer"}}>
+      <div onClick={function(){setOpen(true);}} style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:15,cursor:"pointer"}}>
 
         {/* TOP ROW */}
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:11}}>

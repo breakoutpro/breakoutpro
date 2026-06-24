@@ -7,7 +7,6 @@ import { AIBriefingCard } from "../components/HomeNewsHeatmap";
 import { useStreak } from "../hooks/useStreak";
 import VoiceAlertWidget from "./VoiceAlertWidget";
 import TradingSignals from "./TradingSignals";
-import TradingSignals from "./TradingSignals";
 import HomeLower from "../components/HomeLower";
 import ArticlePage from "./ArticlePage";
 import { JUSTIN } from "./JustInData";

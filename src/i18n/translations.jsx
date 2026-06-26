@@ -56,3 +56,26 @@ export function t(key){
   if(STR.en[key]!=undefined) return STR.en[key];
   return key;
 }
+
+// Shared access check used across the whole app for premium gating.
+// Admin (8790124010) and premium users get everything. New users get a 7-day trial.
+export function hasAccess(){
+  try{
+    var sess=JSON.parse(localStorage.getItem("bp_sess")||"{}");
+    if(sess && (sess.isAdmin || sess.isPrem)) return true;
+    if(sess && sess.trialStart){
+      var sevenDays=7*24*60*60*1000;
+      if(Date.now() < (sess.trialStart + sevenDays)) return true;
+    }
+    if(localStorage.getItem("bp_premium")=="1") return true;
+    return false;
+  }catch(e){ return false; }
+}
+
+// Is the logged-in user the admin?
+export function isAdmin(){
+  try{
+    var sess=JSON.parse(localStorage.getItem("bp_sess")||"{}");
+    return !!(sess && sess.isAdmin);
+  }catch(e){ return false; }
+}

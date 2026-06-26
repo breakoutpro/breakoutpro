@@ -21,7 +21,11 @@ export default function OptionsIntel(props){
           <span style={{fontSize:15,fontWeight:900,color:T1}}>Options Intelligence</span>
           <span style={{fontSize:7.5,fontWeight:800,color:GOLD,background:"rgba(212,175,55,0.12)",border:"1px solid rgba(212,175,55,0.3)",padding:"2px 7px",borderRadius:5,letterSpacing:0.5}}>PRO</span>
         </div>
-        <span style={{fontSize:10,color:T2,fontFamily:"monospace"}}>{data.symbol} {data.spot}</span>
+        {props.onOpen?
+          <button onClick={props.onOpen} style={{background:"none",border:"none",color:BLUE,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>View Full &#8594;</button>
+          :
+          <span style={{fontSize:10,color:T2,fontFamily:"monospace"}}>{data.symbol} {data.spot}</span>
+        }
       </div>
       <div style={{fontSize:9,color:T3,marginBottom:12}}>AI-powered option analytics. Tap any metric for insight.</div>
 

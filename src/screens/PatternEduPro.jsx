@@ -112,11 +112,12 @@ export default function PatternEduPro(props){
           <Box><div style={{fontSize:11.5,color:T1,lineHeight:1.6}}>{d.psychology}</div></Box>
         </Sec>
 
-        <Sec title="HOW TO TRADE IT">
+        <Sec title="HOW THIS PATTERN IS TRADITIONALLY READ">
+          <div style={{fontSize:9,color:T3,marginBottom:8,lineHeight:1.4}}>General educational guidance on how traders study this pattern. Not a recommendation for any specific stock.</div>
           <div style={{background:CARD,border:"1px solid "+BD,borderRadius:12,overflow:"hidden"}}>
-            <Row label="ENTRY" color={CYAN} val={d.entry}/>
-            <Row label="STOP LOSS" color={DOWN} val={d.sl}/>
-            <Row label="TARGET" color={UP} val={d.target} last={true}/>
+            <Row label="TRIGGER" color={CYAN} val={d.entry}/>
+            <Row label="INVALIDATION" color={DOWN} val={d.sl}/>
+            <Row label="OBJECTIVE" color={UP} val={d.target} last={true}/>
           </div>
         </Sec>
 
@@ -162,4 +163,4 @@ function tabBtn(act,col){
   return {flex:1,background:act?(col=="#22C55E"?"rgba(34,197,94,0.12)":"rgba(239,68,68,0.12)"):"rgba(255,255,255,0.04)",border:"1px solid "+(act?col:"#1B2330"),borderRadius:9,padding:"8px",color:act?col:"#A0A7B4",fontSize:10.5,fontWeight:700,cursor:"pointer",fontFamily:"inherit"};
 }
 function statBox(){ return {background:"#101318",border:"1px solid #1B2330",borderRadius:10,padding:"10px 6px",textAlign:"center"}; }
-            
+                  

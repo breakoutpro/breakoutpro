@@ -22,7 +22,7 @@ var SPECS = {
         c(59,64,58,63,60), c(63,68,62,67,55)
       ],
       lines:[{type:"res",y1:52,color:"#EF4444",label:"Resistance",showAt:0.4,dash:"5 4"}],
-      markers:[{type:"entry",price:59,label:"ENTRY"},{type:"sl",price:46,label:"SL"},{type:"target",price:68,label:"TGT"}]
+      markers:[{type:"entry",price:59,label:"TRIGGER"},{type:"sl",price:46,label:"INVALID"},{type:"target",price:68,label:"OBJECTIVE"}]
     },
     failed:{
       candles:[
@@ -31,7 +31,7 @@ var SPECS = {
         c(55,56,48,49,48), c(49,50,44,45,52)
       ],
       lines:[{type:"res",y1:52,color:"#EF4444",label:"Resistance",showAt:0.4,dash:"5 4"}],
-      markers:[{type:"entry",price:55,label:"ENTRY"},{type:"sl",price:46,label:"SL"}]
+      markers:[{type:"entry",price:55,label:"TRIGGER"},{type:"sl",price:46,label:"INVALID"}]
     }
   },
   "bear-engulf":{
@@ -42,7 +42,7 @@ var SPECS = {
         c(49,50,44,45,60), c(45,46,40,41,55)
       ],
       lines:[{type:"sup",y1:58,color:"#22C55E",label:"Support",showAt:0.4,dash:"5 4"}],
-      markers:[{type:"entry",price:49,label:"ENTRY"},{type:"sl",price:62,label:"SL"},{type:"target",price:40,label:"TGT"}]
+      markers:[{type:"entry",price:49,label:"TRIGGER"},{type:"sl",price:62,label:"INVALID"},{type:"target",price:40,label:"OBJECTIVE"}]
     },
     failed:{
       candles:[
@@ -51,7 +51,7 @@ var SPECS = {
         c(53,59,52,58,50), c(58,63,57,62,54)
       ],
       lines:[{type:"sup",y1:58,color:"#22C55E",label:"Support",showAt:0.4}],
-      markers:[{type:"entry",price:53,label:"ENTRY"},{type:"sl",price:62,label:"SL"}]
+      markers:[{type:"entry",price:53,label:"TRIGGER"},{type:"sl",price:62,label:"INVALID"}]
     }
   },
   "double-bot":{
@@ -63,7 +63,7 @@ var SPECS = {
         c(57,63,56,62,60)
       ],
       lines:[{type:"sup",y1:46,color:"#22C55E",label:"Support",showAt:0.5},{type:"res",y1:53,color:"#EF4444",label:"Neckline",showAt:0.6,dash:"5 4"}],
-      markers:[{type:"entry",price:54,label:"ENTRY"},{type:"sl",price:45,label:"SL"},{type:"target",price:63,label:"TGT"}]
+      markers:[{type:"entry",price:54,label:"TRIGGER"},{type:"sl",price:45,label:"INVALID"},{type:"target",price:63,label:"OBJECTIVE"}]
     }
   },
   "double-top":{
@@ -75,7 +75,7 @@ var SPECS = {
         c(46,47,41,42,58)
       ],
       lines:[{type:"res",y1:61,color:"#EF4444",label:"Resistance",showAt:0.5},{type:"sup",y1:55,color:"#22C55E",label:"Neckline",showAt:0.6,dash:"5 4"}],
-      markers:[{type:"entry",price:54,label:"ENTRY"},{type:"sl",price:62,label:"SL"},{type:"target",price:44,label:"TGT"}]
+      markers:[{type:"entry",price:54,label:"TRIGGER"},{type:"sl",price:62,label:"INVALID"},{type:"target",price:44,label:"OBJECTIVE"}]
     }
   },
   "asc-tri":{
@@ -86,7 +86,7 @@ var SPECS = {
         c(57,59,56,58,40), c(58,66,57,65,80,true), c(65,70,64,69,60)
       ],
       lines:[{type:"res",y1:59,color:"#EF4444",label:"Resistance",showAt:0.4},{type:"trend",y1:47,y2:57,x1:0,x2:0.8,color:"#22C55E",label:"Rising support",showAt:0.5,dash:"4 3"}],
-      markers:[{type:"entry",price:60,label:"ENTRY"},{type:"sl",price:54,label:"SL"},{type:"target",price:70,label:"TGT"}]
+      markers:[{type:"entry",price:60,label:"TRIGGER"},{type:"sl",price:54,label:"INVALID"},{type:"target",price:70,label:"OBJECTIVE"}]
     }
   },
   "desc-tri":{
@@ -97,7 +97,7 @@ var SPECS = {
         c(51,53,50,50,40), c(50,51,44,45,78,true), c(45,46,40,41,58)
       ],
       lines:[{type:"sup",y1:50,color:"#22C55E",label:"Support",showAt:0.4},{type:"trend",y1:61,y2:51,x1:0,x2:0.8,color:"#EF4444",label:"Falling resistance",showAt:0.5,dash:"4 3"}],
-      markers:[{type:"entry",price:50,label:"ENTRY"},{type:"sl",price:55,label:"SL"},{type:"target",price:40,label:"TGT"}]
+      markers:[{type:"entry",price:50,label:"TRIGGER"},{type:"sl",price:55,label:"INVALID"},{type:"target",price:40,label:"OBJECTIVE"}]
     }
   },
   "cup-handle":{
@@ -109,7 +109,7 @@ var SPECS = {
         c(59,60,57,58,32), c(58,66,57,65,80,true)
       ],
       lines:[{type:"res",y1:62,color:"#EF4444",label:"Rim",showAt:0.6,dash:"5 4"}],
-      markers:[{type:"entry",price:63,label:"ENTRY"},{type:"sl",price:57,label:"SL"},{type:"target",price:70,label:"TGT"}]
+      markers:[{type:"entry",price:63,label:"TRIGGER"},{type:"sl",price:57,label:"INVALID"},{type:"target",price:70,label:"OBJECTIVE"}]
     }
   },
   "hns":{
@@ -120,7 +120,7 @@ var SPECS = {
         c(57,58,52,53,38), c(53,54,47,48,74,true), c(48,49,43,44,58)
       ],
       lines:[{type:"sup",y1:53,color:"#22C55E",label:"Neckline",showAt:0.6,dash:"5 4"}],
-      markers:[{type:"entry",price:52,label:"ENTRY"},{type:"sl",price:58,label:"SL"},{type:"target",price:44,label:"TGT"}]
+      markers:[{type:"entry",price:52,label:"TRIGGER"},{type:"sl",price:58,label:"INVALID"},{type:"target",price:44,label:"OBJECTIVE"}]
     }
   },
   "flag":{
@@ -131,7 +131,7 @@ var SPECS = {
         c(55,62,54,61,78,true), c(61,66,60,65,58)
       ],
       lines:[{type:"trend",y1:60,y2:56,x1:0.25,x2:0.75,color:"#EF4444",label:"Flag",showAt:0.5,dash:"4 3"}],
-      markers:[{type:"entry",price:60,label:"ENTRY"},{type:"sl",price:54,label:"SL"},{type:"target",price:68,label:"TGT"}]
+      markers:[{type:"entry",price:60,label:"TRIGGER"},{type:"sl",price:54,label:"INVALID"},{type:"target",price:68,label:"OBJECTIVE"}]
     }
   },
   "pennant":{
@@ -142,11 +142,11 @@ var SPECS = {
         c(56,63,55,62,76,true), c(62,67,61,66,56)
       ],
       lines:[{type:"trend",y1:60,y2:57,x1:0.25,x2:0.7,color:"#EF4444",label:"Pennant",showAt:0.5,dash:"4 3"}],
-      markers:[{type:"entry",price:60,label:"ENTRY"},{type:"sl",price:55,label:"SL"},{type:"target",price:68,label:"TGT"}]
+      markers:[{type:"entry",price:60,label:"TRIGGER"},{type:"sl",price:55,label:"INVALID"},{type:"target",price:68,label:"OBJECTIVE"}]
     }
   }
 };
 
 // Patterns that have full animated charts. Others fall back to mini SVG.
 export var ANIMATED_IDS = ["bull-engulf","bear-engulf","double-bot","double-top","asc-tri","desc-tri","cup-handle","hns","flag","pennant"];
-          
+        

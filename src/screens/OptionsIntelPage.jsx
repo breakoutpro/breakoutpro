@@ -17,7 +17,7 @@ export default function OptionsIntelPage(props){
         </div>
       </div>
       <div style={{marginTop:6}}>
-        <OptionsIntel symbol={props.symbol||"NIFTY"}/>
+        <OptionsIntel symbol={props.symbol||"NIFTY"} full={true}/>
       </div>
     </div>
   );

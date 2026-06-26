@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PatternMini } from "./PatternVisuals";
+import { t } from "../i18n/translations";
 
 // BreakoutPro - HomeSignalCards.jsx
 // SEBI-safe: shows PATTERN DETECTION only (educational). No buy/sell, no entry/SL/target.
@@ -22,7 +23,7 @@ export default function HomeSignalCards(props){
   return (
     <div style={{padding:"6px 0 0"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 14px 4px"}}>
-        <span style={{fontSize:14,fontWeight:800,color:T1}}>Pattern Alerts</span>
+        <span style={{fontSize:14,fontWeight:800,color:T1}}>{t("pattern_alerts")}</span>
         <button onClick={function(){setTab("signals");}} style={{background:"none",border:"none",color:BLUE,fontSize:11.5,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>View All &#8594;</button>
       </div>
       <div style={{fontSize:9,color:T3,padding:"0 14px 10px"}}>Educational pattern detection. Tap to learn the pattern.</div>

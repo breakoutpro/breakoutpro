@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { LANGUAGES, getLang, setLang } from "../i18n/translations";
+import { LANGUAGES, getLang, setLang, hasAccess } from "../i18n/translations";
 
 // BreakoutPro - LanguageSelector.jsx
-// Premium language picker. Free: English. Others gated behind trial/premium.
+// Premium language picker. Free: English. Others gated behind trial/premium/admin.
 // Applies choice and reloads so all screens re-render in the new language.
 // Rules: no backtick, no triple-equals, ASCII only.
 
@@ -10,15 +10,8 @@ var CARD="#101318",CARD2="#0B0E13",BD="#1B2330";
 var BLUE="#3B82F6",CYAN="#60A5FA",GOLD="#D4AF37",UP="#22C55E";
 var T1="#FFFFFF",T2="#A0A7B4",T3="#5B6472";
 
-// Is the user premium / in trial? Reads a flag set elsewhere; defaults to trial on.
-function isPremium(){
-  try{
-    if(localStorage.getItem("bp_premium")=="1") return true;
-    var trialEnd=localStorage.getItem("bp_trial_end");
-    if(trialEnd && Date.now() < parseInt(trialEnd,10)) return true;
-    return false;
-  }catch(e){ return false; }
-}
+// Admin and premium users unlock all languages.
+function isPremium(){ return hasAccess(); }
 
 export default function LanguageSelector(props){
   var [cur,setCur]=useState(getLang());

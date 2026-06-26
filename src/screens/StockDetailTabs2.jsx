@@ -161,14 +161,13 @@ export function AITab(props){
         </div>
       </Sec>
 
-      <Sec title="BREAKOUT PRO OPINION">
+      <Sec title="STOCK CHARACTERISTICS">
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
-          {[["Long Term",d.opinion.longterm],["Swing",d.opinion.swing],["Intraday",d.opinion.intraday]].map(function(r,i){
-            var c=r[1]=="Good"?UP:r[1]=="Weak"?DOWN:GOLD;
+          {[["Volatility",d.opinion.longterm],["Liquidity",d.opinion.swing],["Trend Style",d.opinion.intraday]].map(function(r,i){
             return (
               <div key={i} style={{background:CARD,border:"1px solid "+BD,borderRadius:10,padding:"11px 6px",textAlign:"center"}}>
                 <div style={{fontSize:8.5,color:T2,marginBottom:4}}>{r[0]}</div>
-                <div style={{fontSize:12,fontWeight:800,color:c}}>{r[1]}</div>
+                <div style={{fontSize:11,fontWeight:800,color:T1}}>{r[1]}</div>
               </div>
             );
           })}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { t } from "../i18n/translations";
 
 // BreakoutPro - HomeMarketIntel.jsx
 // Merged Market Intelligence: FII/DII + Breadth + Sector + Global in one premium section.
@@ -28,7 +29,7 @@ export default function HomeMarketIntel(props){
   return (
     <div style={{padding:"0 14px",marginTop:22}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-        <span style={{fontSize:15,fontWeight:900,color:T1}}>Market Intelligence</span>
+        <span style={{fontSize:15,fontWeight:900,color:T1}}>{t("market_intel")}</span>
         <button onClick={function(){setTab("markets");}} style={{background:"none",border:"none",color:"#3B82F6",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>Markets &#8594;</button>
       </div>
 

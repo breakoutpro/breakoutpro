@@ -118,7 +118,7 @@ var DEF_SCORES=[
   {label:"Option Buying", stars:3},
   {label:"Option Selling", stars:4}
 ];
-var DEF_OPINION={ longterm:"Good", swing:"Moderate", intraday:"Good" };
+var DEF_OPINION={ longterm:"Moderate", swing:"High", intraday:"Trending" };
 
 export var STOCK_DB = {
   RELIANCE:{name:"Reliance Industries",sector:"Energy",

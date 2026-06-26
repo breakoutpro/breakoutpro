@@ -1,3 +1,4 @@
+import { t } from "../i18n/translations";
 // BreakoutPro - HomeQuickTools.jsx
 // Quick Tools row. Pure black glass, blue icons. Rules: no backtick, no triple-equals, ASCII.
 
@@ -16,7 +17,7 @@ export default function HomeQuickTools(props){
   var setTab=props.setTab||function(){};
   return (
     <div style={{padding:"0 14px",marginTop:22,marginBottom:8}}>
-      <div style={{fontSize:15,fontWeight:900,color:T1,marginBottom:12}}>Quick Tools</div>
+      <div style={{fontSize:15,fontWeight:900,color:T1,marginBottom:12}}>{t("quick_tools")}</div>
       <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:4}}>
         {TOOLS.map(function(t){
           return (

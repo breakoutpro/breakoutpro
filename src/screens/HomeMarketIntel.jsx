@@ -1,0 +1,95 @@
+import { useState } from "react";
+
+// BreakoutPro - HomeMarketIntel.jsx
+// Merged Market Intelligence: FII/DII + Breadth + Sector + Global in one premium section.
+// Pure black glass, minimal green/red. Rules: no backtick, no triple-equals, ASCII.
+
+var CARD="#101318",CARD2="#0B0E13",BD="#1B2330",BD2="#141821";
+var UP="#22C55E",DOWN="#EF4444",CYAN="#60A5FA",GOLD="#D4AF37";
+var T1="#FFFFFF",T2="#A0A7B4",T3="#5B6472";
+
+var FII={fii:-1240,dii:2180};
+var BREADTH={adv:1320,dec:780,unch:90};
+var SECTORS=[
+  {name:"IT",chg:1.8,up:true},{name:"Bank",chg:0.6,up:true},{name:"Auto",chg:-0.4,up:false},
+  {name:"Pharma",chg:1.1,up:true},{name:"FMCG",chg:-0.2,up:false},{name:"Metal",chg:-0.9,up:false}
+];
+var GLOBAL=[
+  {name:"Dow",val:"42,150",chg:0.3,up:true},{name:"Nasdaq",val:"18,420",chg:0.7,up:true},
+  {name:"FTSE",val:"8,210",chg:-0.2,up:false},{name:"Nikkei",val:"39,800",chg:1.2,up:true},
+  {name:"Gold",val:"75,400",chg:0.5,up:true},{name:"Crude",val:"6,850",chg:-1.1,up:false}
+];
+
+export default function HomeMarketIntel(props){
+  var setTab=props.setTab||function(){};
+  var total=BREADTH.adv+BREADTH.dec+BREADTH.unch;
+  var advPct=Math.round((BREADTH.adv/total)*100);
+
+  return (
+    <div style={{padding:"0 14px",marginTop:22}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+        <span style={{fontSize:15,fontWeight:900,color:T1}}>Market Intelligence</span>
+        <button onClick={function(){setTab("markets");}} style={{background:"none",border:"none",color:"#3B82F6",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>Markets &#8594;</button>
+      </div>
+
+      {/* FII / DII */}
+      <div style={{background:CARD,border:"1px solid "+BD,borderRadius:13,padding:13,marginBottom:9}}>
+        <div style={{fontSize:10.5,fontWeight:700,color:T2,marginBottom:10}}>FII / DII Activity (Rs Cr)</div>
+        <div style={{display:"flex",gap:10}}>
+          <div style={{flex:1,background:CARD2,borderRadius:9,padding:"10px 12px"}}>
+            <div style={{fontSize:9,color:T3,marginBottom:3}}>FII</div>
+            <div style={{fontSize:15,fontWeight:800,color:FII.fii>=0?UP:DOWN,fontFamily:"monospace"}}>{FII.fii>=0?"+":""}{FII.fii}</div>
+          </div>
+          <div style={{flex:1,background:CARD2,borderRadius:9,padding:"10px 12px"}}>
+            <div style={{fontSize:9,color:T3,marginBottom:3}}>DII</div>
+            <div style={{fontSize:15,fontWeight:800,color:FII.dii>=0?UP:DOWN,fontFamily:"monospace"}}>{FII.dii>=0?"+":""}{FII.dii}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* MARKET BREADTH */}
+      <div style={{background:CARD,border:"1px solid "+BD,borderRadius:13,padding:13,marginBottom:9}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:9}}>
+          <span style={{fontSize:10.5,fontWeight:700,color:T2}}>Market Breadth</span>
+          <span style={{fontSize:10,color:T2}}><span style={{color:UP,fontWeight:700}}>{BREADTH.adv}</span> adv / <span style={{color:DOWN,fontWeight:700}}>{BREADTH.dec}</span> dec</span>
+        </div>
+        <div style={{display:"flex",height:8,borderRadius:4,overflow:"hidden"}}>
+          <div style={{width:advPct+"%",background:UP}}></div>
+          <div style={{flex:1,background:DOWN}}></div>
+        </div>
+        <div style={{fontSize:9,color:T3,marginTop:7}}>{advPct}% stocks advancing. Breadth is {advPct>=55?"positive":advPct<=45?"weak":"mixed"}.</div>
+      </div>
+
+      {/* SECTOR PERFORMANCE */}
+      <div style={{background:CARD,border:"1px solid "+BD,borderRadius:13,padding:13,marginBottom:9}}>
+        <div style={{fontSize:10.5,fontWeight:700,color:T2,marginBottom:10}}>Sector Performance</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:7}}>
+          {SECTORS.map(function(s){
+            return (
+              <div key={s.name} style={{background:CARD2,borderRadius:8,padding:"8px 9px"}}>
+                <div style={{fontSize:9.5,color:T1,fontWeight:600}}>{s.name}</div>
+                <div style={{fontSize:11,fontWeight:800,color:s.up?UP:DOWN,marginTop:2}}>{s.up?"+":""}{s.chg}%</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* GLOBAL MARKETS */}
+      <div style={{background:CARD,border:"1px solid "+BD,borderRadius:13,padding:13}}>
+        <div style={{fontSize:10.5,fontWeight:700,color:T2,marginBottom:10}}>Global Markets</div>
+        <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:2}}>
+          {GLOBAL.map(function(g){
+            return (
+              <div key={g.name} style={{background:CARD2,borderRadius:9,padding:"9px 12px",flexShrink:0,minWidth:78}}>
+                <div style={{fontSize:9,color:T2}}>{g.name}</div>
+                <div style={{fontSize:11,fontWeight:700,color:T1,marginTop:3,fontFamily:"monospace"}}>{g.val}</div>
+                <div style={{fontSize:9.5,fontWeight:700,color:g.up?UP:DOWN,marginTop:1}}>{g.up?"+":""}{g.chg}%</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}

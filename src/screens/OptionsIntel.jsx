@@ -34,7 +34,7 @@ export default function OptionsIntel(props){
             </div>
             {props.onOpen?<button onClick={props.onOpen} style={{background:"none",border:"none",color:BLUE,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>View Full &#8594;</button>:null}
           </div>
-          <div style={{fontSize:9,color:T3,marginBottom:12}}>{data.symbol} {data.spot} &#8226; {data.expiry} &#8226; Tap any metric for AI insight.</div>
+          <div style={{fontSize:9,color:T3,marginBottom:12}}>{data.symbol} {data.spot} &#8226; {data.expiry} &#8226; {t("tap_insight")}</div>
         </div>
       ):(
         <div style={{fontSize:9,color:T3,marginBottom:12}}>{data.symbol} {data.spot} &#8226; {data.expiry} expiry &#8226; Tap any metric for full explanation.</div>
@@ -136,7 +136,7 @@ export default function OptionsIntel(props){
           <span style={{fontSize:12,fontWeight:800,color:CYAN}}>{t("ai_option_analysis")}</span>
         </div>
         <div style={{fontSize:11.5,color:T1,lineHeight:1.65}}>{data.aiSummary}</div>
-        <div style={{fontSize:8.5,color:T3,marginTop:10,paddingTop:9,borderTop:"1px solid rgba(59,130,246,0.15)"}}>Educational Market Intelligence Only. Not Investment Advice.</div>
+        <div style={{fontSize:8.5,color:T3,marginTop:10,paddingTop:9,borderTop:"1px solid rgba(59,130,246,0.15)"}}>{t("not_advice")}</div>
       </div>
 
       {/* DETAIL MODAL */}
@@ -186,17 +186,17 @@ function MetricDetail(props){
           </div>
           <button onClick={speak} style={{background:"rgba(59,130,246,0.12)",border:"1px solid rgba(59,130,246,0.3)",borderRadius:9,padding:"8px 12px",color:CYAN,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>&#128266; Listen</button>
         </div>
-        {m.what?<Row t="WHAT IT MEANS" v={m.what}/>:null}
-        {m.why?<Row t="WHY IT MATTERS" v={m.why}/>:null}
-        {m.now?<Row t="CURRENT INTERPRETATION" c={CYAN} v={m.now}/>:null}
-        {m.beginner?<Row t="BEGINNER" v={m.beginner}/>:null}
-        {m.advanced?<Row t="ADVANCED" v={m.advanced}/>:null}
-        {m.history?<Row t="HISTORICAL BEHAVIOR" v={m.history}/>:null}
-        {m.risk?<Row t="RISK FACTORS" c={DOWN} v={m.risk}/>:null}
+        {m.what?<Row t={t("lbl_what")} v={m.what}/>:null}
+        {m.why?<Row t={t("lbl_why")} v={m.why}/>:null}
+        {m.now?<Row t={t("lbl_now")} c={CYAN} v={m.now}/>:null}
+        {m.beginner?<Row t={t("lbl_beginner")} v={m.beginner}/>:null}
+        {m.advanced?<Row t={t("lbl_advanced")} v={m.advanced}/>:null}
+        {m.history?<Row t={t("lbl_history")} v={m.history}/>:null}
+        {m.risk?<Row t={t("lbl_risk")} c={DOWN} v={m.risk}/>:null}
         <div style={{background:"rgba(249,115,22,0.06)",border:"1px solid rgba(249,115,22,0.15)",borderRadius:9,padding:10,marginTop:6}}>
           <div style={{fontSize:8.5,color:"#F97316"}}>Educational only. Not a buy or sell recommendation.</div>
         </div>
       </div>
     </div>
   );
-}
+                }

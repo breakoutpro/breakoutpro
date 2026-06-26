@@ -33,8 +33,11 @@ export default function HomeMarketIntel(props){
       </div>
 
       {/* FII / DII */}
-      <div style={{background:CARD,border:"1px solid "+BD,borderRadius:13,padding:13,marginBottom:9}}>
-        <div style={{fontSize:10.5,fontWeight:700,color:T2,marginBottom:10}}>FII / DII Activity (Rs Cr)</div>
+      <div onClick={function(){setTab("fiidii");}} style={{background:CARD,border:"1px solid "+BD,borderRadius:13,padding:13,marginBottom:9,cursor:"pointer"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+          <span style={{fontSize:10.5,fontWeight:700,color:T2}}>FII / DII Activity (Rs Cr)</span>
+          <span style={{fontSize:9,color:CYAN,fontWeight:700}}>Details &#8594;</span>
+        </div>
         <div style={{display:"flex",gap:10}}>
           <div style={{flex:1,background:CARD2,borderRadius:9,padding:"10px 12px"}}>
             <div style={{fontSize:9,color:T3,marginBottom:3}}>FII</div>
@@ -61,8 +64,11 @@ export default function HomeMarketIntel(props){
       </div>
 
       {/* SECTOR PERFORMANCE */}
-      <div style={{background:CARD,border:"1px solid "+BD,borderRadius:13,padding:13,marginBottom:9}}>
-        <div style={{fontSize:10.5,fontWeight:700,color:T2,marginBottom:10}}>Sector Performance</div>
+      <div onClick={function(){setTab("heatmap");}} style={{background:CARD,border:"1px solid "+BD,borderRadius:13,padding:13,marginBottom:9,cursor:"pointer"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+          <span style={{fontSize:10.5,fontWeight:700,color:T2}}>Sector Performance</span>
+          <span style={{fontSize:9,color:CYAN,fontWeight:700}}>Heatmap &#8594;</span>
+        </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:7}}>
           {SECTORS.map(function(s){
             return (
@@ -76,8 +82,11 @@ export default function HomeMarketIntel(props){
       </div>
 
       {/* GLOBAL MARKETS */}
-      <div style={{background:CARD,border:"1px solid "+BD,borderRadius:13,padding:13}}>
-        <div style={{fontSize:10.5,fontWeight:700,color:T2,marginBottom:10}}>Global Markets</div>
+      <div onClick={function(){setTab("global");}} style={{background:CARD,border:"1px solid "+BD,borderRadius:13,padding:13,cursor:"pointer"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+          <span style={{fontSize:10.5,fontWeight:700,color:T2}}>Global Markets</span>
+          <span style={{fontSize:9,color:CYAN,fontWeight:700}}>View All &#8594;</span>
+        </div>
         <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:2}}>
           {GLOBAL.map(function(g){
             return (

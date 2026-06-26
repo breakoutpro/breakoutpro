@@ -178,7 +178,7 @@ export default function SettingsScreen(props) {
         <div onClick={function(){setShowLang(true);}} style={{cursor:"pointer"}}>
           <SettingRow icon="&#127760;" label="Language" sub="App display language" value={(LANGUAGES.find(function(l){return l.code==curLang;})||LANGUAGES[0]).native} arrow={true} iconBg="rgba(59,130,246,0.1)" iconBorder="rgba(59,130,246,0.2)"/>
         </div>
-        {showLang?<LanguageSelector onClose={function(){setShowLang(false);}} onChange={function(c){setCurLang(c);}}/>:null}
+        {showLang?<LanguageSelector onClose={function(){setShowLang(false);}} onChange={function(c){setCurLang(c);}} onUpgrade={function(){setShowLang(false);props.setTab&&props.setTab("sub");}}/>:null}
 
         <LegalModals showPrivacy={showPrivacy} showSebi={showSebi} onClosePrivacy={function(){setShowPrivacy(false);}} onCloseSebi={function(){setShowSebi(false);}}/>
 
@@ -247,5 +247,4 @@ export default function SettingsScreen(props) {
 
     </div>
   );
-        }
-
+              }

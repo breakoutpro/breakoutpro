@@ -113,9 +113,28 @@ export function payoffAt(strat, price){
   return pnl;
 }
 
-// Learning path.
+// Learning path - lesson ids grouped by level (matches OptSellLessonData).
 export var LEARN_PATH = {
-  Beginner:["What are Options?","Calls vs Puts","Premium","Intrinsic Value","Time Value","Expiry","Strike Price","Option Chain Basics"],
-  Intermediate:["What is Option Selling?","Why sellers collect premium","Probability in Option Selling","Theta Decay","Time Decay","Margin Requirement","Open Interest","IV","PCR","Max Pain","Greeks Introduction"],
-  Advanced:["Portfolio Risk","Position Adjustment","Hedging Concepts","Volatility Analysis","Event Risk","Expiry Behaviour","Professional Option Writing Concepts"]
+  Beginner:[
+    {id:"what-options",t:"What are Options?"},{id:"calls-puts",t:"Calls vs Puts"},
+    {id:"premium",t:"Premium"},{id:"intrinsic",t:"Intrinsic Value"},
+    {id:"timevalue",t:"Time Value"},{id:"expiry",t:"Expiry"},
+    {id:"strike",t:"Strike Price"},{id:"chain-basics",t:"Option Chain Basics"}
+  ],
+  Intermediate:[
+    {id:"what-selling",t:"What is Option Selling?"},{id:"why-premium",t:"Why Sellers Collect Premium"},
+    {id:"probability",t:"Probability in Option Selling"},{id:"theta",t:"Theta Decay"},
+    {id:"iv-basics",t:"IV Basics"},{id:"delta",t:"Delta"},{id:"gamma",t:"Gamma"},
+    {id:"vega",t:"Vega"},{id:"margin-basics",t:"Margin Basics"},{id:"risk-mgmt",t:"Risk Management"}
+  ],
+  Advanced:[
+    {id:"iron-condor",t:"Iron Condor"},{id:"iron-fly",t:"Iron Fly"},
+    {id:"short-strangle",t:"Short Strangle"},{id:"short-straddle",t:"Short Straddle"},
+    {id:"credit-spreads",t:"Credit Spreads"},{id:"hedging",t:"Hedging"},
+    {id:"greeks-selling",t:"Greeks in Selling"},{id:"vol-trading",t:"Volatility Trading"},
+    {id:"position-adjust",t:"Position Adjustment"},{id:"rolling",t:"Rolling Positions"},
+    {id:"portfolio-margin",t:"Portfolio Margin"},{id:"event-trading",t:"Event Trading"},
+    {id:"expiry-strategies",t:"Expiry Strategies"}
+  ]
 };
+     

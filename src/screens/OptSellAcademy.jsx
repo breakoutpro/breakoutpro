@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { STRATEGIES, LEARN_PATH } from "./OptSellData";
 import OptSellStrategy from "./OptSellStrategy";
+import OptSellLessonPage from "./OptSellLessonPage";
 
 // BreakoutPro - OptSellAcademy.jsx
 // Options Selling Academy (PRO) dashboard. Educational only. SEBI-safe.
@@ -22,10 +23,12 @@ var CONDITIONS={
 
 export default function OptSellAcademy(props){
   var [sel,setSel]=useState(null);
+  var [lesson,setLesson]=useState(null);
   var [cond,setCond]=useState("Sideways");
   var [tab,setTab]=useState("dash");
 
   if(sel) return <OptSellStrategy id={sel} onBack={function(){setSel(null);}}/>;
+  if(lesson) return <OptSellLessonPage id={lesson} onBack={function(){setLesson(null);}} onNavigate={function(nid){setLesson(nid);}}/>;
 
   return (
     <div style={{background:BG,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:90}}>
@@ -131,8 +134,8 @@ export default function OptSellAcademy(props){
                   <div style={{background:CARD,border:"1px solid "+BD,borderRadius:12,overflow:"hidden"}}>
                     {LEARN_PATH[level].map(function(topic,i){
                       return (
-                        <div key={topic} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 13px",borderBottom:i<LEARN_PATH[level].length-1?"1px solid "+BD2:"none"}}>
-                          <span style={{fontSize:11.5,color:T1}}>{topic}</span>
+                        <div key={topic.id} onClick={function(){setLesson(topic.id);}} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 13px",borderBottom:i<LEARN_PATH[level].length-1?"1px solid "+BD2:"none",cursor:"pointer"}}>
+                          <span style={{fontSize:11.5,color:T1}}>{topic.t}</span>
                           <span style={{fontSize:14,color:T3}}>&#8250;</span>
                         </div>
                       );
@@ -165,4 +168,5 @@ function Disclaimer(){
       <div style={{fontSize:8.5,color:"#F97316",lineHeight:1.5}}>Educational Content Only. This platform is for learning and market intelligence. It does not provide investment advice or trading recommendations. Please consult a SEBI-registered investment adviser before making investment decisions.</div>
     </div>
   );
-}
+                                           }
+      

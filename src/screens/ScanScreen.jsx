@@ -56,6 +56,7 @@ export default function ScanScreen(props){
                         <div style={{display:"flex",alignItems:"center",gap:6}}>
                           <span style={{fontSize:12.5,fontWeight:700,color:T1}}>{it.title}</span>
                           {it.pro?<span style={{fontSize:6.5,fontWeight:800,color:GOLD,background:"rgba(212,175,55,0.1)",padding:"1px 5px",borderRadius:3}}>PRO</span>:null}
+                          {it.live?<span style={{display:"inline-flex",alignItems:"center",gap:3,fontSize:6.5,fontWeight:800,color:UP,background:"rgba(34,197,94,0.1)",border:"1px solid rgba(34,197,94,0.3)",padding:"1px 5px",borderRadius:3}}><span style={{width:4,height:4,borderRadius:"50%",background:UP,display:"inline-block"}}></span>LIVE</span>:null}
                         </div>
                         <div style={{fontSize:9.5,color:T2,marginTop:2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{it.desc}</div>
                       </div>

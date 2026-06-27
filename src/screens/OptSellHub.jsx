@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { getOptionsIntel, toneColor } from "./OptionsIntelData";
+import OptSellHubDetail from "./OptSellHubDetail";
 
 // BreakoutPro - OptSellHub.jsx
 // Option Sellers Daily Hub (educational). Reuses OptionsIntel data + daily commentary,
@@ -30,27 +31,33 @@ var COMMENTARY=[
 ];
 
 var EXPIRY_EDU=[
-  {h:"Weekly Expiry", p:"Weekly options expire every Thursday for indices. Theta decay is fast in the final days, and Gamma risk is highest on expiry day."},
-  {h:"Monthly Expiry", p:"Monthly options expire on the last Thursday. They carry more time value and react less violently than weeklies far from expiry."},
-  {h:"Time Decay Behaviour", p:"Theta accelerates as expiry nears. The last two days see the steepest premium erosion, which sellers study closely."},
-  {h:"Gamma Risk", p:"Near expiry, small moves cause large Delta swings. This Gamma risk can turn a calm position volatile very quickly."},
-  {h:"Volatility Changes", p:"IV often falls into expiry on calm weeks but can spike around events, changing premiums sharply."},
-  {h:"Seller Considerations", p:"Sellers commonly study margin, distance of strikes from spot, and event calendars before expiry."}
+  {id:"weekly",h:"Weekly Expiry", p:"Weekly options expire every Thursday for indices. Theta decay is fast in the final days, and Gamma risk is highest on expiry day."},
+  {id:"monthly",h:"Monthly Expiry", p:"Monthly options expire on the last Thursday. They carry more time value and react less violently than weeklies far from expiry."},
+  {id:"timedecay",h:"Time Decay Behaviour", p:"Theta accelerates as expiry nears. The last two days see the steepest premium erosion, which sellers study closely."},
+  {id:"gammarisk",h:"Gamma Risk", p:"Near expiry, small moves cause large Delta swings. This Gamma risk can turn a calm position volatile very quickly."},
+  {id:"volchange",h:"Volatility Changes", p:"IV often falls into expiry on calm weeks but can spike around events, changing premiums sharply."},
+  {id:"sellerconsider",h:"Seller Considerations", p:"Sellers commonly study margin, distance of strikes from spot, and event calendars before expiry."}
 ];
 
 var RISK_REMINDERS=[
-  {ic:"&#128207;",t:"Position Sizing",d:"Risk only a small part of capital so one move cannot hurt badly."},
-  {ic:"&#128176;",t:"Margin Awareness",d:"Undefined-risk strategies need large margin and can see sudden margin calls."},
-  {ic:"&#128197;",t:"Event Risk",d:"Results, RBI, and global events can cause gaps that hurt sellers."},
-  {ic:"&#9889;",t:"Gap Risk",d:"Overnight gaps can move past your strikes before you can react."},
-  {ic:"&#128200;",t:"Volatility Risk",d:"A sudden IV spike raises option prices and can hurt short positions."},
-  {ic:"&#129504;",t:"Emotional Discipline",d:"Stick to a written plan; do not adjust in panic."}
+  {id:"possize",ic:"&#128207;",t:"Position Sizing",d:"Risk only a small part of capital so one move cannot hurt badly."},
+  {id:"margin",ic:"&#128176;",t:"Margin Awareness",d:"Undefined-risk strategies need large margin and can see sudden margin calls."},
+  {id:"eventrisk",ic:"&#128197;",t:"Event Risk",d:"Results, RBI, and global events can cause gaps that hurt sellers."},
+  {id:"gaprisk",ic:"&#9889;",t:"Gap Risk",d:"Overnight gaps can move past your strikes before you can react."},
+  {id:"volrisk",ic:"&#128200;",t:"Volatility Risk",d:"A sudden IV spike raises option prices and can hurt short positions."},
+  {id:"emotion",ic:"&#129504;",t:"Emotional Discipline",d:"Stick to a written plan; do not adjust in panic."}
 ];
 
 export default function OptSellHub(props){
   var data=getOptionsIntel("NIFTY");
   var [tab,setTab]=useState("dash");
+  var [detail,setDetail]=useState(null);
+  var [detail,setDetail]=useState(null);
   var dte=daysToExpiry();
+
+  if(detail) return <OptSellHubDetail id={detail} onBack={function(){setDetail(null);}}/>;
+
+  if(detail) return <OptSellHubDetail id={detail} onBack={function(){setDetail(null);}} onOpen={function(id){setDetail(id);}}/>;
 
   // pick key metrics for the daily dashboard
   var flat=[]; data.metrics.forEach(function(g){ g.items.forEach(function(m){ flat.push(m); }); });
@@ -114,9 +121,10 @@ export default function OptSellHub(props){
               {dash.map(function(m){
                 var col=toneColor(m.tone);
                 return (
-                  <div key={m.key} style={{background:CARD,border:"1px solid "+BD,borderRadius:11,padding:11}}>
+                  <div key={m.key} onClick={function(){setDetail(m.key);}} style={{background:CARD,border:"1px solid "+BD,borderRadius:11,padding:11,cursor:"pointer"}}>
                     <div style={{fontSize:9.5,color:T2}}>{m.label}</div>
                     <div style={{fontSize:14,fontWeight:800,color:col,marginTop:4,fontFamily:"monospace"}}>{m.val}</div>
+                    <div style={{fontSize:8,color:CYAN,marginTop:4}}>Learn &#8594;</div>
                   </div>
                 );
               })}
@@ -165,8 +173,11 @@ export default function OptSellHub(props){
           <div>
             {EXPIRY_EDU.map(function(e,i){
               return (
-                <div key={i} style={{marginBottom:13}}>
-                  <div style={{fontSize:12,fontWeight:800,color:T1,marginBottom:6}}>{e.h}</div>
+                <div key={i} onClick={function(){setDetail(e.id);}} style={{marginBottom:13,cursor:"pointer"}}>
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
+                    <div style={{fontSize:12,fontWeight:800,color:T1}}>{e.h}</div>
+                    <span style={{fontSize:14,color:T3}}>&#8250;</span>
+                  </div>
                   <div style={{background:CARD,border:"1px solid "+BD,borderRadius:12,padding:13}}><div style={{fontSize:11,color:T1,lineHeight:1.6}}>{e.p}</div></div>
                 </div>
               );
@@ -180,9 +191,10 @@ export default function OptSellHub(props){
             <div style={{fontSize:9,color:T3,marginBottom:11}}>Daily reminders every option seller should study.</div>
             {RISK_REMINDERS.map(function(r,i){
               return (
-                <div key={i} style={{background:CARD,border:"1px solid "+BD,borderRadius:12,padding:13,marginBottom:9,display:"flex",gap:11,alignItems:"flex-start"}}>
+                <div key={i} onClick={function(){setDetail(r.id);}} style={{background:CARD,border:"1px solid "+BD,borderRadius:12,padding:13,marginBottom:9,display:"flex",gap:11,alignItems:"flex-start",cursor:"pointer"}}>
                   <span style={{fontSize:16,flexShrink:0}} dangerouslySetInnerHTML={{__html:r.ic}}/>
-                  <div><div style={{fontSize:12,fontWeight:700,color:T1,marginBottom:3}}>{r.t}</div><div style={{fontSize:10.5,color:T2,lineHeight:1.5}}>{r.d}</div></div>
+                  <div style={{flex:1}}><div style={{fontSize:12,fontWeight:700,color:T1,marginBottom:3}}>{r.t}</div><div style={{fontSize:10.5,color:T2,lineHeight:1.5}}>{r.d}</div></div>
+                  <span style={{fontSize:15,color:T3,flexShrink:0}}>&#8250;</span>
                 </div>
               );
             })}
@@ -200,4 +212,5 @@ function Disclaimer(){
       <div style={{fontSize:8.5,color:"#F97316",lineHeight:1.5}}>Educational Market Intelligence Only. This content is designed to help users understand options markets. It is not investment advice or a trading recommendation.</div>
     </div>
   );
-}
+            }
+          

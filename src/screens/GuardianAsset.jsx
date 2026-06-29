@@ -1,41 +1,15 @@
-import { useState } from "react";
+https://github.com/breakoutpro/breakoutprohttps://github.com/breakoutpro/breakoutprohttps://github.com/breakoutpro/breakoutproimport { useState } from "react";
 import { getAssetCard, getAssetTimeline, getCandleObservation, getStructureReasons, getRelatedObservations, getMultiTF, ASSET_ALERT_OPTIONS, loadAssetAlerts, saveAssetAlerts, alertType, getMarketStatus } from "./GuardianData";
 
 // BreakoutPro - GuardianAsset.jsx
 // Premium AI Observation Report for one asset. Educational only. SEBI-safe.
 // Rules: no backtick, no triple-equals, ASCII.
 
-// Breakout Pro Premium Theme v2
+var BG="#050505",CARD="#0F1319",CARD2="#131922",BD="#232C39",BD2="#1A2330";
+var UP="#34D399",DOWN="#F87171",BLUE="#4F8CFF",CYAN="#67B7FF",GOLD="#E8C55B",WARN="#FB923C";
+var T1="#FFFFFF",T2="#C4CDD8",T3="#8B96A8";
 
-var BG   = "#050505";
-var CARD = "#0F1319";
-var CARD2= "#131922";
-
-var BD   = "#232C39";
-var BD2  = "#1A2330";
-
-var UP   = "#34D399";
-var DOWN = "#F87171";
-
-var BLUE = "#4F8CFF";
-var CYAN = "#67B7FF";
-
-var GOLD = "#E8C55B";
-var WARN = "#FB923C";
-
-var T1   = "#FFFFFF";
-var T2   = "#C4CDD8";
-var T3   = "#8B96A8";
-
-function scoreColor(score){
-
-  if(score >= 80) return UP;
-
-  if(score >= 60) return GOLD;
-
-  return DOWN;
-
-}
+function scoreColor(s){ return s>=75?UP:s>=55?GOLD:DOWN; }
 
 export default function GuardianAsset(props){
   var a=props.asset;
@@ -302,4 +276,5 @@ export default function GuardianAsset(props){
       ):null}
     </div>
   );
-}
+      }
+        

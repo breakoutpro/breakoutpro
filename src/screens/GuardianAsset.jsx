@@ -5,11 +5,37 @@ import { getAssetCard, getAssetTimeline, getCandleObservation, getStructureReaso
 // Premium AI Observation Report for one asset. Educational only. SEBI-safe.
 // Rules: no backtick, no triple-equals, ASCII.
 
-var BG="#050505",CARD="#101318",CARD2="#0B0E13",BD="#1B2330",BD2="#141821";
-var UP="#22C55E",DOWN="#EF4444",BLUE="#4F8CFF",CYAN="#60A5FA",GOLD="#D4AF37",WARN="#F97316";
-var T1="#FFFFFF",T2="#A0A7B4",T3="#5B6472";
+// Breakout Pro Premium Theme v2
 
-function scoreColor(s){ return s>=75?UP:s>=55?GOLD:DOWN; }
+var BG   = "#050505";
+var CARD = "#0F1319";
+var CARD2= "#131922";
+
+var BD   = "#232C39";
+var BD2  = "#1A2330";
+
+var UP   = "#34D399";
+var DOWN = "#F87171";
+
+var BLUE = "#4F8CFF";
+var CYAN = "#67B7FF";
+
+var GOLD = "#E8C55B";
+var WARN = "#FB923C";
+
+var T1   = "#FFFFFF";
+var T2   = "#C4CDD8";
+var T3   = "#8B96A8";
+
+function scoreColor(score){
+
+  if(score >= 80) return UP;
+
+  if(score >= 60) return GOLD;
+
+  return DOWN;
+
+}
 
 export default function GuardianAsset(props){
   var a=props.asset;

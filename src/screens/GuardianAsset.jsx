@@ -1,5 +1,18 @@
-https://github.com/breakoutpro/breakoutprohttps://github.com/breakoutpro/breakoutprohttps://github.com/breakoutpro/breakoutproimport { useState } from "react";
-import { getAssetCard, getAssetTimeline, getCandleObservation, getStructureReasons, getRelatedObservations, getMultiTF, ASSET_ALERT_OPTIONS, loadAssetAlerts, saveAssetAlerts, alertType, getMarketStatus } from "./GuardianData";
+import { useState } from "react";
+
+import {
+  getAssetCard,
+  getAssetTimeline,
+  getCandleObservation,
+  getStructureReasons,
+  getRelatedObservations,
+  getMultiTF,
+  ASSET_ALERT_OPTIONS,
+  loadAssetAlerts,
+  saveAssetAlerts,
+  alertType,
+  getMarketStatus
+} from "./GuardianData";
 
 // BreakoutPro - GuardianAsset.jsx
 // Premium AI Observation Report for one asset. Educational only. SEBI-safe.

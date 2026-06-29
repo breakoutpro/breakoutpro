@@ -60,7 +60,7 @@ export default function GuardianAsset(props){
   return (
     <div style={{background:BG,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:40}}>
       {/* HEADER */}
-      <div style={{background:BG,padding:"12px 14px",borderBottom:"1px solid "+BD,position:"sticky",top:0,zIndex:10}}>
+      <div style={{background:BG,padding:"10px 16px",borderBottom:"1px solid "+BD,position:"sticky",top:0,zIndex:10}}>
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
           <button onClick={props.onBack} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:32,height:32,color:T1,fontSize:16,cursor:"pointer"}}>&#8592;</button>
           <div style={{flex:1}}>

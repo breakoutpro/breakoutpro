@@ -1,4 +1,6 @@
 import { useState } from "react";
+import CandleIcon from "../components/CandleIcon";
+import { CANDLE_DETAIL } from "./CandleDetailData";
 
 var DB="#0A0E1A",CB="#0F1629",BD="#1E2D4A",G="#00C853",G2="#00E676",R="#EF4444",GOLD="#F59E0B",BLUE="#3B82F6",T1="#FFFFFF",T2="#8899BB",T3="#475569";
 
@@ -26,6 +28,12 @@ var CANDLES=[
   {name:"Outside Bar",type:"neutral",desc:"Current candle range fully engulfs prior candle. Volatility expansion.",reliability:"Medium"},
   {name:"Dragonfly Doji",type:"bullish",desc:"Long lower wick, open=close=high. Strong reversal at support.",reliability:"Medium"},
   {name:"Gravestone Doji",type:"bearish",desc:"Long upper wick, open=close=low. Strong reversal at resistance.",reliability:"Medium"},
+  {name:"Harami",type:"neutral",desc:"Small candle inside prior large candle body. Reversal warning.",reliability:"Medium"},
+  {name:"Harami Cross",type:"neutral",desc:"Doji inside prior large body. Stronger reversal warning.",reliability:"Medium"},
+  {name:"Inside Bar",type:"neutral",desc:"Current candle range fully within prior candle. Consolidation.",reliability:"Low"},
+  {name:"Outside Bar",type:"neutral",desc:"Current candle engulfs prior candle range. Volatility expansion.",reliability:"Medium"},
+  {name:"Rising Three Methods",type:"bullish",desc:"Strong up candle, small pause candles, then up continuation.",reliability:"Medium"},
+  {name:"Falling Three Methods",type:"bearish",desc:"Strong down candle, small pause candles, then down continuation.",reliability:"Medium"},
 ];
 
 function CandleSVG(props){
@@ -59,25 +67,40 @@ export default function CandleLibrary(props){
   var filtered = filter=="all" ? CANDLES : CANDLES.filter(function(c){return c.type==filter;});
 
   if(selected){
+    var det=CANDLE_DETAIL[selected.name];
+    var badgeCol=selected.type=="bullish"?G2:selected.type=="bearish"?R:GOLD;
     return (
       <div style={{background:DB,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:30}}>
         <div style={{background:CB,padding:"12px 16px",borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",gap:10}}>
           <button onClick={function(){setSelected(null);}} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:32,height:32,color:T1,fontSize:14,cursor:"pointer"}}>&#8592;</button>
           <div style={{fontSize:14,fontWeight:800,color:T1}}>{selected.name}</div>
         </div>
-        <div style={{padding:20,textAlign:"center"}}>
-          <div style={{display:"flex",justifyContent:"center",marginBottom:16}}>
-            <CandleSVG name={selected.name} type={selected.type}/>
+        <div style={{padding:16}}>
+          {/* large animated SVG */}
+          <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,padding:20,display:"flex",justifyContent:"center",marginBottom:14}}>
+            <CandleIcon name={selected.name} size={140} animate={true}/>
           </div>
-          <div style={{background:(selected.type=="bullish"?"rgba(0,200,83,0.1)":selected.type=="bearish"?"rgba(239,68,68,0.1)":"rgba(245,158,11,0.1)"),borderRadius:20,padding:"4px 14px",display:"inline-block",marginBottom:16}}>
-            <span style={{fontSize:10,fontWeight:700,color:selected.type=="bullish"?G2:selected.type=="bearish"?R:GOLD,textTransform:"capitalize"}}>{selected.type} Signal</span>
+          <div style={{textAlign:"center",marginBottom:16}}>
+            <span style={{background:(selected.type=="bullish"?"rgba(0,200,83,0.1)":selected.type=="bearish"?"rgba(239,68,68,0.1)":"rgba(245,158,11,0.1)"),borderRadius:20,padding:"4px 14px",fontSize:10,fontWeight:700,color:badgeCol,textTransform:"capitalize"}}>{selected.type} Signal</span>
           </div>
-          <div style={{background:CB,border:"1px solid "+BD,borderRadius:14,padding:16,textAlign:"left"}}>
-            <div style={{fontSize:11,color:T2,lineHeight:1.8,marginBottom:14}}>{selected.desc}</div>
-            <div style={{display:"flex",justifyContent:"space-between",borderTop:"1px solid "+BD,paddingTop:12}}>
-              <span style={{fontSize:9,color:T3}}>Reliability</span>
-              <span style={{fontSize:10,fontWeight:700,color:selected.reliability=="High"?G2:selected.reliability=="Medium"?GOLD:T2}}>{selected.reliability}</span>
-            </div>
+          {det?[
+            ["Psychology",det.psychology],["Formation Rules",det.formation],["Where It Appears",det.where],
+            ["Confirmation Required",det.confirmation],["Ideal Timeframe",det.timeframe],["Common Mistakes",det.mistakes],
+            ["Educational Explanation",det.edu]
+          ].map(function(row,i){
+            return (
+              <div key={i} style={{background:CB,border:"1px solid "+BD,borderRadius:12,padding:13,marginBottom:9}}>
+                <div style={{fontSize:9,fontWeight:800,color:T3,letterSpacing:0.4,marginBottom:5}}>{row[0].toUpperCase()}</div>
+                <div style={{fontSize:11,color:T2,lineHeight:1.6}}>{row[1]}</div>
+              </div>
+            );
+          }):<div style={{background:CB,border:"1px solid "+BD,borderRadius:12,padding:13,marginBottom:9}}><div style={{fontSize:11,color:T2,lineHeight:1.6}}>{selected.desc}</div></div>}
+          <div style={{display:"flex",justifyContent:"space-between",background:CB,border:"1px solid "+BD,borderRadius:12,padding:13,marginBottom:9}}>
+            <span style={{fontSize:10,color:T3}}>Reliability</span>
+            <span style={{fontSize:11,fontWeight:800,color:selected.reliability=="High"?G2:selected.reliability=="Medium"?GOLD:T2}}>{selected.reliability}</span>
+          </div>
+          <div style={{background:"rgba(249,115,22,0.06)",border:"1px solid rgba(249,115,22,0.15)",borderRadius:10,padding:11}}>
+            <div style={{fontSize:8.5,color:"#F97316",lineHeight:1.5}}>Educational Market Observation Only. Not Investment Advice.</div>
           </div>
         </div>
       </div>
@@ -100,16 +123,24 @@ export default function CandleLibrary(props){
           })}
         </div>
 
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+        <div style={{display:"flex",flexDirection:"column",gap:8}}>
           {filtered.map(function(c){
             var col=c.type=="bullish"?G2:c.type=="bearish"?R:GOLD;
+            var dot=c.type=="bullish"?"&#128994;":c.type=="bearish"?"&#128308;":"&#128993;";
             return (
-              <div key={c.name} onClick={function(){setSelected(c);}} style={{background:CB,border:"1px solid "+BD,borderRadius:12,padding:"12px 10px",cursor:"pointer",textAlign:"center"}}>
-                <div style={{display:"flex",justifyContent:"center",marginBottom:6}}>
-                  <CandleSVG name={c.name} type={c.type}/>
+              <div key={c.name} onClick={function(){setSelected(c);}} style={{background:CB,border:"1px solid "+BD,borderRadius:12,padding:"10px 12px",cursor:"pointer",display:"flex",alignItems:"center",gap:12}}>
+                <div style={{width:46,height:46,background:"rgba(255,255,255,0.02)",border:"1px solid "+BD,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <CandleIcon name={c.name} size={38}/>
                 </div>
-                <div style={{fontSize:10,fontWeight:700,color:T1,marginBottom:4}}>{c.name}</div>
-                <span style={{fontSize:7,fontWeight:700,color:col,background:col+"15",borderRadius:6,padding:"2px 6px"}}>{c.type}</span>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:12,fontWeight:800,color:T1}}>{c.name}</div>
+                  <div style={{display:"flex",alignItems:"center",gap:5,marginTop:2}}>
+                    <span style={{fontSize:8}} dangerouslySetInnerHTML={{__html:dot}}/>
+                    <span style={{fontSize:8.5,color:col,fontWeight:700,textTransform:"capitalize"}}>{c.type}</span>
+                  </div>
+                  <div style={{fontSize:8.5,color:T2,marginTop:3,lineHeight:1.4,overflow:"hidden",textOverflow:"ellipsis",display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical"}}>{c.desc}</div>
+                </div>
+                <span style={{fontSize:14,color:T3,flexShrink:0}}>&#8250;</span>
               </div>
             );
           })}
@@ -117,4 +148,4 @@ export default function CandleLibrary(props){
       </div>
     </div>
   );
-}
+              }

@@ -30,8 +30,6 @@ var CANDLES=[
   {name:"Gravestone Doji",type:"bearish",desc:"Long upper wick, open=close=low. Strong reversal at resistance.",reliability:"Medium"},
   {name:"Harami",type:"neutral",desc:"Small candle inside prior large candle body. Reversal warning.",reliability:"Medium"},
   {name:"Harami Cross",type:"neutral",desc:"Doji inside prior large body. Stronger reversal warning.",reliability:"Medium"},
-  {name:"Inside Bar",type:"neutral",desc:"Current candle range fully within prior candle. Consolidation.",reliability:"Low"},
-  {name:"Outside Bar",type:"neutral",desc:"Current candle engulfs prior candle range. Volatility expansion.",reliability:"Medium"},
   {name:"Rising Three Methods",type:"bullish",desc:"Strong up candle, small pause candles, then up continuation.",reliability:"Medium"},
   {name:"Falling Three Methods",type:"bearish",desc:"Strong down candle, small pause candles, then down continuation.",reliability:"Medium"},
 ];
@@ -126,7 +124,6 @@ export default function CandleLibrary(props){
         <div style={{display:"flex",flexDirection:"column",gap:8}}>
           {filtered.map(function(c){
             var col=c.type=="bullish"?G2:c.type=="bearish"?R:GOLD;
-            var dot=c.type=="bullish"?"&#128994;":c.type=="bearish"?"&#128308;":"&#128993;";
             return (
               <div key={c.name} onClick={function(){setSelected(c);}} style={{background:CB,border:"1px solid "+BD,borderRadius:12,padding:"10px 12px",cursor:"pointer",display:"flex",alignItems:"center",gap:12}}>
                 <div style={{width:46,height:46,background:"rgba(255,255,255,0.02)",border:"1px solid "+BD,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
@@ -134,10 +131,7 @@ export default function CandleLibrary(props){
                 </div>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontSize:12,fontWeight:800,color:T1}}>{c.name}</div>
-                  <div style={{display:"flex",alignItems:"center",gap:5,marginTop:2}}>
-                    <span style={{fontSize:8}} dangerouslySetInnerHTML={{__html:dot}}/>
-                    <span style={{fontSize:8.5,color:col,fontWeight:700,textTransform:"capitalize"}}>{c.type}</span>
-                  </div>
+                  <div style={{fontSize:8.5,color:col,fontWeight:700,textTransform:"capitalize",marginTop:2}}>{c.type}</div>
                   <div style={{fontSize:8.5,color:T2,marginTop:3,lineHeight:1.4,overflow:"hidden",textOverflow:"ellipsis",display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical"}}>{c.desc}</div>
                 </div>
                 <span style={{fontSize:14,color:T3,flexShrink:0}}>&#8250;</span>
@@ -148,4 +142,4 @@ export default function CandleLibrary(props){
       </div>
     </div>
   );
-}
+            }

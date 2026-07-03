@@ -17,6 +17,10 @@ export default function FloatingBubble(props){
   var pressRef=useRef(null);
 
   if(!props.enabled) return null;
+  // Master Smart Alerts switch: bubble hidden when alerts are off.
+  var master=true;
+  try{ master=localStorage.getItem("bp_smart_alerts")!="0"; }catch(e){}
+  if(!master) return null;
 
   function down(e){
     var pt=e.touches?e.touches[0]:e;
@@ -64,4 +68,3 @@ export default function FloatingBubble(props){
     </div>
   );
 }
-

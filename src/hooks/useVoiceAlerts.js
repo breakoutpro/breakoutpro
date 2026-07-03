@@ -115,6 +115,8 @@ export function useVoiceAlerts(){
   var PRIORITY_INFO = {"Breakout":1,"Breakdown":1,"Trend Change":1,"Support Break":1,"Resistance Break":1,"Three White Soldiers":1,"Three Black Crows":1,"Long Build-up":1,"Short Build-up":1,"Short Covering":1,"Long Unwinding":1,"Gamma Blast":1,"Gamma Flip":1,"Max Pain Shift":1,"Strong Bullish Pattern":1,"Strong Bearish Pattern":1};
   var fire = useCallback(function(sig){
     if(!enabledRef.current) return;
+    // Master Smart Alerts switch: if off, no voice/bell at all.
+    try{ if(localStorage.getItem("bp_smart_alerts")=="0") return; }catch(e){}
     // Watchlist-only mode: ignore symbols not in the watchlist.
     if(watchOnlyRef.current){
       var wl = watchListRef.current || [];

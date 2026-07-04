@@ -20,10 +20,10 @@ export var LANGUAGES = [
 ];
 
 export function getLang(){
-  try{ return localStorage.getItem("bp_lang")||"en"; }catch(e){ return "en"; }
+  return "en"; // ENGLISH-ONLY private beta: locked to English
 }
 export function setLang(code){
-  try{ localStorage.setItem("bp_lang",code); }catch(e){}
+  try{ localStorage.setItem("bp_lang","en"); }catch(e){} // locked to English
 }
 
 // TERMINOLOGY - always English in every language. Never translate these.
@@ -79,9 +79,8 @@ var STR = {
 // Translate a key. Terminology returns English always. Others use selected language,
 // falling back to English, then to the key.
 export function t(key){
+  // ENGLISH-ONLY (private beta): always return English, ignore any selected language.
   if(TERMS[key]!=undefined) return TERMS[key];
-  var lang=getLang();
-  if(STR[lang] && STR[lang][key]!=undefined) return STR[lang][key];
   if(STR.en[key]!=undefined) return STR.en[key];
   return key;
 }

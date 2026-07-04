@@ -56,22 +56,20 @@ export default function MorningPulse(props){
   },[]);
 
   function getPulse(){
-    var key=getKey();
-    if(!key){setError("Add VITE_GROQ_KEY in Vercel settings!");return;}
     setLoading(true);setError("");setPulse("");
-    fetch(GROQ_URL,{
+    fetch("/api/ai",{
       method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},
-      body:JSON.stringify({model:GROQ_MODEL,messages:[{role:"user",content:buildPrompt()}],temperature:0.7,max_tokens:2000}),
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({messages:[{role:"user",content:buildPrompt()}],max_tokens:2000}),
     })
     .then(function(r){return r.json();})
     .then(function(data){
-      if(data.error){setError("Error: "+data.error.message);setLoading(false);return;}
-      var txt=data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content;
-      if(!txt){setError("Empty response");setLoading(false);return;}
+      if(!data||!data.ok){setError("AI is temporarily unavailable. Please try again later.");setLoading(false);return;}
+      var txt=data.text;
+      if(!txt){setError("Empty response. Please try again.");setLoading(false);return;}
       setPulse(txt);setLastFetch(timeStr);setLoading(false);
     })
-    .catch(function(e){setError("Network error: "+e.message);setLoading(false);});
+    .catch(function(){setError("Network error. Please check your internet.");setLoading(false);});
   }
 
   function renderPulse(text){
@@ -246,4 +244,5 @@ export default function MorningPulse(props){
       <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}"}</style>
     </div>
   );
-        }
+                          }
+                                      

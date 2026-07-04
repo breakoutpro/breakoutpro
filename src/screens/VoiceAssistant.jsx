@@ -72,18 +72,17 @@ export default function VoiceAssistant(props){
     if(!question.trim())return;
     setLoading(true);setAiReply("");setError("");
     var prompt="You are a friendly Indian stock market educational assistant. Answer this question concisely in 2-3 sentences (educational only, not investment advice): "+question;
-    fetch("https://api.anthropic.com/v1/messages",{
+    fetch("/api/ai",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
-        model:"claude-sonnet-4-6",
-        max_tokens:1000,
-        messages:[{role:"user",content:prompt}]
+        messages:[{role:"user",content:prompt}],
+        max_tokens:1000
       })
     })
     .then(function(r){return r.json();})
     .then(function(d){
-      var reply=d.content&&d.content[0]?d.content[0].text:"No response received.";
+      var reply=d&&d.ok&&d.text?d.text:"AI is temporarily unavailable. Please try again later.";
       setAiReply(reply);
       setHistory(function(prev){return [{q:question,a:reply,time:new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})}].concat(prev).slice(0,10);});
       setLoading(false);
@@ -226,4 +225,4 @@ export default function VoiceAssistant(props){
       `}</style>
     </div>
   );
-}
+                             }

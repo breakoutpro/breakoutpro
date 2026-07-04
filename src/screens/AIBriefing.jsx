@@ -42,40 +42,30 @@ export default function AIBriefing() {
   var today = new Date().toLocaleDateString("en-IN", {weekday:"long", day:"numeric", month:"long"});
 
   function getBriefing() {
-    var key = getKey();
-    if (!key) {
-      setError("VITE_GROQ_KEY not set in Vercel! Add it in Environment Variables.");
-      return;
-    }
     setLoading(true);
     setError("");
     setBriefing("");
 
     var reqBody = JSON.stringify({
-      model: GROQ_MODEL,
       messages: [{role:"user", content: buildPrompt()}],
-      temperature: 0.7,
-      max_tokens: 1500,
+      max_tokens: 1500
     });
 
-    fetch(GROQ_URL, {
+    fetch("/api/ai", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + key,
-      },
+      headers: { "Content-Type": "application/json" },
       body: reqBody,
     })
     .then(function(res) { return res.json(); })
     .then(function(data) {
-      if (data.error) {
-        setError("Groq Error: " + (data.error.message || "Unknown error"));
+      if (!data || !data.ok) {
+        setError("AI briefing is temporarily unavailable. Please try again later.");
         setLoading(false);
         return;
       }
-      var text = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+      var text = data.text;
       if (!text) {
-        setError("Empty response from Groq");
+        setError("Empty response. Please try again.");
         setLoading(false);
         return;
       }
@@ -83,8 +73,8 @@ export default function AIBriefing() {
       setLastFetch(new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"}));
       setLoading(false);
     })
-    .catch(function(err) {
-      setError("Network error: " + err.message);
+    .catch(function() {
+      setError("Network error. Please check your internet.");
       setLoading(false);
     });
   }
@@ -199,4 +189,4 @@ export default function AIBriefing() {
       </div>
     </div>
   );
-}
+                }

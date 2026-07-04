@@ -84,26 +84,18 @@ export default function PortfolioReview(props){
       "\nSectors: "+Object.entries(sectors).map(function(e){return e[0]+":Rs"+Math.round(e[1]);}).join(", ")+
       "\n\nGive concise educational analysis in 5 bullet points: 1) Portfolio health 2) Sector concentration risk 3) Best performer action 4) Worst performer suggestion 5) One improvement tip. Keep it under 150 words. Start each bullet with emoji.";
 
-    var key=typeof __VITE_GROQ_KEY__ !== "undefined" ? __VITE_GROQ_KEY__ : (window.__env && window.__env.VITE_GROQ_KEY);
-    if(!key){
-      setAiReview("AI Key not configured. Add VITE_GROQ_KEY in Vercel environment variables to enable AI Portfolio Review.");
-      setAiLoading(false);
-      return;
-    }
-
-    fetch("https://api.anthropic.com/v1/messages",{
+    fetch("/api/ai",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
-        model:"claude-sonnet-4-6",
-        max_tokens:1000,
-        messages:[{role:"user",content:prompt}]
+        messages:[{role:"user",content:prompt}],
+        max_tokens:1000
       })
     })
     .then(function(r){return r.json();})
     .then(function(d){
-      var text=d.content&&d.content[0]?d.content[0].text:"No response";
-      setAiReview(text);
+      if(d&&d.ok&&d.text){ setAiReview(d.text); }
+      else { setAiReview("AI review is temporarily unavailable. Please try again later."); }
       setAiLoading(false);
     })
     .catch(function(){
@@ -240,4 +232,4 @@ export default function PortfolioReview(props){
       <style>{"@keyframes pr-spin{to{transform:rotate(360deg)}}"}</style>
     </div>
   );
-}
+                         }

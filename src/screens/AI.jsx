@@ -24,29 +24,24 @@ export default function AIScreen() {
     setMsgs(nm); setInput(""); setLoading(true);
     var loc = localAI(q, AI_KB, CANDLE_PATTERNS);
     if (loc) { setMsgs(nm.concat([{ role: "ai", text: loc, time: nowT() }]).slice(-20)); setLoading(false); return; }
-    var GROQ_KEY = "";
-    try { if (typeof import.meta != "undefined" && import.meta.env) { GROQ_KEY = import.meta.env.VITE_GROQ_KEY || ""; } } catch(e) {}
     function finish(txt) { setMsgs(nm.concat([{ role: "ai", text: txt, time: nowT() }]).slice(-20)); setLoading(false); }
-    if (!GROQ_KEY) { finish("API key not set. Add VITE_GROQ_KEY in Vercel environment variables."); return; }
-    fetch("https://api.groq.com/openai/v1/chat/completions", {
+    fetch("/api/ai", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + GROQ_KEY },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
         messages: [
           { role: "system", content: "You are a helpful Indian stock market assistant for Breakout Pro app. Give clear, educational answers about trading, charts, indicators, and market concepts. Keep answers concise and in simple English. Do not give direct buy/sell advice. Educational only." },
           { role: "user", content: q }
         ],
-        temperature: 0.7,
-        max_tokens: 800,
+        max_tokens: 800
       })
     })
     .then(function(r) { return r.json(); })
     .then(function(d) {
-      var txt = d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content;
-      finish(txt || "No response. Please try again.");
+      if (d && d.ok && d.text) { finish(d.text); }
+      else { finish("AI is temporarily unavailable. Please try again later."); }
     })
-    .catch(function() { finish("Connection error. Check internet and API key."); })
+    .catch(function() { finish("Connection error. Please check your internet."); })
   }
 
   return (
@@ -95,3 +90,4 @@ export default function AIScreen() {
     </div>
   );
 }
+

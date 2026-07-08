@@ -3,11 +3,15 @@ import { G, DISCLAIMER, GEMINI_URL } from "./utils/helpers";
 import { STOCKS } from "./data/stocks";
 import { NEWS } from "./data/news";
 import { useLiveNews } from "./hooks/useLiveNews";
-import useWatchlistAlerts from "./hooks/useWatchlistAlerts";
-import PatternAlertBanner from "./components/PatternAlertBanner";
+// SAFETY PATCH: useWatchlistAlerts import removed - fabricated candle-based
+// pattern detection was firing real OS notifications on simulated data.
+// See audit findings. PatternAlertBanner import removed with it (no other
+// consumer, would otherwise reference an undefined data source).
+import ExpiryAlertPopup from "./components/ExpiryAlertPopup";
 import { SUB_PLANS } from "./data/globals";
 import TopBar from "./components/TopBar";
 import TabBar from "./components/TabBar";
+import { FirstRunTutorial, shouldShowTutorial, OfflineBanner, AlertHistory as AlertHistoryScreen } from "./components/LaunchKit";
 import AlertBanner from "./components/AlertBanner";
 import { ToolsScreen, JournalScreen, ChallengesScreen, SubScreen } from "./screens/InlineScreens";
 import SplashScreen from "./screens/SplashScreen";
@@ -23,9 +27,11 @@ import NewsScreen   from "./screens/News";
 import ErrorBoundary from "./components/ErrorBoundary";
 var OIChain = lazy(function(){ return import("./screens/OIChain"); });
 var AlertsScreen = lazy(function(){ return import("./screens/Alerts"); });
+var ExpiryAlerts = lazy(function(){ return import("./screens/ExpiryAlerts"); });
 var SettingsScreen = lazy(function(){ return import("./screens/Settings"); });
 var AIBriefing = lazy(function(){ return import("./screens/AIBriefing"); });
 var AdminShare = lazy(function(){ return import("./screens/AdminShare"); });
+var SocialStudio = lazy(function(){ return import("./screens/SocialStudio"); });
 var MorningPulse = lazy(function(){ return import("./screens/MorningPulse"); });
 var WatchlistScreen = lazy(function(){ return import("./screens/Watchlist"); });
 var ChartPatterns = lazy(function(){ return import("./screens/ChartPatterns"); });
@@ -50,6 +56,10 @@ var MarketCloseSummary = lazy(function(){ return import("./screens/MarketCloseSu
 var IPOScreen       = lazy(function(){ return import("./screens/IPOScreen"); });
 var SearchScreen    = lazy(function(){ return import("./screens/SearchScreen"); });
 var StockProfile    = lazy(function(){ return import("./screens/StockProfile"); });
+var SignalsPage     = lazy(function(){ return import("./screens/SignalsPage"); });
+var OptSellAcademy  = lazy(function(){ return import("./screens/OptSellAcademy"); });
+var OptSellHub      = lazy(function(){ return import("./screens/OptSellHub"); });
+var Guardian        = lazy(function(){ return import("./screens/Guardian"); });
 
 function Loader() {
   return (
@@ -64,31 +74,51 @@ function AuthScreen(props) {
   var [name,setName] = useState("");
   var [phone,setPhone] = useState("");
   var [pass,setPass] = useState("");
+  var [invite,setInvite] = useState("");
   var [err,setErr] = useState("");
 
   function submit() {
     setErr("");
     if(!phone||phone.length<10){setErr("Enter valid 10-digit phone");return;}
     if(!pass||pass.length<6){setErr("Password min 6 chars");return;}
-    if(phone=="8790124010"&&pass=="Suresh@2025"){
-      props.onLogin({name:"Admin",phone:"8790124010",isAdmin:true,isPrem:true,trialStart:Date.now()});return;
-    }
-    var users={};
-    try{users=JSON.parse(localStorage.getItem("bp_users")||"{}");}catch(e){}
+    setErr("Checking...");
+
     if(mode=="register"){
-      if(!name){setErr("Enter your name");return;}
-      users[phone]={name:name,phone:phone,pass:pass};
-      try{localStorage.setItem("bp_users",JSON.stringify(users));}catch(e){}
-      props.onLogin({name:name,phone:phone,trialStart:Date.now()});
-    } else {
-      if(!users[phone]){
-        users[phone]={name:"Trader",phone:phone,pass:pass};
-        try{localStorage.setItem("bp_users",JSON.stringify(users));}catch(e){}
-        props.onLogin({name:"Trader",phone:phone,trialStart:Date.now()});return;
-      }
-      if(users[phone].pass!=pass){setErr("Wrong password");return;}
-      props.onLogin(users[phone]);
+      // Verify invite code on the SERVER (code list never ships to the browser).
+      fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"verifyCode",code:(invite||"").trim()})})
+        .then(function(r){return r.json();})
+        .then(function(d){
+          if(!d||!d.ok){ setErr("Valid invite code required for private beta"); return; }
+          if(!name){ setErr("Enter your name"); return; }
+          // Beta access granted by server. Store session token only (no password persisted).
+          try{ sessionStorage.setItem("bp_session", d.token||""); }catch(e){}
+          try{
+            var reg=JSON.parse(localStorage.getItem("bp_users")||"{}");
+            reg[phone]={name:name,phone:phone}; // no plaintext password stored
+            localStorage.setItem("bp_users",JSON.stringify(reg));
+          }catch(e){}
+          props.onLogin({name:name,phone:phone,trialStart:Date.now()});
+        })
+        .catch(function(){ setErr("Network error. Try again."); });
+      return;
     }
+
+    // LOGIN: try admin (server-verified) first, then known beta user.
+    fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"admin",phone:phone,pass:pass})})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d&&d.ok&&d.role=="admin"){
+          try{ sessionStorage.setItem("bp_session", d.token||""); }catch(e){}
+          props.onLogin({name:"Admin",phone:phone,isAdmin:true,isPrem:true,trialStart:Date.now()});
+          return;
+        }
+        // Not admin: check locally-registered beta user (registered earlier via server code check).
+        var users={};
+        try{users=JSON.parse(localStorage.getItem("bp_users")||"{}");}catch(e){}
+        if(!users[phone]){ setErr("No account found. Register with your invite code."); return; }
+        props.onLogin({name:users[phone].name||"Trader",phone:phone,trialStart:Date.now()});
+      })
+      .catch(function(){ setErr("Network error. Try again."); });
   }
 
   var inp={width:"100%",background:"#fff",border:"1.5px solid #E5E7EB",borderRadius:10,padding:"11px 13px",color:"#111827",fontSize:13,fontFamily:"inherit",outline:"none",boxSizing:"border-box",marginBottom:10};
@@ -100,7 +130,10 @@ function AuthScreen(props) {
         </div>
         <div style={{fontSize:24,fontWeight:900,color:"#111827"}}>Breakout<span style={{color:G}}> Pro</span></div>
         <div style={{fontSize:8,color:"#F97316",fontWeight:800,letterSpacing:2,marginTop:3}}>CATCH EVERY BREAKOUT</div>
-        <div style={{fontSize:9,color:"#9CA3AF",marginTop:4}}>India's No.1 Trading Education Platform</div>
+        <div style={{display:"inline-block",marginTop:8,background:"#EFF6FF",border:"1px solid #BFDBFE",borderRadius:20,padding:"4px 12px"}}>
+          <span style={{fontSize:9,fontWeight:800,color:"#2563EB"}}>Private Beta &bull; Early Access Testing</span>
+        </div>
+        <div style={{fontSize:9,color:"#9CA3AF",marginTop:6}}>India's Advanced Trading Education &amp; Market Intelligence Platform</div>
       </div>
       <div style={{padding:"24px 20px",flex:1}}>
         <div style={{display:"flex",background:"#F3F4F6",borderRadius:12,padding:4,marginBottom:20}}>
@@ -111,6 +144,7 @@ function AuthScreen(props) {
         </div>
         {err?<div style={{background:"#FEF2F2",border:"1px solid #FECACA",borderRadius:10,padding:"10px 12px",marginBottom:12,fontSize:11,color:"#DC2626"}}>! {err}</div>:null}
         {mode=="register"?<input style={inp} placeholder="Full Name" value={name} onChange={function(e){setName(e.target.value);}}/>:null}
+        {mode=="register"?<input style={inp} placeholder="Invite Code (private beta)" value={invite} onChange={function(e){setInvite(e.target.value);}}/>:null}
         <input style={inp} placeholder="Phone (10 digits)" type="tel" maxLength={10} value={phone} onChange={function(e){setPhone(e.target.value);}}/>
         <input style={inp} placeholder="Password (min 6 chars)" type="password" value={pass} onChange={function(e){setPass(e.target.value);}}/>
         <button style={{width:"100%",background:G,border:"none",borderRadius:12,padding:"14px",fontSize:13,fontWeight:700,color:"#fff",cursor:"pointer",fontFamily:"inherit"}} onClick={submit}>
@@ -265,6 +299,7 @@ function MoreScreen(props) {
     share:      "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='18' cy='5' r='3'/><circle cx='6' cy='12' r='3'/><circle cx='18' cy='19' r='3'/><line x1='8.59' y1='13.51' x2='15.42' y2='17.49'/><line x1='15.41' y1='6.51' x2='8.59' y2='10.49'/></svg>",
     sub:        "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'/></svg>",
     news:       "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2'/><path d='M18 14h-8'/><path d='M15 18h-5'/><path d='M10 6h8v4h-8V6z'/></svg>",
+    studio:     "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><rect x='3' y='3' width='18' height='18' rx='2'/><circle cx='8.5' cy='8.5' r='1.5'/><path d='M21 15l-5-5L5 21'/></svg>",
   };
 
   var sections = [
@@ -292,6 +327,7 @@ function MoreScreen(props) {
       {id:"settings",   label:"Settings",           sub:"Alerts, notifications, preferences", col:T2    },
       {id:"referral",   label:"Refer & Earn",       sub:"Invite friends, unlock Premium",     col:UP    },
       {id:"share",      label:"Share Posters",      sub:"Create shareable market posters",    col:PURPLE},
+      {id:"studio",     label:"Social Media Studio", sub:"Auto-generate branded posters to share", col:"#EC4899"},
       {id:"sub",        label:"Go Premium",         sub:"Unlock unlimited features",          col:GOLD  },
     ]},
   ];
@@ -332,18 +368,31 @@ function MoreScreen(props) {
 
 export default function App() {
   var liveNewsData = useLiveNews();
-  var watchlistAlerts = useWatchlistAlerts();
+  // SAFETY PATCH: watchlistAlerts engine unmounted - see notes above.
   var LIVE_NEWS = liveNewsData.news.length > 0 ? liveNewsData.news : NEWS;
   function getSess(){
     try{var s=JSON.parse(localStorage.getItem("bp_sess")||"null");if(s&&s.name&&s.phone)return s;return null;}catch(e){return null;}
   }
   var saved = getSess();
   var [splash,setSplash] = useState(true);
+  var [showTutorial,setShowTutorial] = useState(function(){ try{ return shouldShowTutorial(); }catch(e){ return false; } });
   var [user,setUser] = useState(saved);
   var [tab,setTab] = useState("home");
   var [notifAsked,setNotifAsked] = useState(false);
   var [selectedStock,setSelectedStock] = useState(null);
   var [sidebar,setSidebar] = useState(false);
+  var [brightness,setBrightness] = useState(function(){ try{ return parseInt(localStorage.getItem("bp_brightness")||"100"); }catch(e){ return 100; } });
+  useEffect(function(){
+    function onB(e){ try{ setBrightness(e.detail); }catch(err){} }
+    try{ window.addEventListener("bp_brightness_change",onB); }catch(e){}
+    return function(){ try{ window.removeEventListener("bp_brightness_change",onB); }catch(e){} };
+  },[]);
+  var [winW,setWinW] = useState(function(){ try{ return window.innerWidth; }catch(e){ return 430; } });
+  useEffect(function(){
+    function onResize(){ try{ setWinW(window.innerWidth); }catch(e){} }
+    try{ window.addEventListener("resize",onResize); }catch(e){}
+    return function(){ try{ window.removeEventListener("resize",onResize); }catch(e){} };
+  },[]);
   var [nifty] = useState({ltp:22467.90,pct:1.35,up:true});
   var [sensex] = useState({ltp:73863.45,pct:1.28,up:true});
   var [bankNifty] = useState({ltp:48234.60,pct:0.86,up:true});
@@ -423,10 +472,9 @@ export default function App() {
   }
   function loadBriefing(){
     setBriefingLoading(true);
-    var KEY="";if(typeof window!="undefined"&&window.GEMINI_KEY)KEY=window.GEMINI_KEY;
-    fetch(GEMINI_URL+KEY,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{role:"user",parts:[{text:"Brief Indian stock market educational summary 80 words. Educational only. End with: Educational only. Not investment advice."}]}],generationConfig:{maxOutputTokens:200,temperature:0.7}})})
+    fetch("/api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:[{role:"user",content:"Brief Indian stock market educational summary 80 words. Educational only. End with: Educational only. Not investment advice."}],max_tokens:200})})
       .then(function(r){return r.json();})
-      .then(function(d){setBriefing(d.candidates&&d.candidates[0]&&d.candidates[0].content?d.candidates[0].content.parts[0].text:"Check API key.");setBriefingLoading(false);})
+      .then(function(d){setBriefing(d&&d.ok&&d.text?d.text:"AI briefing temporarily unavailable.");setBriefingLoading(false);})
       .catch(function(){setBriefing("Could not load. Check internet.");setBriefingLoading(false);});
   }
 
@@ -443,16 +491,16 @@ export default function App() {
     stocks:STOCKS,news:LIVE_NEWS,briefing:briefing,briefingLoading:briefingLoading,
     onBriefing:loadBriefing,user:user,setTab:setTab,glTab:glTab,setGlTab:setGlTab};
 
-  var KNOWN_TABS = ["home","markets","scan","scanner","learn","ai","briefing","alerts","settings","share","morning","commodity","watchlist","patterns","paper","news","candle","chart","detector","analysis","scalper","more","quiz","global","heatmap","fiidii","journal","challenges","sub","oi","tools","breakdown","volspike","gap","rsiscan","macdscan","supertrend","orb","mf","portfolio","voice","backtest","strategy","profile","referral","datahub","marketclose","search","stockprofile","ipo"];
+  var KNOWN_TABS = ["home","markets","scan","scanner","learn","ai","briefing","alerts","settings","share","morning","commodity","watchlist","patterns","paper","news","candle","chart","detector","analysis","scalper","more","quiz","global","heatmap","fiidii","journal","challenges","sub","oi","tools","breakdown","volspike","gap","rsiscan","macdscan","supertrend","orb","mf","portfolio","voice","backtest","strategy","profile","referral","datahub","marketclose","search","stockprofile","ipo","signals","optsell","optsellhub","guardian","expiryalerts","alerthistory","studio"];
 
   function renderScreen(){
     return (
       <ErrorBoundary key={tab}>
       <Suspense fallback={<Loader/>}>
         <AlertBanner/>
-        {tab=="home"     ? <HomeScreen nifty={hp.nifty} sensex={hp.sensex} bankNifty={hp.bankNifty} midcap={hp.midcap} stocks={hp.stocks} news={hp.news} briefing={hp.briefing} briefingLoading={hp.briefingLoading} onBriefing={hp.onBriefing} user={hp.user} setTab={hp.setTab} glTab={hp.glTab} setGlTab={hp.setGlTab} isPrem={isPrem}/> : null}
+        {tab=="home"     ? <HomeScreen nifty={hp.nifty} sensex={hp.sensex} bankNifty={hp.bankNifty} midcap={hp.midcap} stocks={hp.stocks} news={hp.news} briefing={hp.briefing} briefingLoading={hp.briefingLoading} onBriefing={hp.onBriefing} user={hp.user} setTab={hp.setTab} glTab={hp.glTab} setGlTab={hp.setGlTab} isPrem={isPrem} onMenu={function(){setSidebar(true);}}/> : null}
         {tab=="markets"  ? <MarketsScreen stocks={STOCKS}/> : null}
-        {tab=="scan"     ? <ScanScreen setTab={setTab}/> : null}
+        {tab=="scan"     ? <ScanScreen setTab={setTab} onStock={function(s){setSelectedStock(s);setTab("stockprofile");}}/> : null}
         {tab=="portfolio"? <PortfolioReview setTab={setTab} onBack={function(){setTab("home");}} /> : null}
         {tab=="voice"    ? <VoiceAssistant  setTab={setTab} onBack={function(){setTab("home");}} /> : null}
         {tab=="backtest" ? <Backtesting     setTab={setTab} onBack={function(){setTab("home");}} /> : null}
@@ -463,6 +511,12 @@ export default function App() {
         {tab=="marketclose" ? <MarketCloseSummary setTab={setTab} onBack={function(){setTab("home");}} /> : null}
         {tab=="search"      ? <SearchScreen onBack={function(){setTab("home");}} onSelect={function(s){setSelectedStock(s);setTab("stockprofile");}} /> : null}
         {tab=="stockprofile"? <StockProfile stock={selectedStock} onBack={function(){setTab("search");}} setTab={setTab}/> : null}
+        {tab=="signals"     ? <SignalsPage setTab={setTab} onBack={function(){setTab("home");}} onStock={function(s){setSelectedStock(s);setTab("stockprofile");}}/> : null}
+        {tab=="optsell"     ? <OptSellAcademy setTab={setTab} onBack={function(){setTab("learn");}}/> : null}
+        {tab=="optsellhub"  ? <OptSellHub setTab={setTab} onBack={function(){setTab("home");}}/> : null}
+        {tab=="guardian"    ? <Guardian setTab={setTab} onBack={function(){setTab("home");}}/> : null}
+        {tab=="expiryalerts"? <ExpiryAlerts setTab={setTab} onBack={function(){setTab("home");}}/> : null}
+        {tab=="alerthistory"? <AlertHistoryScreen onBack={function(){setTab("home");}}/> : null}
         {tab=="ipo"         ? <IPOScreen setTab={setTab} onBack={function(){setTab("home");}} /> : null}
         {tab=="scanner"  ? <ScannerScreen stocks={STOCKS}/> : null}
         {tab=="learn"    ? <LearnScreen/> : null}
@@ -470,6 +524,7 @@ export default function App() {
         {tab=="briefing" ? <AIBriefing/> : null}
         {tab=="alerts"   ? <AlertsScreen setTab={setTab}/> : null}
         {tab=="settings"  ? <SettingsScreen user={user} isPrem={isPrem} isAdmin={isAdmin} setTab={setTab} onLogout={logout}/> : null}
+        {tab=="studio"    ? <SocialStudio setTab={setTab}/> : null}
         {tab=="share"     ? <AdminShare isAdmin={isAdmin} setTab={setTab}/> : null}
         {tab=="morning"   ? <MorningPulse/> : null}
         {tab=="commodity" ? <CommodityScreen setTab={setTab}/> : null}
@@ -502,15 +557,37 @@ export default function App() {
 
   if(!user) return <AuthScreen onLogin={login}/>;
 
-  return (
-    <div style={{position:"relative",width:"100%",maxWidth:430,margin:"0 auto",height:"100vh",overflow:"hidden",fontFamily:"Inter,Arial,sans-serif",background:"#F8F9FA"}}>
-      <div style={{height:"100vh",overflowY:"auto"}}>
-        {tab!="home"&&tab!="alerts" ? <TopBar isPrem={isPrem} trialDays={trialDays} setTab={setTab} onMenu={function(){setSidebar(true);}} onSub={function(){setTab("sub");}}/> : null}
-        <PatternAlertBanner alert={watchlistAlerts.latestAlert} onDismiss={watchlistAlerts.clearLatest} onView={function(){watchlistAlerts.clearLatest();setTab("watchlist");}}/>
+  var tutorialOverlay = showTutorial ? <FirstRunTutorial onClose={function(){setShowTutorial(false);}}/> : null;
+
+  // Responsive breakpoints.
+  var isMobile = winW<768;
+  var isTablet = winW>=768 && winW<1024;
+  var isLaptop = winW>=1024 && winW<1440;
+  var isDesktopBp = winW>=1440 && winW<1920;
+  var isUltra = winW>=1920;
+  var isDesktop = winW>=1024; // laptop and above use the 3-column shell
+  // Content scale grows with screen so text/cards stay readable, not tiny.
+  var zoomLevel = isUltra?1.5:(isDesktopBp?1.35:(isLaptop?1.18:1));
+  // Sidebar widths scale with breakpoint.
+  var leftW = isUltra?340:(isDesktopBp?300:280);
+  var rightW = isUltra?400:(isDesktopBp?360:320);
+  var shellMax = isUltra?2200:1800;
+  var shellPad = isUltra?32:24;
+  var shellGap = isUltra?28:24;
+  var centerW = isDesktop?"100%":(isTablet?720:430);
+
+  // The mobile app column (unchanged on mobile).
+  var appColumn = (
+    <div style={{position:"relative",width:"100%",maxWidth:centerW,margin:"0 auto",height:isDesktop?"100%":"100vh",overflow:"hidden",fontFamily:"Inter,Arial,sans-serif",background:"#F8F9FA",filter:brightness!=100?"brightness("+(brightness/100)+")":"none"}}>
+      <div style={{height:isDesktop?"100%":"100vh",overflowY:"auto"}}>
+        {tab!="home"&&tab!="alerts"&&tab!="scan"&&tab!="guardian"&&tab!="optsell"&&tab!="optsellhub"&&tab!="signals"&&tab!="settings"&&tab!="search" ? <TopBar isPrem={isPrem} trialDays={trialDays} setTab={setTab} onMenu={function(){setSidebar(true);}} onSub={function(){setTab("sub");}}/> : null}
+        {/* SAFETY PATCH: PatternAlertBanner removed with its fake data source. */}
+        <OfflineBanner/>
         {renderScreen()}
       </div>
+      <ExpiryAlertPopup maxWidth={centerW} onOpen={function(){setTab("expiryalerts");}}/>
       {!notifAsked && typeof Notification != "undefined" && Notification.permission == "default" ? (
-        <div style={{position:"fixed",bottom:65,left:0,right:0,zIndex:998,padding:"0 14px"}}>
+        <div style={{position:"fixed",bottom:65,left:0,right:0,zIndex:998,padding:"0 14px",maxWidth:centerW,margin:"0 auto"}}>
           <div style={{background:"linear-gradient(135deg,#0F1629,#1A2A1A)",border:"1px solid rgba(0,200,83,0.3)",borderRadius:14,padding:"12px 14px",display:"flex",alignItems:"center",gap:10,boxShadow:"0 -4px 20px rgba(0,0,0,0.5)"}}>
             <div style={{fontSize:20}}>&#128276;</div>
             <div style={{flex:1}}>
@@ -527,7 +604,7 @@ export default function App() {
           </div>
         </div>
       ) : null}
-      <TabBar tab={tab} setTab={goTo}/>
+      {!isDesktop ? <TabBar tab={tab} setTab={goTo}/> : null}
       {sidebar?(
         <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,zIndex:200,display:"flex"}}>
           <div style={{width:260,background:"#fff",borderRight:"1px solid #E5E7EB",display:"flex",flexDirection:"column",boxShadow:"4px 0 24px rgba(0,0,0,0.1)"}}>
@@ -558,6 +635,130 @@ export default function App() {
           <div style={{flex:1,background:"rgba(0,0,0,0.3)"}} onClick={function(){setSidebar(false);}}></div>
         </div>
       ):null}
+    </div>
+  );
+
+  // MOBILE / TABLET: render the app column as-is (unchanged mobile UI).
+  if(!isDesktop) return <>{appColumn}{tutorialOverlay}</>;
+
+  // LAPTOP and above: premium 3-column dashboard around the app column.
+  return (
+    <div style={{width:"100%",minHeight:"100vh",background:"#050505",display:"flex",justifyContent:"center",fontFamily:"Inter,Arial,sans-serif"}}>
+      <div style={{width:"100%",maxWidth:shellMax,display:"flex",gap:shellGap,padding:shellPad,boxSizing:"border-box",height:"100vh"}}>
+        <DesktopLeftSidebar tab={tab} setTab={goTo} user={user} onLogout={logout} width={leftW}/>
+        <div style={{flex:1,minWidth:0,height:"calc(100vh - "+(shellPad*2)+"px)",overflow:"hidden",borderRadius:20,border:"1px solid #1B2330",boxShadow:"0 8px 40px rgba(0,0,0,0.5)",background:"#F8F9FA"}}>
+          <div style={{zoom:zoomLevel,width:"100%",height:"100%"}}>
+            {appColumn}
+          </div>
+        </div>
+        <DesktopRightSidebar setTab={goTo} liveNews={LIVE_NEWS} width={rightW}/>
+      </div>
+      {tutorialOverlay}
+    </div>
+  );
+}
+
+// --- DESKTOP LEFT SIDEBAR (280px) ---
+function DesktopLeftSidebar(props){
+  var BG="#0A0D12",BD="#1B2330",T1="#FFFFFF",T2="#8899BB",T3="#5B6472",BLUE="#4F8CFF";
+  var W=props.width||280;
+  var items=[
+    {label:"Home",id:"home",ic:"&#127968;"},
+    {label:"Markets",id:"markets",ic:"&#128202;"},
+    {label:"AI Market Guardian",id:"guardian",ic:"&#128737;"},
+    {label:"Scanner",id:"scan",ic:"&#128269;"},
+    {label:"Learn",id:"learn",ic:"&#128218;"},
+    {label:"Portfolio",id:"watchlist",ic:"&#128188;"},
+    {label:"Settings",id:"settings",ic:"&#9881;"}
+  ];
+  return (
+    <div style={{width:W,flexShrink:0,height:"calc(100vh - 48px)",position:"sticky",top:24,background:BG,border:"1px solid "+BD,borderRadius:20,padding:18,boxSizing:"border-box",display:"flex",flexDirection:"column"}}>
+      <div style={{display:"flex",alignItems:"center",gap:11,marginBottom:24,padding:"4px 6px"}}>
+        <div style={{width:42,height:42,borderRadius:13,background:"linear-gradient(135deg,#00C853,#00A040)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:"#fff"}}>B</div>
+        <div>
+          <div style={{fontSize:16,fontWeight:900,color:T1}}>Breakout<span style={{color:"#00C853"}}> Pro</span></div>
+          <div style={{fontSize:7,color:"#F97316",fontWeight:800,letterSpacing:1.5}}>CATCH EVERY BREAKOUT</div>
+        </div>
+      </div>
+      <div style={{flex:1}}>
+        {items.map(function(it){
+          var act=props.tab==it.id;
+          return (
+            <button key={it.id} onClick={function(){props.setTab(it.id);}} style={{width:"100%",background:act?"rgba(79,140,255,0.12)":"none",border:"1px solid "+(act?"rgba(79,140,255,0.3)":"transparent"),borderRadius:12,padding:"12px 14px",marginBottom:5,display:"flex",alignItems:"center",gap:12,cursor:"pointer",fontFamily:"inherit",textAlign:"left",transition:"all 0.18s"}}>
+              <span style={{fontSize:16}} dangerouslySetInnerHTML={{__html:it.ic}}/>
+              <span style={{fontSize:13.5,fontWeight:act?800:600,color:act?BLUE:T2}}>{it.label}</span>
+            </button>
+          );
+        })}
+      </div>
+      <div style={{borderTop:"1px solid "+BD,paddingTop:14}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,padding:"0 6px"}}>
+          <div style={{width:34,height:34,borderRadius:"50%",background:"linear-gradient(135deg,#00C853,#00A040)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:900,color:"#fff"}}>{props.user.name[0].toUpperCase()}</div>
+          <div style={{minWidth:0}}>
+            <div style={{fontSize:12,fontWeight:800,color:T1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{props.user.name}</div>
+            <div style={{fontSize:8,color:T3}}>{props.user.phone}</div>
+          </div>
+        </div>
+        <button onClick={props.onLogout} style={{width:"100%",background:"rgba(239,68,68,0.08)",border:"1px solid rgba(239,68,68,0.25)",borderRadius:10,padding:"10px",color:"#EF4444",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>Logout</button>
+      </div>
+    </div>
+  );
+}
+
+// --- DESKTOP RIGHT SIDEBAR (320px) ---
+function DesktopRightSidebar(props){
+  var BG="#0A0D12",BD="#1B2330",BD2="#141821",T1="#FFFFFF",T2="#8899BB",T3="#5B6472",BLUE="#4F8CFF",UP="#22C55E",DOWN="#EF4444";
+  var W=props.width||320;
+  var gainers=[{s:"SBIN",p:"812.45",c:"+2.30%"},{s:"ICICIBANK",p:"1167.80",c:"+1.40%"},{s:"TCS",p:"1434.20",c:"+1.90%"}];
+  var losers=[{s:"WIPRO",p:"174.00",c:"-2.10%"},{s:"TATASTEEL",p:"148.00",c:"-1.20%"},{s:"AXISBANK",p:"1088.20",c:"-1.24%"}];
+  var news=(props.liveNews||[]).slice(0,4);
+  function Card(p){
+    return (
+      <div style={{background:BG,border:"1px solid "+BD,borderRadius:16,padding:14,marginBottom:14}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:11}}>
+          <span style={{fontSize:12,fontWeight:800,color:T1}}>{p.title}</span>
+          {p.action?<button onClick={p.onAction} style={{background:"none",border:"none",color:BLUE,fontSize:10,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{p.action}</button>:null}
+        </div>
+        {p.children}
+      </div>
+    );
+  }
+  function Row(p){
+    return (
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"7px 0",borderBottom:p.last?"none":"1px solid "+BD2}}>
+        <span style={{fontSize:11,fontWeight:700,color:T1}}>{p.s}</span>
+        <div style={{textAlign:"right"}}>
+          <span style={{fontSize:11,fontWeight:800,color:T1,fontFamily:"monospace",marginRight:8}}>{p.p}</span>
+          <span style={{fontSize:10,fontWeight:700,color:p.up?UP:DOWN}}>{p.c}</span>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div style={{width:W,flexShrink:0,height:"calc(100vh - 48px)",position:"sticky",top:24,overflowY:"auto",paddingRight:2}}>
+      <Card title="Watchlist" action="Open" onAction={function(){props.setTab("watchlist");}}>
+        <Row s="NIFTY 50" p="24,850" c="+0.60%" up={true}/>
+        <Row s="BANK NIFTY" p="52,140" c="+0.80%" up={true}/>
+        <Row s="RELIANCE" p="1,779" c="+0.40%" up={true} last={true}/>
+      </Card>
+      <Card title="Top Gainers">
+        {gainers.map(function(g,i){ return <Row key={g.s} s={g.s} p={g.p} c={g.c} up={true} last={i==gainers.length-1}/>; })}
+      </Card>
+      <Card title="Top Losers">
+        {losers.map(function(l,i){ return <Row key={l.s} s={l.s} p={l.p} c={l.c} up={false} last={i==losers.length-1}/>; })}
+      </Card>
+      <Card title="Live News" action="All" onAction={function(){props.setTab("news");}}>
+        {news.length?news.map(function(n,i){
+          return <div key={i} style={{padding:"8px 0",borderBottom:i<news.length-1?"1px solid "+BD2:"none"}}><div style={{fontSize:10.5,color:T1,lineHeight:1.5,overflow:"hidden",textOverflow:"ellipsis",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{n.title||n.headline||"Market update"}</div></div>;
+        }):<div style={{fontSize:10,color:T3}}>Loading market news...</div>}
+      </Card>
+      <Card title="Economic Calendar" action="View" onAction={function(){props.setTab("news");}}>
+        <div style={{fontSize:10.5,color:T2,lineHeight:1.7}}>
+          <div style={{marginBottom:6,display:"flex",justifyContent:"space-between"}}><span>RBI Policy</span><span style={{color:T3}}>Fri</span></div>
+          <div style={{marginBottom:6,display:"flex",justifyContent:"space-between"}}><span>US CPI Data</span><span style={{color:T3}}>Wed</span></div>
+          <div style={{display:"flex",justifyContent:"space-between"}}><span>India IIP</span><span style={{color:T3}}>Mon</span></div>
+        </div>
+      </Card>
     </div>
   );
 }

@@ -174,6 +174,10 @@ export default function ScannerScreen(props) {
       </div>
 
       <div style={{padding:"10px 14px"}}>
+        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
+          <span style={{fontSize:7.5,fontWeight:800,color:"#F59E0B",background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.3)",padding:"2px 7px",borderRadius:5,letterSpacing:0.5}}>DEMO DATA</span>
+          <span style={{fontSize:8,color:"#4A5A7A"}}>Simulated scan results for preview. Not live market values.</span>
+        </div>
         {results.length==0?(
           <div style={{textAlign:"center",padding:"40px 0"}}>
             <div style={{fontSize:14,color:T2,marginBottom:6}}>No stocks match this scanner</div>

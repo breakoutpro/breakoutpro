@@ -1,138 +1,220 @@
-import { useState } from "react";
-import { getPhase, OVERNIGHT, LEVELS, NEWS_POS, NEWS_NEG, SECTORS, WATCH, PLAN, METRICS, MT, computeMood, getVerdict, getVoiceSummary } from "./MarketMoodData";
-import { Gauge, MiniCue, LevelCard, NewsBlock, SectorGrid } from "./MarketMoodParts";
+import { useState, useEffect } from "react";
+import { useResponsive } from "../hooks/useResponsive";
+import { track } from "../state/analyticsRegistry";
+import {
+  MT, getSessionMeta, buildIndexRow, buildEvolution,
+  buildUnverifiedSection, buildVoiceSummary, rankSectors, buildVixHistory
+} from "./MarketMoodData";
+import {
+  SectionHead, SectionHeadWithPill, UnavailableCard, IndexRow,
+  Gauge, EvolutionCard, StageTimeline, GridWrap, AiCommentaryBlock, Sparkline
+} from "./MarketMoodParts";
 
 // BreakoutPro - MarketMood.jsx
-// Premium Today's Game Plan screen. 8 sections + 30 second voice summary.
+// AI Market Mood - full open page. Owns page COMPOSITION only.
+// All numbers come from the real useMarketMood() state (mm prop, same
+// object MarketMoodCard.jsx already uses) via MarketMoodEngine.js
+// (deterministic score) and api/market-mood-ai.js (grounded AI text).
+// No static/fake datasets. Missing data renders honest UNAVAILABLE.
 // Rules: no backtick, no triple-equals, ASCII only.
 
 function speakText(t){
   try{
     if(!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
-    var u=new SpeechSynthesisUtterance(t);
-    u.lang="en-IN"; u.rate=1; u.pitch=1;
+    var u = new SpeechSynthesisUtterance(t);
+    u.lang = "en-IN"; u.rate = 1; u.pitch = 1;
     window.speechSynthesis.speak(u);
   }catch(e){}
 }
 
-function Head(props){
-  return <div style={{fontSize:12,color:MT.T2,fontWeight:800,margin:"4px 0 10px",letterSpacing:0.5}}>{props.children}</div>;
-}
-
 export default function MarketMood(props){
-  var phase=getPhase();
-  var mood=computeMood();
-  var verdict=getVerdict();
-  var setTab=props.setTab||function(){};
-  var [speaking,setSpeaking]=useState(false);
+  var mm = props.mm || {};
+  var mood = mm.mood || null;
+  var ai = mm.ai || null;
+  var data = mm.data || null;
+  var session = mm.session || "";
+  var status = mm.status || "loading";
+
+  var responsive = useResponsive();
+  var cols = responsive.columns || 1;
+
+  var sMeta = getSessionMeta(session);
+  var evolution = buildEvolution(data || {});
+
+  var idx = (data && data.indices) || {};
+  var niftyRow = buildIndexRow("NIFTY 50", idx.NIFTY);
+  var sensexRow = buildIndexRow("SENSEX", idx.SENSEX);
+  var bankRow = buildIndexRow("BANK NIFTY", idx.BANKNIFTY);
+  var vixRow = buildIndexRow("INDIA VIX", idx.VIX);
+
+  // Sector Rotation / Global Markets: real, server-populated groups as of
+  // Step 5 (batched quote fetch, honest LIVE/DELAYED/STALE/PARTIAL/
+  // UNAVAILABLE per group). Market Breadth / Important Events: still
+  // honest UNAVAILABLE - no validated provider exists for them.
+  var sectorSection = buildUnverifiedSection(data && data.sectors);
+  var rankedSectors = sectorSection.available ? rankSectors(sectorSection.items) : [];
+  var globalSection = buildUnverifiedSection(data && data.global);
+  var vixHist = buildVixHistory(data && data.vixHistory);
+
+  var [speaking, setSpeaking] = useState(false);
+
+  // Fires exactly once per genuine open (component mount), not on
+  // re-render - matches the ANALYTICS_EVENTS allow-list in
+  // analyticsRegistry.js ("feature_open": ["feature"]), no new event type.
+  useEffect(function(){
+    track("feature_open", { feature:"marketMood" });
+  }, []);
 
   function onVoice(){
-    var t=getVoiceSummary();
+    var t = buildVoiceSummary(mood, ai, session);
     setSpeaking(true);
     speakText(t);
-    setTimeout(function(){setSpeaking(false);},1000);
+    setTimeout(function(){ setSpeaking(false); }, 1000);
   }
+
+  var showLoading = status=="loading" && !mood;
+  var showOffline = status=="offline";
 
   return (
     <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:MT.BG,zIndex:350,overflowY:"auto"}}>
 
       {/* HEADER */}
-      <div style={{background:MT.CARD,borderBottom:"1px solid "+MT.BD,padding:"16px",display:"flex",alignItems:"center",gap:12,position:"sticky",top:0,zIndex:5}}>
-        <button onClick={props.onClose} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:34,height:34,color:MT.T1,fontSize:16,cursor:"pointer",flexShrink:0}}>&#8592;</button>
-        <div style={{flex:1}}>
-          <div style={{fontSize:22,fontWeight:800,color:MT.T1}}>Today's Game Plan</div>
-          <div style={{fontSize:11,color:MT.T2,marginTop:2,display:"flex",alignItems:"center",gap:5}}>
-            <span style={{width:6,height:6,borderRadius:"50%",background:phase.dot,display:"inline-block"}}></span>
-            {phase.label}  &#8226;  {phase.sub}
+      <div style={{background:MT.CARD,borderBottom:"1px solid "+MT.BD,position:"sticky",top:0,zIndex:5}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,padding:"16px",maxWidth:responsive.shell.centerMax,margin:"0 auto",boxSizing:"border-box"}}>
+          <button onClick={props.onClose} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:44,height:44,color:MT.T1,fontSize:16,cursor:"pointer",flexShrink:0}}>&#8592;</button>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:20,fontWeight:800,color:MT.T1}}>AI Market Mood</div>
+            <div style={{fontSize:11,color:MT.T2,marginTop:2,display:"flex",alignItems:"center",gap:5,flexWrap:"wrap"}}>
+              <span style={{width:6,height:6,borderRadius:"50%",background:sMeta.dot,display:"inline-block",flexShrink:0}}></span>
+              <span>{sMeta.label} &#8226; {sMeta.sub}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div style={{padding:"18px 16px 36px"}}>
+      <div style={{padding:"18px " + (responsive.shell.pad>16?responsive.shell.pad:16) + "px 40px",maxWidth:responsive.shell.centerMax,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
 
-        {/* 1. MOOD GAUGE + VERDICT + METRICS */}
-        <div style={{background:MT.CARD,border:"1px solid "+MT.BD,borderRadius:16,padding:"20px 16px 16px",marginBottom:18}}>
+        {showLoading ? (
+          <div style={{padding:"30px 0",textAlign:"center",color:MT.T2,fontSize:12.5}}>Loading market mood...</div>
+        ) : showOffline ? (
+          <div style={{padding:"30px 0",textAlign:"center",color:MT.T2,fontSize:12.5}}>You are offline. Showing last-known data where available.</div>
+        ) : null}
+
+        {/* 1. TODAY'S SUMMARY */}
+        <SectionHead>TODAY'S SUMMARY</SectionHead>
+        <div style={{background:MT.CARD,border:"1px solid "+MT.BD,borderRadius:16,padding:"20px 16px 16px",marginBottom:6}}>
           <Gauge mood={mood}/>
-          <div style={{marginTop:14,background:MT.CARD2,border:"1px solid "+MT.BD,borderRadius:12,padding:14}}>
-            <div style={{fontSize:10,color:MT.CYAN||"#60A5FA",fontWeight:800,marginBottom:6,letterSpacing:0.4}}>AI MARKET VERDICT</div>
-            <div style={{fontSize:13.5,color:MT.T1,lineHeight:1.7}}>{verdict}</div>
-          </div>
-          <div style={{display:"flex",gap:6,marginTop:12}}>
-            {METRICS.map(function(m){
-              return (
-                <div key={m.label} style={{flex:1,background:MT.CARD2,border:"1px solid "+MT.BD,borderRadius:9,padding:"9px 3px",textAlign:"center"}}>
-                  <div style={{fontSize:8,color:MT.T2,marginBottom:3}}>{m.label}</div>
-                  <div style={{fontSize:11,fontWeight:800,color:m.color}}>{m.val}</div>
-                </div>
-              );
-            })}
-          </div>
         </div>
+        <AiCommentaryBlock ai={ai}/>
 
-        {/* 8. VOICE SUMMARY - placed near top for quick access */}
-        <button onClick={onVoice} style={{width:"100%",background:MT.BLUE,border:"none",borderRadius:13,padding:14,color:"#fff",fontSize:13.5,fontWeight:800,cursor:"pointer",fontFamily:"inherit",marginBottom:20,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+        <button onClick={onVoice} style={{width:"100%",background:MT.BLUE,border:"none",borderRadius:13,padding:14,color:"#fff",fontSize:13.5,fontWeight:800,cursor:"pointer",fontFamily:"inherit",marginBottom:6,display:"flex",alignItems:"center",justifyContent:"center",gap:8,minHeight:44}}>
           <span style={{fontSize:16}} dangerouslySetInnerHTML={{__html:"&#128266;"}}/>
-          {speaking?"Playing...":"Listen 30-Second Market Mood"}
+          {speaking ? "Playing..." : "Listen: Market Mood Summary"}
         </button>
 
-        {/* 2. OVERNIGHT */}
-        <Head>OVERNIGHT  &#8226;  WHAT HAPPENED LAST NIGHT</Head>
-        <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:6,marginBottom:18}}>
-          {OVERNIGHT.map(function(c){return <MiniCue key={c.name} c={c}/>;})}
+        {/* 2. 3-DAY EVOLUTION */}
+        <SectionHead>3-DAY EVOLUTION</SectionHead>
+        <EvolutionCard evolution={evolution}/>
+
+        {/* 3-5. YESTERDAY / PREVIOUS SESSION / CURRENT SESSION */}
+        <SectionHead>YESTERDAY, PREVIOUS SESSION AND CURRENT SESSION</SectionHead>
+        <div style={{background:MT.CARD,border:"1px solid "+MT.BD,borderRadius:14,overflow:"hidden",marginBottom:14}}>
+          <IndexRow row={niftyRow}/>
+          <IndexRow row={sensexRow}/>
+          <IndexRow row={bankRow}/>
+        </div>
+        <div style={{fontSize:9.5,color:MT.T3,marginTop:-8,marginBottom:14}}>
+          Yesterday and previous-session detail use the same live index feed above with session-aware freshness labels. A dedicated multi-day close history view will expand this once approved.
         </div>
 
-        {/* 3. KEY LEVELS */}
-        <Head>KEY LEVELS TODAY</Head>
-        {LEVELS.map(function(L){return <LevelCard key={L.name} L={L}/>;})}
+        {/* 6. MARKET STAGE TIMELINE */}
+        <SectionHead>MARKET STAGE TIMELINE</SectionHead>
+        <StageTimeline mood={mood} evolution={evolution}/>
 
-        {/* 4. NEWS IMPACT */}
-        <Head>NEWS IMPACT STOCKS</Head>
-        <NewsBlock pos={true} items={NEWS_POS}/>
-        <NewsBlock pos={false} items={NEWS_NEG}/>
+        {/* 7. SECTOR ROTATION */}
+        {sectorSection.available ? (
+          <div>
+            <SectionHeadWithPill status={sectorSection.status}>SECTOR ROTATION</SectionHeadWithPill>
+            <GridWrap columns={cols}>
+              {rankedSectors.map(function(s,i){
+                var color = s.up==null?MT.T2:(s.up?MT.GREEN:MT.RED);
+                return (
+                  <div key={i} style={{background:MT.CARD,border:"1px solid "+MT.BD,borderRadius:12,padding:12}}>
+                    <div style={{fontSize:11,color:MT.T1,fontWeight:700}}>{s.name}</div>
+                    <div style={{fontSize:10,color:color,marginTop:2}}>{s.chgPct!=null ? (s.chgPct>=0?"+":"")+s.chgPct+"%" : "--"}</div>
+                    {s.tag ? <div style={{fontSize:8.5,color:MT.T3,marginTop:3}}>{s.tag}</div> : null}
+                  </div>
+                );
+              })}
+            </GridWrap>
+            <div style={{fontSize:9,color:MT.T3,marginTop:6,marginBottom:8}}>Relative strength derived from the same live sector-index dataset above. Not institutional flow data.</div>
+          </div>
+        ) : (
+          <div>
+            <SectionHead>SECTOR ROTATION</SectionHead>
+            <UnavailableCard title="Sector Rotation" note="No verified sector-index provider connected yet."/>
+          </div>
+        )}
 
-        {/* 5. SECTOR MOOD */}
-        <Head>SECTOR MOOD</Head>
-        <SectorGrid sectors={SECTORS}/>
+        {/* 8. MARKET BREADTH */}
+        <SectionHead>MARKET BREADTH</SectionHead>
+        <UnavailableCard title="Market Breadth" note="No verified advance/decline provider connected yet."/>
 
-        {/* 6. STOCKS TO WATCH */}
-        <Head>STOCKS TO WATCH</Head>
-        <div style={{background:MT.CARD,border:"1px solid "+MT.BD,borderRadius:14,overflow:"hidden",marginBottom:18}}>
-          {WATCH.map(function(w,i){
-            var c=w.setup=="Bullish"?MT.GREEN:w.setup=="Bearish"?MT.RED:MT.YELLOW;
-            return (
-              <div key={w.sym} onClick={function(){setTab("scan");}} style={{display:"flex",alignItems:"center",gap:11,padding:"12px 13px",borderBottom:i<WATCH.length-1?"1px solid "+MT.BD:"none",cursor:"pointer"}}>
-                <div style={{width:8,height:8,borderRadius:"50%",background:c,flexShrink:0}}></div>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:13,fontWeight:800,color:MT.T1}}>{w.sym}</div>
-                  <div style={{fontSize:9.5,color:MT.T2,marginTop:1}}>{w.note}</div>
-                </div>
-                <span style={{fontSize:9,fontWeight:700,color:c,background:c+"18",borderRadius:6,padding:"3px 9px"}}>{w.setup}</span>
-              </div>
-            );
-          })}
+        {/* 9. GLOBAL MARKETS */}
+        {globalSection.available ? (
+          <div>
+            <SectionHeadWithPill status={globalSection.status}>GLOBAL MARKETS</SectionHeadWithPill>
+            <GridWrap columns={cols}>
+              {globalSection.items.map(function(g,i){
+                var color = g.up==null?MT.T2:(g.up?MT.GREEN:MT.RED);
+                return (
+                  <div key={i} style={{background:MT.CARD,border:"1px solid "+MT.BD,borderRadius:12,padding:12}}>
+                    <div style={{fontSize:11,color:MT.T1,fontWeight:700}}>{g.name}</div>
+                    <div style={{fontSize:10,color:color,marginTop:2}}>{g.chgPct!=null ? (g.chgPct>=0?"+":"")+g.chgPct+"%" : "--"}</div>
+                  </div>
+                );
+              })}
+            </GridWrap>
+            <div style={{fontSize:9,color:MT.T3,marginTop:6,marginBottom:8}}>Last available quote per market. May reflect a prior close outside that market's own trading hours.</div>
+          </div>
+        ) : (
+          <div>
+            <SectionHead>GLOBAL MARKETS</SectionHead>
+            <UnavailableCard title="Global Markets" note="No verified global-index provider connected yet."/>
+          </div>
+        )}
+
+        {/* 10. INDIA VIX */}
+        <SectionHead>INDIA VIX</SectionHead>
+        <div style={{background:MT.CARD,border:"1px solid "+MT.BD,borderRadius:14,overflow:"hidden",marginBottom:vixHist.available?0:14}}>
+          <IndexRow row={vixRow}/>
         </div>
+        {vixHist.available ? (
+          <div style={{background:MT.CARD,border:"1px solid "+MT.BD,borderTop:"none",borderRadius:"0 0 14px 14px",padding:"10px 14px 14px",marginBottom:14}}>
+            <div style={{fontSize:9,color:MT.T3,marginBottom:4}}>Last {vixHist.sessions} sessions (daily close)</div>
+            <Sparkline points={vixHist.points}/>
+          </div>
+        ) : null}
 
-        {/* 7. TRADING PLAN */}
-        <Head>TRADING PLAN</Head>
-        <div style={{background:MT.CARD2,border:"1px solid "+MT.BD,borderRadius:14,padding:14,marginBottom:18}}>
-          {PLAN.map(function(p,i){
-            return (
-              <div key={p.cond} style={{display:"flex",alignItems:"center",gap:11,padding:"10px 0",borderTop:i>0?"1px solid "+MT.DIV:"none"}}>
-                <div style={{width:10,height:10,borderRadius:3,background:p.color,flexShrink:0}}></div>
-                <span style={{fontSize:12.5,fontWeight:800,color:MT.T1,width:120,flexShrink:0}}>{p.cond}</span>
-                <span style={{fontSize:11,color:MT.T2,flex:1}}>{p.act}</span>
-              </div>
-            );
-          })}
+        {/* 11. IMPORTANT EVENTS */}
+        <SectionHead>IMPORTANT EVENTS</SectionHead>
+        <UnavailableCard title="Important Events" note="No verified economic-calendar source connected yet."/>
+
+        {/* 12. EDUCATIONAL EXPLANATION */}
+        <SectionHead>EDUCATIONAL EXPLANATION</SectionHead>
+        <div style={{background:MT.CARD2,border:"1px solid "+MT.BD,borderRadius:14,padding:16,marginBottom:14}}>
+          <div style={{fontSize:11.5,color:MT.T2,lineHeight:1.7}}>
+            Market Mood is a deterministic score (0 to 100) built from live index trend, India VIX, and multi-session structure, weighted by how much verified data is actually available right now. Components with no trustworthy data are excluded rather than guessed, and remaining weights are re-balanced. AI only explains this score in plain language; it never changes the number or adds outside facts.
+          </div>
         </div>
 
         {/* DISCLAIMER */}
-        <div style={{background:"rgba(249,115,22,0.06)",border:"1px solid rgba(249,115,22,0.15)",borderRadius:10,padding:11}}>
-          <div style={{fontSize:8.5,color:"#F97316",lineHeight:1.6}}>Educational only. Not SEBI registered. Not investment advice. Levels, cues and plans are for learning, not trade calls.</div>
+        <div style={{background:"rgba(249,115,22,0.06)",border:"1px solid rgba(249,115,22,0.15)",borderRadius:10,padding:11,marginTop:6}}>
+          <div style={{fontSize:8.5,color:MT.WARN,lineHeight:1.6}}>Educational Market Observation Only. Not Investment Advice.</div>
         </div>
 
       </div>
     </div>
   );
-      }
+}

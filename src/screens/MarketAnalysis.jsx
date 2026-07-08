@@ -159,7 +159,11 @@ export default function MarketAnalysis() {
     <div style={{background:DB,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:80}}>
       <div style={{background:CB,padding:"12px 14px",borderBottom:"1px solid "+BD}}>
         <div style={{fontSize:16,fontWeight:900,color:T1}}>Market <span style={{color:G}}>Analysis</span></div>
-        <div style={{fontSize:8,color:"#F97316",fontWeight:700,letterSpacing:1,marginBottom:10}}>EDUCATIONAL - NOT INVESTMENT ADVICE</div>
+        <div style={{fontSize:8,color:"#F97316",fontWeight:700,letterSpacing:1,marginBottom:6}}>EDUCATIONAL - NOT INVESTMENT ADVICE</div>
+        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
+          <span style={{fontSize:7.5,fontWeight:800,color:GOLD,background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.3)",padding:"2px 7px",borderRadius:5,letterSpacing:0.5}}>DEMO DATA</span>
+          <span style={{fontSize:8,color:T2}}>Simulated prices and candles for preview. Not live market values.</span>
+        </div>
         <div style={{display:"flex",gap:6}}>
           {[["indices","Indices (6)"],["stocks","Stocks (20)"]].map(function(t){
             var act=activeTab==t[0];

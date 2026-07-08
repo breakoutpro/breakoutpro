@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ALL_NSE_STOCKS } from "../data/marketsStocks";
-import useWatchlistAlerts from "../hooks/useWatchlistAlerts";
+// SAFETY PATCH: useWatchlistAlerts removed - fabricated candle-based pattern
+// detection was firing real OS notifications on simulated data. See audit.
 
 var BG="#07111F",CARD="#101B2E",BD="#1E3A5F",BLUE="#3B82F6",BLUE2="#60A5FA",PURPLE="#7C3AED",PURPLE2="#A855F7",GOLD="#F59E0B",UP="#22C55E",DOWN="#EF4444",T1="#FFFFFF",T2="#94A3B8",T3="#475569";
 
@@ -34,7 +35,6 @@ function MiniSpark(props) {
 
 export default function Watchlist(props) {
   var setTab = props.setTab || function(){};
-  var watchlistAlerts = useWatchlistAlerts();
   var [list, setList] = useState(loadWatchlist());
   var [search, setSearch] = useState("");
   var [showAdd, setShowAdd] = useState(false);
@@ -60,18 +60,10 @@ export default function Watchlist(props) {
     });
   },[list]);
 
-  useEffect(function(){
-    var t = setInterval(function(){
-      setStocks(function(prev){
-        return prev.map(function(s){
-          var chg = (Math.random()-0.48)*s.ltp*0.003;
-          var nl = parseFloat((s.ltp+chg).toFixed(2));
-          return Object.assign({},s,{ltp:nl, spark:s.spark.slice(-19).concat([nl])});
-        });
-      });
-    },3000);
-    return function(){clearInterval(t);};
-  },[]);
+  // SAFETY PATCH: continuous Math.random price-ticking removed - these
+  // values are demo/simulated (ALL_NSE_STOCKS is a static local dataset,
+  // not a live feed) and must not animate as if live. See disclosure
+  // banner added to the render below.
 
   function addStock(sym) {
     if (list.indexOf(sym)==-1) setList(list.concat([sym]));
@@ -142,7 +134,12 @@ export default function Watchlist(props) {
             <button onClick={function(){setShowAdd(true);}} style={{background:"linear-gradient(135deg,"+BLUE+","+PURPLE+")",border:"none",borderRadius:10,padding:"10px 18px",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>+ Add Your First Stock</button>
           </div>
         ):(
-          <div style={{background:CARD,border:"1px solid "+BD,borderRadius:14,overflow:"hidden"}}>
+          <div>
+            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
+              <span style={{fontSize:7.5,fontWeight:800,color:GOLD,background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.3)",padding:"2px 7px",borderRadius:5,letterSpacing:0.5}}>DEMO DATA</span>
+              <span style={{fontSize:8,color:T3}}>Simulated prices for preview. Not live market values.</span>
+            </div>
+            <div style={{background:CARD,border:"1px solid "+BD,borderRadius:14,overflow:"hidden"}}>
             {stocks.map(function(s){
               var pct = s.base>0 ? ((s.ltp-s.base)/s.base*100) : 0;
               var up = pct>=0;
@@ -161,47 +158,13 @@ export default function Watchlist(props) {
                 </div>
               );
             })}
+            </div>
           </div>
         )}
 
-        {/* Pattern Alert Test + Notification Status */}
-        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:14,padding:"12px 14px",marginBottom:14}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-            <div>
-              <div style={{fontSize:11,fontWeight:700,color:T1}}>Pattern Alerts</div>
-              <div style={{fontSize:8,color:T3,marginTop:2}}>Notifications: <span style={{color:watchlistAlerts.notifPermission=="granted"?UP:watchlistAlerts.notifPermission=="denied"?DOWN:GOLD,fontWeight:700}}>{watchlistAlerts.notifPermission=="granted"?"Enabled":watchlistAlerts.notifPermission=="denied"?"Blocked":"Not enabled"}</span></div>
-            </div>
-            <button onClick={watchlistAlerts.testBell} style={{background:"rgba(59,130,246,0.12)",border:"1px solid rgba(59,130,246,0.3)",borderRadius:10,padding:"8px 12px",color:BLUE2,fontSize:9,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>Test Bell Sound</button>
-          </div>
-          {watchlistAlerts.notifPermission!="granted"?(
-            <button onClick={watchlistAlerts.requestPermission} style={{width:"100%",background:"rgba(245,158,11,0.1)",border:"1px solid rgba(245,158,11,0.25)",borderRadius:10,padding:"9px",color:GOLD,fontSize:9,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>Enable Phone Notifications</button>
-          ):null}
-        </div>
-
-        {/* Recent Pattern Alerts */}
-        {watchlistAlerts.alertHistory.length>0?(
-          <div style={{marginTop:16}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-              <span style={{fontSize:9,fontWeight:700,color:T3,letterSpacing:0.8}}>RECENT PATTERN ALERTS</span>
-              <button onClick={function(){setTab("settings");}} style={{background:"none",border:"none",color:BLUE2,fontSize:8,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>Scan interval &#8594;</button>
-            </div>
-            {watchlistAlerts.alertHistory.slice(0,8).map(function(a){
-              var col=a.type=="bullish"?UP:a.type=="bearish"?DOWN:GOLD;
-              return (
-                <div key={a.id} style={{background:CARD,border:"1px solid "+BD,borderLeft:"3px solid "+col,borderRadius:10,padding:"9px 12px",marginBottom:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <div>
-                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
-                      <span style={{fontSize:10,fontWeight:700,color:T1}}>{a.sym}</span>
-                      <span style={{fontSize:9,color:col,fontWeight:600}}>{a.pattern}</span>
-                    </div>
-                    <div style={{fontSize:7,color:T3}}>{a.time}</div>
-                  </div>
-                  <span style={{fontSize:9,fontWeight:700,color:col}}>{a.conf}%</span>
-                </div>
-              );
-            })}
-          </div>
-        ):null}
+        {/* SAFETY PATCH: Pattern Alerts panel + Recent Pattern Alerts history
+            removed - their data source (useWatchlistAlerts) generated
+            fabricated candles/patterns and is no longer mounted. */}
 
       </div>
     </div>

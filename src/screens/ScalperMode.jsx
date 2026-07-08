@@ -35,19 +35,9 @@ export default function ScalperMode(props){
     setEma21(selSym.base*0.997);
   },[selSym]);
 
-  useEffect(function(){
-    var t=setInterval(function(){
-      setPrice(function(p){
-        var chg=(Math.random()-0.48)*p*0.0008;
-        return parseFloat((p+chg).toFixed(2));
-      });
-      setRsi(function(r){
-        var nr=r+(Math.random()-0.5)*4;
-        return Math.max(20,Math.min(80,parseFloat(nr.toFixed(1))));
-      });
-    },2000);
-    return function(){clearInterval(t);};
-  },[]);
+  // SAFETY PATCH: continuous Math.random price/RSI ticking removed - this
+  // tool's price/VWAP/EMA/RSI/signal are simulated for practice, not live
+  // market values. See disclosure banner added to the render below.
 
   useEffect(function(){
     var bullish=0,bearish=0;
@@ -66,7 +56,11 @@ export default function ScalperMode(props){
   return (
     <div style={{background:DB,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:30}}>
       <div style={{background:CB,padding:"12px 16px",borderBottom:"1px solid "+BD}}>
-        <div style={{fontSize:15,fontWeight:900,color:T1,marginBottom:8}}>Scalper <span style={{color:BLUE}}>Mode</span></div>
+        <div style={{fontSize:15,fontWeight:900,color:T1,marginBottom:6}}>Scalper <span style={{color:BLUE}}>Mode</span></div>
+        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
+          <span style={{fontSize:7.5,fontWeight:800,color:GOLD,background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.3)",padding:"2px 7px",borderRadius:5,letterSpacing:0.5}}>SIMULATED</span>
+          <span style={{fontSize:8,color:T3}}>Practice mode. Price, RSI, and signal are simulated, not live market values.</span>
+        </div>
         <div style={{display:"flex",gap:6,overflowX:"auto"}}>
           {SYMS.map(function(s){
             var act=selSym.sym==s.sym;

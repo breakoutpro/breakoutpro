@@ -1,25 +1,21 @@
 import { useState, useEffect } from "react";
+import { useTheme } from "../theme/ThemeProvider";
 import { DEMO_STOCKS, ALL_NSE_STOCKS } from "../data/marketsStocks";
 import { COMMODITIES, INDICES, SECTORS } from "../data/marketsMeta";
 import { genSpark, MiniChart, BackBtn, StockRow, CommodityDetail, SectorDetail, IndexDetail } from "./MarketsUI";
 import { STOCK_META } from "../data/stockMeta";
 import StockProfile from "./StockProfile";
-import StockDetail from "./StockDetail";
+import IndexFullPage from "./IndexFullPage";
 import MarketsTop from "./MarketsTop";
 
-var DB = "#050505";
-var CB = "#101318";
-var BD = "#1B2330";
-var G = "#22C55E";
-var G2 = "#22C55E";
-var R = "#EF4444";
-var GOLD = "#D4AF37";
-var BLUE = "#60A5FA";
-var T1 = "#FFFFFF";
-var T2 = "#A0A7B4";
-var T3 = "#5B6472";
+// Colors come from the theme via useTheme() inside the component.
 
 export default function MarketsScreen(props) {
+  var TH=useTheme().c;
+  var DB=TH.bg,CB=TH.card,BD=TH.border;
+  var G=TH.up,G2=TH.up,R=TH.down;
+  var GOLD=TH.gold,BLUE=TH.blue;
+  var T1=TH.text1,T2=TH.text2,T3=TH.text3;
   var stocks=(props.stocks&&props.stocks.length>0)?props.stocks:ALL_NSE_STOCKS;
   var [search,setSearch]=useState("");
   var [liveData,setLiveData]=useState({});
@@ -106,9 +102,9 @@ export default function MarketsScreen(props) {
     }
   },[]);
 
-  if(selStock)  return <StockDetail stock={selStock} onBack={function(){setSelStock(null);}}/>;
+  if(selStock)  return <StockProfile stock={selStock} onBack={function(){setSelStock(null);}}/>;
   if(selSector) return <SectorDetail s={selSector} onBack={function(){setSelSector(null);}}/>;
-  if(selIdx)    return <IndexDetail idx={selIdx} onBack={function(){setSelIdx(null);}}/>;
+  if(selIdx)    return <IndexFullPage idx={{label:selIdx}} onBack={function(){setSelIdx(null);}}/>;
   if(selCom)    return <CommodityDetail s={selCom} onBack={function(){setSelCom(null);}}/>;
 
   var mergedStocks = stocks.map(function(s){
@@ -162,9 +158,9 @@ export default function MarketsScreen(props) {
   return (
     <div style={{background:DB,minHeight:"100%",paddingBottom:80,fontFamily:"Inter,Arial,sans-serif"}}>
       <div style={{background:CB,padding:"12px 14px",borderBottom:"1px solid "+BD}}>
-        <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.05)",border:"1px solid "+BD,borderRadius:10,padding:"8px 12px",marginBottom:10}}>
-          <span style={{color:T2}}>&#128269;</span>
-          <input style={{flex:1,background:"none",border:"none",outline:"none",fontSize:12,color:T1,fontFamily:"inherit"}} placeholder="Search stocks, sectors..." value={search} onChange={function(e){setSearch(e.target.value);}}/>
+        <div style={{display:"flex",alignItems:"center",gap:7,background:"rgba(255,255,255,0.04)",border:"1px solid "+BD,borderRadius:9,padding:"6px 10px",marginBottom:10}}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T2} strokeWidth="2.2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input style={{flex:1,background:"none",border:"none",outline:"none",fontSize:11.5,color:T1,fontFamily:"inherit"}} placeholder="Search stocks, sectors..." value={search} onChange={function(e){setSearch(e.target.value);}}/>
           {search?<button onClick={function(){setSearch("");}} style={{background:"none",border:"none",cursor:"pointer",color:T2,fontSize:12}}>X</button>:null}
         </div>
         <div style={{display:"flex",gap:6,overflowX:"auto"}}>
@@ -180,16 +176,22 @@ export default function MarketsScreen(props) {
         </div>
       </div>
 
-      {activeTab=="stocks"?<MarketsTop setTab={props.setTab}/>:null}
+      {activeTab=="stocks"&&!search?<MarketsTop setTab={props.setTab} onStock={function(st){setSelStock(st);}}/>:null}
 
       {/* STOCKS */}
       {activeTab=="stocks"?(
-        <div style={{background:CB,margin:"10px 14px",borderRadius:12,border:"1px solid "+BD,overflow:"hidden"}}>
-          {filtered.length==0?(
-            <div style={{padding:24,textAlign:"center",color:T2,fontSize:12}}>No stocks found</div>
-          ):filtered.map(function(s){
-            return <StockRow key={s.sym} s={s} onClick={function(){setSelStock(s);}}/>;
-          })}
+        <div style={{margin:"10px 14px 0"}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
+            <span style={{fontSize:7.5,fontWeight:800,color:GOLD,background:"rgba(212,175,55,0.12)",border:"1px solid rgba(212,175,55,0.3)",padding:"2px 7px",borderRadius:5,letterSpacing:0.5}}>DEMO DATA</span>
+            <span style={{fontSize:8,color:T3}}>Simulated prices and volume for preview. Not live market values.</span>
+          </div>
+          <div style={{background:CB,borderRadius:12,border:"1px solid "+BD,overflow:"hidden"}}>
+            {filtered.length==0?(
+              <div style={{padding:24,textAlign:"center",color:T2,fontSize:12}}>No stocks found</div>
+            ):filtered.map(function(s){
+              return <StockRow key={s.sym} s={s} onClick={function(){setSelStock(s);}}/>;
+            })}
+          </div>
         </div>
       ):null}
 
@@ -197,8 +199,8 @@ export default function MarketsScreen(props) {
       {activeTab=="indices"?(
         <div style={{display:"flex",justifyContent:"flex-end",padding:"4px 14px 0"}}>
           <div style={{background:liveStatus=="live"?"rgba(0,200,83,0.15)":liveStatus=="closed"?"rgba(255,255,255,0.06)":"rgba(245,158,11,0.1)",border:"1px solid "+(liveStatus=="live"?"rgba(0,200,83,0.3)":liveStatus=="closed"?"rgba(255,255,255,0.1)":"rgba(245,158,11,0.25)"),borderRadius:20,padding:"2px 8px",display:"flex",alignItems:"center",gap:4}}>
-            <div style={{width:5,height:5,borderRadius:"50%",background:liveStatus=="live"?"#00E676":liveStatus=="closed"?"#8899BB":"#F59E0B"}}></div>
-            <span style={{fontSize:7,fontWeight:700,color:liveStatus=="live"?"#00E676":liveStatus=="closed"?"#8899BB":"#F59E0B"}}>{liveStatus=="live"?"LIVE":liveStatus=="closed"?"MARKET CLOSED":"CONNECTING"}</span>
+            <div style={{width:5,height:5,borderRadius:"50%",background:liveStatus=="live"?G:liveStatus=="closed"?T2:GOLD}}></div>
+            <span style={{fontSize:7,fontWeight:700,color:liveStatus=="live"?G:liveStatus=="closed"?T2:GOLD}}>{liveStatus=="live"?"LIVE":liveStatus=="closed"?"MARKET CLOSED":"CONNECTING"}</span>
           </div>
         </div>
       ):null}
@@ -272,7 +274,7 @@ export default function MarketsScreen(props) {
                     </div>
                     <div style={{background:s.up?"rgba(0,200,83,0.15)":"rgba(239,68,68,0.15)",borderRadius:5,padding:"1px 6px",fontSize:8,fontWeight:700,color:s.up?G2:R,marginTop:2}}>{s.up?"+":""}{s.chgPct.toFixed(2)}%</div>
                   </div>
-                  <span style={{color:"#4A5A7A",fontSize:14}}>&#8250;</span>
+                  <span style={{color:T3,fontSize:14}}>&#8250;</span>
                 </div>
               );
             })}
@@ -385,7 +387,7 @@ export default function MarketsScreen(props) {
                       </div>
                     </div>
                     <div style={{textAlign:"right"}}>
-                      <div style={{fontSize:13,fontWeight:800,color:"#60A5FA"}}>{s.vol}{s.volUnit}</div>
+                      <div style={{fontSize:13,fontWeight:800,color:BLUE}}>{s.vol}{s.volUnit}</div>
                       <div style={{fontSize:9,fontWeight:700,color:s.up?G2:R}}>{s.up?"+":""}{s.chgPct}%</div>
                     </div>
                   </div>
@@ -403,12 +405,12 @@ export default function MarketsScreen(props) {
       {activeTab=="delivery"?(
         <div style={{padding:"10px 14px"}}>
           <div style={{background:"rgba(139,92,246,0.08)",border:"1px solid rgba(139,92,246,0.2)",borderRadius:10,padding:"8px 12px",marginBottom:10}}>
-            <div style={{fontSize:9,color:"#A78BFA"}}>High delivery % = strong institutional interest. Above 50% is bullish signal.</div>
+            <div style={{fontSize:9,color:BLUE}}>High delivery % = strong institutional interest. Above 50% is bullish signal.</div>
           </div>
           <div style={{background:CB,border:"1px solid "+BD,borderRadius:12,overflow:"hidden"}}>
             {DELIVERY.map(function(s,i){
               var barW = Math.round(s.delPct);
-              var col = s.delPct>65?"#22C55E":s.delPct>45?"#60A5FA":"#F59E0B";
+              var col = s.delPct>65?G:s.delPct>45?BLUE:GOLD;
               return (
                 <div key={s.sym} style={{padding:"10px 14px",borderBottom:i<DELIVERY.length-1?"1px solid "+BD:"none",cursor:"pointer"}} onClick={function(){setSelStock(s);}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>

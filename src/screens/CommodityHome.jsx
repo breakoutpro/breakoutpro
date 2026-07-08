@@ -70,9 +70,10 @@ export default function CommodityHome(props){
   var [selComm,setSelComm]=useState(null);
 
   useEffect(function(){
+    // SAFETY PATCH: fake commodity price ticking (Math.random) removed -
+    // this screen's prices are demo/simulated. Clock update kept (real).
     var t=setInterval(function(){
       setTime(new Date());
-      setComms(function(prev){return prev.map(function(c){var chg=(Math.random()-0.48)*c.ltp*0.003;var nl=parseFloat((c.ltp+chg).toFixed(2));return Object.assign({},c,{ltp:nl,spark:c.spark.slice(-19).concat([nl]),up:nl>=c.ltp});});});
     },3000);
     return function(){clearInterval(t);};
   },[]);
@@ -86,6 +87,10 @@ export default function CommodityHome(props){
 
       {/* Header */}
       <div style={{background:"linear-gradient(180deg,#1A1208,"+BG+")",padding:"12px 16px",borderBottom:"1px solid "+BD}}>
+        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
+          <span style={{fontSize:7.5,fontWeight:800,color:GOLD,background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.3)",padding:"2px 7px",borderRadius:5,letterSpacing:0.5}}>DEMO DATA</span>
+          <span style={{fontSize:8,color:T3}}>Simulated commodity prices for preview. Not live market values.</span>
+        </div>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <button onClick={function(){
@@ -152,7 +157,10 @@ export default function CommodityHome(props){
 
         {/* 2. Top Commodity Alerts */}
         <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:"12px 14px",marginBottom:12}}>
-          <div style={{fontSize:9,fontWeight:700,color:T3,letterSpacing:0.8,marginBottom:10}}>TOP COMMODITY ALERTS</div>
+          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
+            <span style={{fontSize:9,fontWeight:700,color:T3,letterSpacing:0.8}}>TOP COMMODITY ALERTS</span>
+            <span style={{fontSize:7,fontWeight:800,color:GOLD,background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.3)",padding:"1px 6px",borderRadius:5}}>SAMPLE</span>
+          </div>
           {ALERTS.map(function(a,i){
             return (
               <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderBottom:i<ALERTS.length-1?"1px solid "+BD:"none"}}>
@@ -168,7 +176,10 @@ export default function CommodityHome(props){
 
         {/* 3. High Impact News */}
         <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:"12px 14px",marginBottom:12}}>
-          <div style={{fontSize:9,fontWeight:700,color:T3,letterSpacing:0.8,marginBottom:10}}>HIGH IMPACT NEWS</div>
+          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
+            <span style={{fontSize:9,fontWeight:700,color:T3,letterSpacing:0.8}}>HIGH IMPACT NEWS</span>
+            <span style={{fontSize:7,fontWeight:800,color:GOLD,background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.3)",padding:"1px 6px",borderRadius:5}}>SAMPLE</span>
+          </div>
           {NEWS.map(function(n,i){
             return (
               <div key={i} style={{display:"flex",gap:8,marginBottom:i<NEWS.length-1?10:0,alignItems:"flex-start"}}>

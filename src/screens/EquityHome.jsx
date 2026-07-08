@@ -1,29 +1,25 @@
 import { useState, useEffect } from "react";
-import IndexDetail from "./IndexDetail";
-import { MiniChart, genSpark, INDICES, LARGECAP, MIDCAP, SECTORS, GAINERS, LOSERS, GLOBAL, getSession } from "./HomeData";
-import HomeBottom from "./HomeBottom";
+import { t } from "../i18n/translations";
+import HomeLearnCards from "./HomeLearnCards";
+import LearnTopicPage from "./LearnTopicPage";
+import IndexFullPage from "./IndexFullPage";
+import { MiniChart, genSpark, INDICES, getSession } from "./HomeData";
 import MorningPulse from "./MorningPulse";
-import { AIBriefingCard } from "../components/HomeNewsHeatmap";
 import { useStreak } from "../hooks/useStreak";
-import TradingSignals from "./TradingSignals";
 import MarketMoodCard from "./MarketMoodCard";
-import HomeLower from "../components/HomeLower";
+import HomeMarketIntel from "./HomeMarketIntel";
+import OptionsIntel from "./OptionsIntel";
+import FuturesIntel, { GammaBlast } from "./FuturesIntel";
+import OptionsIntelPage from "./OptionsIntelPage";
+import HomeQuickTools from "./HomeQuickTools";
 import ArticlePage from "./ArticlePage";
 import { JUSTIN } from "./JustInData";
 
-var BG="#050505",CARD="#101318",BD="#1B2330";
+var BG="#000000",CARD="#101318",BD="#1B2330";
 var BLUE="#3B82F6",CYAN="#60A5FA",PROBLUE="#60A5FA";
 var UP="#22C55E",DOWN="#EF4444",GOLD="#D4AF37";
 var T1="#FFFFFF",T2="#A0A7B4",T3="#5B6472";
 var CARDBORDER="#1B2330";
-
-var ALERT_CARDS=[
-  {type:"Breakout Alert",sym:"RELIANCE",time:"9:42 AM",col:UP},
-  {type:"Doji Pattern",sym:"NIFTY50",time:"9:51 AM",col:T2},
-  {type:"Volume Spike",sym:"TATASTEEL",time:"10:03 AM",col:UP},
-  {type:"All Time High",sym:"TCS",time:"10:11 AM",col:UP},
-  {type:"OI Build-up",sym:"BANKNIFTY",time:"10:18 AM",col:T2},
-];
 
 var TICKER=JUSTIN.map(function(n){return n.headline;});
 
@@ -31,12 +27,14 @@ export default function EquityHome(props){
   var setTab=props.setTab||function(){};
   var isPrem=props.isPrem||false;
   var [sess,setSess]=useState(getSession());
-  var [indices,setIndices]=useState(function(){return INDICES.map(function(x){return Object.assign({},x,{ltp:x.base,spark:genSpark(x.base)});});});
+  var [indices,setIndices]=useState(function(){var keep=["NIFTY 50","BANK NIFTY","SENSEX","MIDCAP 50"];return INDICES.filter(function(x){return keep.indexOf(x.label)!=-1;}).map(function(x){return Object.assign({},x,{ltp:x.base,spark:genSpark(x.base)});});});
   var [selIdx,setSelIdx]=useState(null);
   var [mood,setMood]=useState({bull:72,fg:68,conf:82,trend:"Up"});
   var [showBriefing,setShowBriefing]=useState(false);
   var [tickerIdx,setTickerIdx]=useState(0);
   var [selArticle,setSelArticle]=useState(null);
+  var [showOptions,setShowOptions]=useState(false);
+  var [learnTopic,setLearnTopic]=useState(null);
   var streakData=useStreak();
   var isEvening=new Date().getHours()>=16;
 
@@ -50,7 +48,9 @@ export default function EquityHome(props){
     return function(){clearInterval(t);clearInterval(tk);};
   },[]);
 
-  if(selIdx) return <IndexDetail idx={selIdx} onBack={function(){setSelIdx(null);}} setTab={setTab}/>;
+  if(selIdx) return <IndexFullPage idx={selIdx} onBack={function(){setSelIdx(null);}} setTab={setTab}/>;
+  if(showOptions) return <OptionsIntelPage symbol="NIFTY" onBack={function(){setShowOptions(false);}}/>;
+  if(learnTopic) return <LearnTopicPage id={learnTopic} setTab={setTab} onBack={function(){setLearnTopic(null);}}/>;
   if(selArticle) return (
     <ArticlePage
       article={selArticle}
@@ -75,7 +75,7 @@ export default function EquityHome(props){
       <div style={{background:BG,borderBottom:"1px solid "+BD,padding:"12px 14px"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <button onClick={function(){setTab("more");}} style={{background:"none",border:"none",padding:4,cursor:"pointer",flexShrink:0}}>
+            <button onClick={function(){ if(props.onMenu){props.onMenu();} else {setTab("more");} }} style={{background:"none",border:"none",padding:4,cursor:"pointer",flexShrink:0}}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={T1} strokeWidth="2.2" strokeLinecap="round">
                 <line x1="3" y1="6" x2="21" y2="6"/>
                 <line x1="3" y1="12" x2="21" y2="12"/>
@@ -85,6 +85,7 @@ export default function EquityHome(props){
             <div style={{fontSize:22,fontWeight:900,letterSpacing:-0.5}}>
               <span style={{color:T1}}>Breakout</span><span style={{color:PROBLUE}}>Pro</span>
             </div>
+            <MarketBadge/>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:14,flexShrink:0}}>
             <button onClick={function(){setTab("search");}} style={{background:"none",border:"none",padding:3,cursor:"pointer"}}>
@@ -111,7 +112,7 @@ export default function EquityHome(props){
       </div>
 
       {/* JUST IN - Moneycontrol style red ticker, 10s auto rotate, tap to full article */}
-      <div onClick={function(){setSelArticle(JUSTIN[tickerIdx]);}} style={{background:"#0A0D12",borderBottom:"1px solid "+BD,display:"flex",alignItems:"stretch",overflow:"hidden",cursor:"pointer"}}>
+      <div onClick={function(){setSelArticle(JUSTIN[tickerIdx]);}} style={{background:"#0B0E13",borderBottom:"1px solid "+BD,display:"flex",alignItems:"stretch",overflow:"hidden",cursor:"pointer"}}>
         <div style={{background:"#EF4444",padding:"5px 8px",display:"flex",alignItems:"center",flexShrink:0}}>
           <span style={{width:4,height:4,borderRadius:"50%",background:"#fff",marginRight:5,animation:"pulse-dot 1.4s infinite"}}/>
           <span style={{fontSize:8,fontWeight:800,color:"#fff",letterSpacing:0.6,whiteSpace:"nowrap"}}>JUST IN</span>
@@ -125,8 +126,24 @@ export default function EquityHome(props){
       {/* TODAY'S GAME PLAN - 30 second market mood */}
       <MarketMoodCard setTab={setTab}/>
 
+      {/* QUICK ACTIONS */}
+      <div style={{display:"flex",gap:8,padding:"12px 14px 0"}}>
+        {[["Scanner","scan","&#128269;"],["Watchlist","watchlist","&#11088;"],["Alerts","alerts","&#128276;"],["News","news","&#128240;"]].map(function(q){
+          return (
+            <button key={q[1]} onClick={function(){setTab(q[1]);}} style={{flex:1,background:CARD,border:"1px solid "+BD,borderRadius:12,padding:"11px 4px",display:"flex",flexDirection:"column",alignItems:"center",gap:5,cursor:"pointer",fontFamily:"inherit"}}>
+              <span style={{fontSize:17}} dangerouslySetInnerHTML={{__html:q[2]}}/>
+              <span style={{fontSize:9,fontWeight:700,color:T2}}>{q[0]}</span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* MARKET DASHBOARD - index cards scroll */}
       <div style={{padding:"12px 0 0"}}>
+        <div style={{display:"flex",alignItems:"center",gap:6,padding:"0 14px 6px"}}>
+          <span style={{fontSize:7.5,fontWeight:800,color:GOLD,background:"rgba(212,175,55,0.12)",border:"1px solid rgba(212,175,55,0.3)",padding:"2px 7px",borderRadius:5,letterSpacing:0.5}}>DEMO DATA</span>
+          <span style={{fontSize:8,color:T3}}>Simulated for preview. Not live market values.</span>
+        </div>
         <div style={{display:"flex",gap:10,overflowX:"auto",padding:"0 14px 4px",WebkitOverflowScrolling:"touch"}}>
           {indices.map(function(idx){return(
             <div key={idx.label} onClick={function(){setSelIdx(idx);}} style={{background:CARD,border:"1px solid "+BD,borderRadius:12,padding:"12px",flexShrink:0,minWidth:120,cursor:"pointer"}}>
@@ -141,49 +158,80 @@ export default function EquityHome(props){
         </div>
       </div>
 
-      {/* TRADING SIGNALS */}
-      <TradingSignals setTab={setTab}/>
+      {/* MARKET INTELLIGENCE - merged FII/DII + breadth + sector + global */}
+      <div style={{marginTop:18}}>
+        <HomeMarketIntel setTab={setTab}/>
+      </div>
 
-      {/* SMART ALERTS */}
-      <div style={{padding:"14px 14px 0"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:9}}>
-          <span style={{fontSize:13,fontWeight:800,color:T1}}>Smart Alerts</span>
-          <button onClick={function(){setTab("alerts");}} style={{background:"none",border:"none",color:PROBLUE,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>View All &#8594;</button>
+      {/* OPTIONS INTELLIGENCE - hero premium feature */}
+      <div style={{marginTop:18}}>
+        <OptionsIntel symbol="NIFTY" onOpen={function(){setShowOptions(true);}}/>
+      </div>
+
+      {/* FUTURES INTELLIGENCE */}
+      <div style={{marginTop:18}}>
+        <FuturesIntel symbol="NIFTY"/>
+      </div>
+
+      {/* GAMMA BLAST SCANNER (Premium) */}
+      <div style={{marginTop:18}}>
+        <GammaBlast symbol="NIFTY"/>
+      </div>
+
+      {/* LEARN AND INVEST */}
+      <div style={{marginTop:18}}>
+        <HomeLearnCards setTab={setTab} onTopic={function(id){setLearnTopic(id);}}/>
+      </div>
+
+      {/* LIVE MARKET NEWS - top 5 clean cards */}
+      <div style={{marginTop:18,padding:"0 14px"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+          <span style={{fontSize:14,fontWeight:800,color:T1}}>{t("top_news")}</span>
+          <button onClick={function(){setTab("news");}} style={{background:"none",border:"none",color:CYAN,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>View All &#8594;</button>
         </div>
-        <div style={{display:"flex",gap:9,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
-          {ALERT_CARDS.map(function(a){return(
-            <div key={a.sym+a.type} onClick={function(){setTab("alerts");}} style={{background:CARD,border:"1px solid "+BD,borderRadius:12,padding:"11px 13px",minWidth:130,flexShrink:0,cursor:"pointer"}}>
-              <div style={{fontSize:8.5,color:a.col,fontWeight:700,marginBottom:5}}>{a.type}</div>
-              <div style={{fontSize:13,fontWeight:800,color:T1,marginBottom:3}}>{a.sym}</div>
-              <div style={{fontSize:9,color:T3}}>{a.time}</div>
-            </div>
-          );})}
+        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:12,overflow:"hidden"}}>
+          {JUSTIN.slice(0,5).map(function(n,i){
+            var ic=n.impact=="Bullish"?UP:n.impact=="Bearish"?DOWN:T2;
+            return (
+              <div key={n.id} onClick={function(){setSelArticle(n);}} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 13px",borderBottom:i<4?"1px solid "+BD:"none",cursor:"pointer"}}>
+                <div style={{width:3,height:34,background:ic,borderRadius:2,flexShrink:0,opacity:0.8}}></div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:11,fontWeight:600,color:T1,lineHeight:1.4,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{n.headline}</div>
+                  <div style={{fontSize:8.5,color:T3,marginTop:3}}>{n.source}  &#8226;  {n.time}</div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* TRENDING STOCKS */}
-      <div style={{padding:"14px 14px 0"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:9}}>
-          <span style={{fontSize:13,fontWeight:800,color:T1}}>Trending Stocks</span>
-          <button onClick={function(){setTab("markets");}} style={{background:"none",border:"none",color:PROBLUE,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>View All &#8594;</button>
-        </div>
-        <div style={{display:"flex",gap:9,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
-          {LARGECAP.concat(MIDCAP).sort(function(a,b){return Math.abs(b.pct)-Math.abs(a.pct);}).slice(0,8).map(function(s){return(
-            <div key={s.sym} onClick={function(){setTab("markets");}} style={{background:CARD,border:"1px solid "+BD,borderRadius:12,padding:"11px 13px",minWidth:100,flexShrink:0,cursor:"pointer"}}>
-              <div style={{fontSize:11,fontWeight:700,color:T1,marginBottom:4}}>{s.sym}</div>
-              <div style={{fontSize:13,fontWeight:800,color:T1,fontFamily:"monospace",marginBottom:4}}>{s.ltp.toLocaleString("en-IN",{maximumFractionDigits:1})}</div>
-              <div style={{fontSize:10.5,fontWeight:700,color:s.up?UP:DOWN}}>{s.up?"+":""}{s.pct}%</div>
-            </div>
-          );})}
-        </div>
+      {/* QUICK TOOLS */}
+      <div style={{marginTop:18}}>
+        <HomeQuickTools setTab={setTab}/>
       </div>
 
-      {/* LOWER SECTIONS */}
-      <HomeLower setTab={setTab} isPrem={isPrem} isEvening={isEvening}
-        gainers={GAINERS} losers={LOSERS} sectors={SECTORS} global={GLOBAL}
-        largecap={LARGECAP} midcap={MIDCAP}/>
+      <div style={{height:24}}></div>
 
       <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}@keyframes ticker-fade{from{opacity:0}to{opacity:1}}"}</style>
     </div>
+  );
+}
+
+// Auto market-status badge: Open / Pre-Market / Post-Market / Closed.
+function MarketBadge(){
+  var d=new Date();
+  var mins=d.getHours()*60+d.getMinutes();
+  var day=d.getDay(); // 0 Sun, 6 Sat
+  var st;
+  if(day==0||day==6){ st={label:"Closed",col:DOWN,dot:DOWN}; }
+  else if(mins>=9*60+15&&mins<15*60+30){ st={label:"Open",col:UP,dot:UP}; }
+  else if(mins>=9*60&&mins<9*60+15){ st={label:"Pre-Market",col:GOLD,dot:GOLD}; }
+  else if(mins>=15*60+30&&mins<16*60){ st={label:"Post-Market",col:BLUE,dot:BLUE}; }
+  else { st={label:"Closed",col:DOWN,dot:DOWN}; }
+  return (
+    <span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.05)",border:"1px solid "+BD,borderRadius:20,padding:"3px 8px"}}>
+      <span style={{width:6,height:6,borderRadius:"50%",background:st.dot,animation:st.label=="Open"?"pulse-dot 1.4s infinite":"none"}}></span>
+      <span style={{fontSize:8.5,fontWeight:800,color:st.col}}>{st.label}</span>
+    </span>
   );
 }

@@ -1,117 +1,162 @@
 // BreakoutPro - MarketMoodData.jsx
-// All data + logic for the premium Today's Game Plan screen.
+// Presentation/formatting helper layer ONLY for the AI Market Mood open page.
+// Owns NO score logic and NO market data of its own. Every function here takes
+// real state from useMarketMood() (data, mood, ai, session, lastUpdated) and
+// formats it for display. If real data is missing, functions return an
+// "unavailable" shape - they never invent numbers, levels, news, or claims.
+// Score/stage/confidence ownership stays exclusively in MarketMoodEngine.js.
 // Rules: no backtick, no triple-equals, ASCII only.
 
-// Theme tokens shared across mood parts.
+// Theme tokens (style constants only - not market data).
 export var MT = {
-  BG:"#050505", CARD:"#0A0F1A", CARD2:"#101827", BD:"#1E293B",
-  T1:"#FFFFFF", T2:"#9CA3AF", BLUE:"#3B82F6",
+  BG:"#000000", CARD:"#101318", CARD2:"#0B0E13", BD:"#1B2330",
+  T1:"#FFFFFF", T2:"#A0A7B4", T3:"#5B6472", BLUE:"#3B82F6", CYAN:"#60A5FA",
   GREEN:"#22C55E", DGREEN:"#15803D", RED:"#EF4444", DRED:"#7F1D1D",
-  YELLOW:"#F59E0B", DIV:"#1F2937"
+  GOLD:"#D4AF37", WARN:"#F97316", DIV:"#1B2330"
 };
 
-// Session phase based on IST hour.
-export function getPhase(){
-  var now=new Date();
-  var utc=now.getTime()+now.getTimezoneOffset()*60000;
-  var ist=new Date(utc+3600000*5.5);
-  var mins=ist.getHours()*60+ist.getMinutes();
-  var day=ist.getDay();
-  if(day==0||day==6) return {id:"weekend",label:"Weekend",sub:"Markets closed",dot:"#9CA3AF"};
-  if(mins<540) return {id:"premarket",label:"Pre-Market",sub:"Get ready before the open",dot:"#F59E0B"};
-  if(mins<555) return {id:"preopen",label:"Pre-Open",sub:"Pre-open session live",dot:"#F59E0B"};
-  if(mins<930) return {id:"live",label:"Market Live",sub:"NSE and BSE are open",dot:"#22C55E"};
-  return {id:"closed",label:"Market Closed",sub:"See you tomorrow at 9:15 AM",dot:"#EF4444"};
+// --- Session (market hours) presentation. Session string comes from the
+// server (api/market-mood-data.js), which computes it honestly from IST time.
+var SESSION_META = {
+  OPEN:       { label:"Market Live",  sub:"NSE and BSE are open",         dot:MT.GREEN },
+  PRE_OPEN:   { label:"Pre-Open",     sub:"Pre-open session in progress", dot:MT.GOLD },
+  POST_CLOSE: { label:"Post Close",   sub:"Session ended, settling",      dot:MT.T3 },
+  CLOSED:     { label:"Market Closed",sub:"Outside trading hours",        dot:MT.T3 },
+  WEEKEND:    { label:"Weekend",      sub:"Markets closed",               dot:MT.T3 }
+};
+export function getSessionMeta(session){
+  return SESSION_META[session] || { label:"Unknown", sub:"Session status unavailable", dot:MT.T3 };
 }
 
-export var OVERNIGHT = [
-  {name:"Dow Jones",  val:"38,654", chg:"+0.82%", up:true},
-  {name:"Nasdaq",     val:"16,234", chg:"+1.24%", up:true},
-  {name:"GIFT Nifty", val:"23,910", chg:"+0.36%", up:true},
-  {name:"Crude Oil",  val:"82.34",  chg:"+1.23%", up:true},
-  {name:"Dollar Index",val:"104.2", chg:"-0.18%", up:false},
-];
-
-export var LEVELS = [
-  {name:"NIFTY",    ltp:"23,824", r2:"24,010", r1:"23,920", piv:"23,780", s1:"23,690", s2:"23,560"},
-  {name:"BANKNIFTY",ltp:"51,240", r2:"51,800", r1:"51,520", piv:"51,100", s1:"50,820", s2:"50,500"},
-  {name:"SENSEX",   ltp:"76,688", r2:"77,200", r1:"76,950", piv:"76,400", s1:"76,100", s2:"75,700"},
-];
-
-export var NEWS_POS = [
-  {sym:"RELIANCE", note:"Crude prices softened overnight"},
-  {sym:"TCS",      note:"Nasdaq strength positive for IT"},
-  {sym:"HDFCBANK", note:"FII inflows remain strong"},
-];
-
-export var NEWS_NEG = [
-  {sym:"TATASTEEL", note:"Weak China sentiment"},
-  {sym:"BPCL",      note:"Crude oil rise negative"},
-  {sym:"INDUSINDBK",note:"RBI concerns weigh"},
-];
-
-export var SECTORS = [
-  {name:"IT",      mood:"bull"},
-  {name:"BANKING", mood:"bull"},
-  {name:"PHARMA",  mood:"neutral"},
-  {name:"AUTO",    mood:"bull"},
-  {name:"METAL",   mood:"bear"},
-  {name:"FMCG",    mood:"neutral"},
-];
-
-export var WATCH = [
-  {sym:"RELIANCE", setup:"Bullish", note:"Near breakout above 2,860", up:true},
-  {sym:"HDFCBANK", setup:"Neutral", note:"Coiling near resistance",   up:true},
-  {sym:"TCS",      setup:"Bullish", note:"IT strength, volume rising", up:true},
-];
-
-export var PLAN = [
-  {cond:"Above 23,920", act:"Bullish continuation", color:"#22C55E"},
-  {cond:"Below 23,780", act:"Weakness possible",    color:"#EF4444"},
-  {cond:"Sideways",     act:"Range-bound market",   color:"#F59E0B"},
-];
-
-export var METRICS = [
-  {label:"Mood",  val:"Bullish", color:"#22C55E"},
-  {label:"F&G",   val:"78",      color:"#FFFFFF"},
-  {label:"FII",   val:"Net Buy", color:"#FFFFFF"},
-  {label:"Trend", val:"Up",      color:"#FFFFFF"},
-  {label:"Conf",  val:"86%",     color:"#60A5FA"},
-];
-
-export function computeMood(){
-  var ups=0,i;
-  for(i=0;i<OVERNIGHT.length;i++){ if(OVERNIGHT[i].up) ups=ups+1; }
-  var ratio=ups/OVERNIGHT.length;
-  var score=Math.round(60+ratio*35);
-  if(ratio>=0.6) return {label:"Bullish",color:MT.GREEN,score:score,gapText:"Gap-up opening likely"};
-  if(ratio<=0.4) return {label:"Bearish",color:MT.RED,score:Math.round(100-score),gapText:"Gap-down opening likely"};
-  return {label:"Neutral",color:MT.YELLOW,score:score,gapText:"Flat to range-bound open"};
+// --- Freshness / data-honesty labels. Every real value must carry one of
+// these; never render a number without a status next to it.
+var FRESHNESS_META = {
+  LIVE:        { text:"LIVE",        color:MT.GREEN },
+  DELAYED:     { text:"DELAYED",     color:MT.GOLD },
+  STALE:       { text:"STALE",       color:MT.WARN },
+  PARTIAL:     { text:"PARTIAL",     color:MT.GOLD },
+  OFFLINE:     { text:"OFFLINE",     color:MT.T3 },
+  UNAVAILABLE: { text:"UNAVAILABLE", color:MT.T3 }
+};
+export function getFreshnessMeta(status){
+  return FRESHNESS_META[status] || FRESHNESS_META.UNAVAILABLE;
 }
 
-export function getVerdict(){
-  var mood=computeMood();
-  var n=LEVELS[0];
-  if(mood.label=="Bullish") return "Global cues positive. Gap-up opening likely. Watch NIFTY above "+n.piv+" for upside towards "+n.r1+".";
-  if(mood.label=="Bearish") return "Global cues weak. Gap-down likely. NIFTY may test "+n.s1+" if "+n.piv+" breaks.";
-  return "Mixed global cues. Flat open likely. NIFTY range "+n.s1+" to "+n.r1+" today.";
+// --- Number formatting (pure formatting, no invented values). ---
+export function formatIndexValue(v){
+  if(v==null) return "--";
+  try{ return Number(v).toLocaleString("en-IN", { maximumFractionDigits:2 }); }
+  catch(e){ return String(Math.round(v*100)/100); }
+}
+export function formatPct(v){
+  if(v==null) return "--";
+  var n = Math.round(v*100)/100;
+  return (n>=0?"+":"") + n + "%";
 }
 
-export function getGreetingLine(){
-  var mood=computeMood();
-  return mood.gapText+"  &#8226;  "+WATCH.length+" stocks near breakout";
+// --- Build one real index row from data.indices[key]. Returns null shape
+// (available:false) if the server marked it unavailable - never fabricated.
+export function buildIndexRow(name, idxData){
+  if(!idxData || idxData.ltp==null || !idxData.freshness){
+    return { available:false, name:name };
+  }
+  var fresh = getFreshnessMeta(idxData.freshness.status);
+  return {
+    available:true,
+    name:name,
+    ltp:formatIndexValue(idxData.ltp),
+    chgPct:formatPct(idxData.chgPct),
+    up: idxData.chgPct!=null ? idxData.chgPct>=0 : null,
+    freshnessText:fresh.text,
+    freshnessColor:fresh.color
+  };
 }
 
-// Build the 30-second voice summary text.
-export function getVoiceSummary(){
-  var mood=computeMood();
-  var n=LEVELS[0];
-  var parts=[];
-  parts.push(mood.label=="Bullish"?"Global markets were positive overnight.":mood.label=="Bearish"?"Global markets were weak overnight.":"Global markets were mixed overnight.");
-  parts.push("GIFT Nifty indicates a "+(mood.label=="Bearish"?"gap-down":"gap-up")+" opening.");
-  parts.push("FII flows remain strong.");
-  parts.push("IT and Banking sectors are showing strength.");
-  parts.push("Watch Nifty above "+n.r1+".");
-  parts.push("Reliance, HDFC Bank and TCS are near breakout.");
+// --- 3-Day Evolution / Market Stage Timeline material, built only from the
+// real context3d block returned by the server (daily candle history).
+export function buildEvolution(data){
+  var ctx = data && data.context3d;
+  if(!ctx || ctx.return3dPct==null){
+    return { available:false };
+  }
+  var structure = [];
+  if(ctx.higherHighs) structure.push("Higher highs");
+  if(ctx.lowerLows) structure.push("Lower lows");
+  if(ctx.rangeCompressing) structure.push("Range compressing");
+  if(!structure.length) structure.push("No clear structure signal");
+  return {
+    available:true,
+    return3dPct:formatPct(ctx.return3dPct),
+    structure:structure,
+    sessions:ctx.sessions,
+    note:ctx.note || "",
+    status:ctx.status || "DELAYED" // daily candles are prior-session based, never LIVE
+  };
+}
+
+// --- Sections with no verified provider yet (sectors, global, breadth,
+// events). These must render an honest UNAVAILABLE card, never a fake one.
+// When a real provider is added (Step 5), the corresponding api field will
+// carry real values + a real freshness status, and this helper will pass
+// them through unchanged instead of returning available:false.
+export function buildUnverifiedSection(dataBlock){
+  if(!dataBlock || dataBlock.status=="UNAVAILABLE" || !dataBlock.items){
+    return { available:false };
+  }
+  return { available:true, items:dataBlock.items, status:dataBlock.status };
+}
+
+// Sector Rotation wording ("Leading Today" / "Lagging Today") must only be
+// derived mathematically from the same real dataset - a simple sort by
+// change percent, not a claim about institutional flows.
+export function rankSectors(items){
+  if(!items || !items.length) return [];
+  var sorted = items.slice().sort(function(a,b){
+    var av = a.chgPct==null?-999:a.chgPct, bv = b.chgPct==null?-999:b.chgPct;
+    return bv-av;
+  });
+  return sorted.map(function(s,i){
+    var tag = "";
+    if(i==0 && s.chgPct!=null) tag = "Leading Today";
+    else if(i==sorted.length-1 && s.chgPct!=null) tag = "Lagging Today";
+    return { name:s.name, chgPct:s.chgPct, up:s.up, freshness:s.freshness, tag:tag };
+  });
+}
+
+// VIX history sparkline data - only real daily closes, never invented.
+export function buildVixHistory(vh){
+  if(!vh || !vh.points || !vh.points.length){
+    return { available:false };
+  }
+  return { available:true, points:vh.points, sessions:vh.sessions, status:vh.status || "DELAYED" };
+}
+// the deterministic engine (mood) and the grounded AI synthesis (ai).
+// No invented prices, levels, FII data, or stock calls. Falls back to a
+// plain, honest sentence when AI commentary has not arrived yet.
+export function buildSummaryLine(mood, session){
+  if(!mood || mood.score==null){
+    return "Market mood data unavailable right now.";
+  }
+  var sMeta = getSessionMeta(session);
+  return mood.label + " (" + mood.score + "), stage: " + mood.stage + ". " + sMeta.label + ".";
+}
+
+export function buildVoiceSummary(mood, ai, session){
+  if(!mood || mood.score==null){
+    return "Market mood data is not available right now. Please check back shortly.";
+  }
+  var parts = [];
+  var sMeta = getSessionMeta(session);
+  parts.push(sMeta.label + ".");
+  parts.push("Deterministic market mood reading: " + mood.label + ", score " + mood.score + " out of 100.");
+  parts.push("Current stage: " + mood.stage + ". Confidence: " + mood.confidence + ".");
+  if(ai && ai.now){ parts.push(ai.now); }
+  if(ai && ai.keyDrivers && ai.keyDrivers.length){
+    parts.push("Key drivers: " + ai.keyDrivers.join(", ") + ".");
+  }
+  if(mood.unavailableComponents && mood.unavailableComponents.length){
+    parts.push("Not counted due to missing data: " + mood.unavailableComponents.join(", ") + ".");
+  }
+  parts.push("This is an educational market observation, not investment advice.");
   return parts.join(" ");
 }

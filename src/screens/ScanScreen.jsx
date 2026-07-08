@@ -1,71 +1,86 @@
-var DB="#0A0E1A",CB="#0F1629",BD="#1E2D4A",BLUE="#3B82F6",BLUE2="#60A5FA";
-var T1="#FFFFFF",T2="#8899BB",T3="#475569";
+import { useState } from "react";
+import { SECTIONS, getScanResults } from "./ScannerData";
+import { hasAccess } from "../i18n/translations";
+import ScannerDetailPro from "./ScannerDetailPro";
 
-var SVGS = {
-  alerts:     "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#60A5FA' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9'/><path d='M13.73 21a2 2 0 0 1-3.46 0'/></svg>",
-  chart:      "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#60A5FA' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><polyline points='22 12 18 12 15 21 9 3 6 12 2 12'/></svg>",
-  scalper:    "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#60A5FA' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><polygon points='13 2 3 14 12 14 11 22 21 10 12 10 13 2'/></svg>",
-  analysis:   "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#60A5FA' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><line x1='18' y1='20' x2='18' y2='10'/><line x1='12' y1='20' x2='12' y2='4'/><line x1='6' y1='20' x2='6' y2='14'/></svg>",
-  patterns:   "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#60A5FA' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><rect x='2' y='3' width='4' height='18'/><rect x='10' y='8' width='4' height='13'/><rect x='18' y='5' width='4' height='16'/></svg>",
-  detector:   "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#60A5FA' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='11' cy='11' r='8'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>",
-  heatmap:    "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#60A5FA' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><rect x='3' y='3' width='7' height='7'/><rect x='14' y='3' width='7' height='7'/><rect x='3' y='14' width='7' height='7'/><rect x='14' y='14' width='7' height='7'/></svg>",
-  fiidii:     "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#60A5FA' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><rect x='2' y='7' width='20' height='14' rx='2'/><path d='M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2'/></svg>",
-  global:     "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#60A5FA' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='12' r='10'/><line x1='2' y1='12' x2='22' y2='12'/><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'/></svg>",
-  candle:     "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#60A5FA' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><rect x='4' y='6' width='4' height='12' rx='1'/><line x1='6' y1='2' x2='6' y2='6'/><line x1='6' y1='18' x2='6' y2='22'/><rect x='16' y='4' width='4' height='10' rx='1'/><line x1='18' y1='2' x2='18' y2='4'/><line x1='18' y1='14' x2='18' y2='22'/></svg>",
-  breakdown:  "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#EF4444' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><polyline points='23 18 13.5 8.5 8.5 13.5 1 6'/><polyline points='17 18 23 18 23 12'/></svg>",
-  volspike:   "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#F97316' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><line x1='12' y1='2' x2='12' y2='6'/><line x1='12' y1='18' x2='12' y2='22'/><path d='M4.93 4.93l2.83 2.83'/><path d='M16.24 16.24l2.83 2.83'/><line x1='2' y1='12' x2='6' y2='12'/><line x1='18' y1='12' x2='22' y2='12'/><path d='M4.93 19.07l2.83-2.83'/><path d='M16.24 7.76l2.83-2.83'/></svg>",
-  gap:        "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#F59E0B' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><line x1='17' y1='7' x2='7' y2='17'/><polyline points='17 17 7 17'/><polyline points='7 7 17 7'/></svg>",
-  rsiscan:    "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#8B5CF6' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M2 12 Q6 4 10 12 Q14 20 18 12 Q20 8 22 12'/></svg>",
-  macdscan:   "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#3B82F6' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M2 16 Q7 6 12 12 Q17 18 22 8'/><line x1='2' y1='12' x2='22' y2='12'/></svg>",
-  supertrend: "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#06B6D4' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M3 12h4l3-9 4 18 3-9h4'/></svg>",
-  orb:        "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#10B981' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='12' r='2'/><circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='10'/></svg>",
-};
+// BreakoutPro - ScanScreen.jsx (Scanner Hub)
+// 8 sections, premium cards, each opens a detail page. SEBI-safe (no buy/sell).
+// Pure black, blue accent, green/red direction. Rules: no backtick, no triple-equals, ASCII.
 
-var SCAN_ITEMS = [
-  {id:"alerts",   label:"Live Alerts",        sub:"Breakout, Pattern, Volume alerts",        col:"#EF4444"},
-  {id:"chart",    label:"Chart Engine",        sub:"60fps professional chart",                col:"#3B82F6"},
-  {id:"scalper",  label:"Scalper Mode",        sub:"EMA, VWAP, CPR, RSI signals",            col:"#F59E0B"},
-  {id:"analysis", label:"Market Analysis",     sub:"Indices + 20 stocks deep dive",          col:"#8B5CF6"},
-  {id:"patterns", label:"Chart Patterns",      sub:"20 patterns with SVG visuals",           col:"#06B6D4"},
-  {id:"detector", label:"Candle Detector",     sub:"12 candlestick patterns offline",        col:"#10B981"},
-  {id:"heatmap",  label:"Heatmap",             sub:"NIFTY 50 sector color blocks",           col:"#F97316"},
-  {id:"fiidii",   label:"FII / DII",           sub:"Institutional buying & selling",         col:"#6366F1"},
-  {id:"global",   label:"Global Markets",      sub:"Dow, Nasdaq, Gold, Crude, DXY",         col:"#60A5FA"},
-  {id:"candle",   label:"Candle Library",      sub:"Learn 23 candlestick patterns",          col:"#A78BFA"},
-  {id:"breakdown",label:"Breakdown Scanner",   sub:"Stocks breaking key support levels",     col:"#EF4444"},
-  {id:"volspike", label:"Volume Spike",        sub:"Unusual volume activity detection",      col:"#F97316"},
-  {id:"gap",      label:"Gap Up / Gap Down",   sub:"Opening gap analysis & targets",         col:"#F59E0B"},
-  {id:"rsiscan",  label:"RSI Scanner",         sub:"Overbought & oversold stocks",           col:"#8B5CF6"},
-  {id:"macdscan", label:"MACD Scanner",        sub:"MACD crossover signals",                 col:"#3B82F6"},
-  {id:"supertrend",label:"Supertrend Scanner", sub:"Supertrend buy/sell signals",            col:"#06B6D4"},
-  {id:"orb",      label:"ORB Scanner",         sub:"Opening Range Breakout setups",          col:"#10B981"},
-];
+var BG="#050505",CARD="#101318",CARD2="#0B0E13",BD="#1B2330",BD2="#141821";
+var UP="#22C55E",DOWN="#EF4444",BLUE="#3B82F6",CYAN="#60A5FA",GOLD="#D4AF37";
+var T1="#FFFFFF",T2="#A0A7B4",T3="#5B6472";
 
-export default function ScanScreen(props) {
-  var setTab = props.setTab || function(){};
+// icon glyphs per section (HTML entities).
+var SEC_ICON=["&#128202;","&#128200;","&#127919;","&#129302;","&#128218;","&#128176;","&#129518;","&#128640;"];
+
+export default function ScanScreen(props){
+  var setTab=props.setTab||function(){};
+  var [scan,setScan]=useState(null);
+  var prem=hasAccess();
+
+  if(scan) return <ScannerDetailPro item={scan} onBack={function(){setScan(null);}} onStock={function(s){ if(props.onStock){props.onStock(s);} else {setTab("markets");} }}/>;
+
+  function openItem(it){
+    if(it.kind=="tab"){ setTab(it.tab); return; }
+    if(it.kind=="calc"){ setTab("tools"); return; }
+    setScan(it); // scan kind opens detail page
+  }
+
   return (
-    <div style={{background:DB,minHeight:"100vh",paddingBottom:80,fontFamily:"Inter,Arial,sans-serif"}}>
-      <div style={{background:"linear-gradient(135deg,#0F1629,#0A1525)",padding:"20px 16px 14px",borderBottom:"1px solid "+BD}}>
-        <div style={{fontSize:22,fontWeight:900,color:"#FFFFFF"}}>Scanner <span style={{color:BLUE2}}>& Tools</span></div>
-        <div style={{fontSize:11,color:T2,marginTop:3,letterSpacing:0.3}}>Trading signals, charts & analysis tools</div>
+    <div style={{background:BG,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:90}}>
+      <div style={{background:BG,padding:"14px 14px 12px",borderBottom:"1px solid "+BD,position:"sticky",top:0,zIndex:10}}>
+        <div style={{fontSize:18,fontWeight:900,color:T1}}>Scanner Hub</div>
+        <div style={{fontSize:10,color:T2,marginTop:2}}>Professional market intelligence tools</div>
+        <div style={{display:"flex",alignItems:"center",gap:6,marginTop:8}}>
+          <span style={{fontSize:7.5,fontWeight:800,color:GOLD,background:"rgba(212,175,55,0.12)",border:"1px solid rgba(212,175,55,0.3)",padding:"2px 7px",borderRadius:5,letterSpacing:0.5}}>DEMO DATA</span>
+          <span style={{fontSize:8,color:T3}}>Scan results are simulated for preview. Not live market values.</span>
+        </div>
       </div>
-      <div style={{padding:"12px 14px"}}>
-        <div style={{fontSize:11,fontWeight:700,color:T3,letterSpacing:1,marginBottom:10}}>TRADING TOOLS</div>
-        <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,0.25)"}}>
-          {SCAN_ITEMS.map(function(item,i){
-            return (
-              <div key={item.id} onClick={function(){setTab(item.id);}} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 14px",borderBottom:i<SCAN_ITEMS.length-1?"1px solid rgba(30,42,77,0.6)":"none",cursor:"pointer"}}>
-                <div style={{width:40,height:40,borderRadius:12,background:item.col+"18",border:"1px solid "+item.col+"44",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} dangerouslySetInnerHTML={{__html:SVGS[item.id]||SVGS.chart}}/>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:13,fontWeight:700,color:"#FFFFFF"}}>{item.label}</div>
-                  <div style={{fontSize:10,color:T2,marginTop:2}}>{item.sub}</div>
-                </div>
-                <span style={{color:T3,fontSize:18}}>&#8250;</span>
+
+      <div style={{padding:14}}>
+        {SECTIONS.map(function(sec,si){
+          return (
+            <div key={sec.name} style={{marginBottom:22}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:11}}>
+                <span style={{fontSize:14}} dangerouslySetInnerHTML={{__html:SEC_ICON[si]||"&#128202;"}}/>
+                <span style={{fontSize:12.5,fontWeight:800,color:T1,letterSpacing:0.3}}>{sec.name}</span>
+                {sec.pro?<span style={{fontSize:7,fontWeight:800,color:GOLD,background:"rgba(212,175,55,0.12)",border:"1px solid rgba(212,175,55,0.3)",padding:"2px 6px",borderRadius:4}}>PRO</span>:null}
               </div>
-            );
-          })}
+
+              <div style={{display:"grid",gridTemplateColumns:"1fr",gap:8}}>
+                {sec.items.map(function(it){
+                  var locked=it.pro && !prem;
+                  return (
+                    <button key={it.id} onClick={function(){ if(locked){setTab("sub");return;} openItem(it); }} style={{display:"flex",alignItems:"center",gap:12,background:CARD,border:"1px solid "+BD,borderRadius:13,padding:"13px 14px",cursor:"pointer",fontFamily:"inherit",textAlign:"left",width:"100%"}}>
+                      <div style={{width:38,height:38,background:CARD2,border:"1px solid "+BD2,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                        <span style={{fontSize:15}} dangerouslySetInnerHTML={{__html:SEC_ICON[si]||"&#128202;"}}/>
+                      </div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{display:"flex",alignItems:"center",gap:6}}>
+                          <span style={{fontSize:12.5,fontWeight:700,color:T1}}>{it.title}</span>
+                          {it.pro?<span style={{fontSize:6.5,fontWeight:800,color:GOLD,background:"rgba(212,175,55,0.1)",padding:"1px 5px",borderRadius:3}}>PRO</span>:null}
+                          {it.live?<span style={{display:"inline-flex",alignItems:"center",gap:3,fontSize:6.5,fontWeight:800,color:UP,background:"rgba(34,197,94,0.1)",border:"1px solid rgba(34,197,94,0.3)",padding:"1px 5px",borderRadius:3}}><span style={{width:4,height:4,borderRadius:"50%",background:UP,display:"inline-block"}}></span>LIVE</span>:null}
+                        </div>
+                        <div style={{fontSize:9.5,color:T2,marginTop:2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{it.desc}</div>
+                      </div>
+                      {locked?
+                        <span style={{fontSize:12,flexShrink:0}} dangerouslySetInnerHTML={{__html:"&#128274;"}}/>
+                        :<span style={{fontSize:15,color:T3,flexShrink:0}}>&#8250;</span>
+                      }
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+
+        <div style={{background:"rgba(249,115,22,0.06)",border:"1px solid rgba(249,115,22,0.15)",borderRadius:10,padding:11}}>
+          <div style={{fontSize:9,color:"#F97316"}}>Educational Market Intelligence Only. Not Investment Advice.</div>
         </div>
       </div>
     </div>
   );
 }
+

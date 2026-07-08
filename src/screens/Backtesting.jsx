@@ -168,7 +168,7 @@ export default function Backtesting(props){
         <button onClick={onBack} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:32,height:32,color:T1,fontSize:14,cursor:"pointer"}}>&#8592;</button>
         <div style={{flex:1}}>
           <div style={{fontSize:18,fontWeight:900,color:T1}}>Backtesting</div>
-          <div style={{fontSize:10,color:T2}}>Test strategies on historical data  Educational only</div>
+          <div style={{fontSize:10,color:T2}}>Test strategies on simulated price data - Educational only</div>
         </div>
       </div>
 
@@ -227,6 +227,10 @@ export default function Backtesting(props){
         {/* Results */}
         {result&&(
           <div>
+            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
+              <span style={{fontSize:7.5,fontWeight:800,color:GOLD,background:"rgba(245,158,11,0.12)",border:"1px solid rgba(245,158,11,0.3)",padding:"2px 7px",borderRadius:5,letterSpacing:0.5}}>SIMULATED DATA</span>
+              <span style={{fontSize:8,color:T3}}>Results use generated price series, not real historical market prices.</span>
+            </div>
             {/* Summary Cards */}
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
               {[

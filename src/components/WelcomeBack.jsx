@@ -9,7 +9,7 @@ var UP="#22C55E",DOWN="#EF4444",BLUE="#3B82F6",CYAN="#60A5FA",T1="#FFFFFF",T2="#
 export default function WelcomeBack(props){
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
-  var BLUE = theme.c.blue, CARD = theme.c.card, CARD2 = theme.c.card2, T2 = theme.c.text2, T3 = theme.c.text3;
+  var BLUE = theme.c.blue, CARD = theme.c.card, CARD2 = theme.c.card2, T2 = theme.c.text2, T3 = theme.c.text3; T1=theme.c.text1; UP=theme.c.up;
 
   // props: name, gapText, missedAlerts (array), delta (array of {key,changePct}), summary (cached string), onContinue
   var name = props.name || "Trader";

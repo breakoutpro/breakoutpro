@@ -51,6 +51,7 @@ var RISK_REMINDERS=[
 
 export default function OptSellHub(props){
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
+  BLUE=theme.c.blue; 
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
   var BG = theme.c.bg, CARD = theme.c.card, CARD2 = theme.c.card2, GOLD = theme.c.gold, T2 = theme.c.text2, T3 = theme.c.text3; T1=theme.c.text1; UP=theme.c.up;
 
@@ -92,7 +93,7 @@ export default function OptSellHub(props){
         <div style={{display:"flex",gap:6,marginTop:12,overflowX:"auto"}}>
           {[["dash","Dashboard"],["ai","AI Commentary"],["expiry","Expiry"],["risk","Risk"]].map(function(t){
             var act=tab==t[0];
-            return <button key={t[0]} onClick={function(){setTab(t[0]);}} style={{background:act?CYAN:"rgba(255,255,255,0.05)",border:"1px solid "+(act?CYAN:BD),borderRadius:9,padding:"6px 13px",color:act?"#04060D":T2,fontSize:11,fontWeight:act?800:600,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{t[1]}</button>;
+            return <button key={t[0]} onClick={function(){setTab(t[0]);}} style={{background:act?BLUE:"rgba(255,255,255,0.05)",border:"1px solid "+(act?BLUE:BD),borderRadius:9,padding:"6px 13px",color:act?"#04060D":T2,fontSize:11,fontWeight:act?800:600,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{t[1]}</button>;
           })}
         </div>
       </div>
@@ -101,7 +102,7 @@ export default function OptSellHub(props){
         {tab=="dash"?(
           <div>
             {/* expiry countdown */}
-            <div style={{background:"linear-gradient(135deg,rgba(212,175,55,0.1),rgba(212,175,55,0.02))",border:"1px solid rgba(212,175,55,0.25)",borderRadius:13,padding:14,marginBottom:14,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div style={{background:theme.c.card,border:"1px solid rgba(212,175,55,0.25)",borderRadius:13,padding:14,marginBottom:14,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
               <div>
                 <div style={{fontSize:10,color:T2}}>Weekly Expiry Countdown</div>
                 <div style={{fontSize:13,fontWeight:800,color:GOLD,marginTop:3}}>{dte==0?"Expiry Today":dte+(dte==1?" day left":" days left")}</div>
@@ -129,7 +130,7 @@ export default function OptSellHub(props){
                   <div key={m.key} onClick={function(){setDetail(m.key);}} style={{background:CARD,border:"1px solid "+BD,borderRadius:11,padding:11,cursor:"pointer"}}>
                     <div style={{fontSize:9.5,color:T2}}>{m.label}</div>
                     <div style={{fontSize:14,fontWeight:800,color:col,marginTop:4,fontFamily:"monospace"}}>{m.val}</div>
-                    <div style={{fontSize:8,color:CYAN,marginTop:4}}>Learn &#8594;</div>
+                    <div style={{fontSize:8,color:BLUE,marginTop:4}}>Learn &#8594;</div>
                   </div>
                 );
               })}
@@ -159,8 +160,8 @@ export default function OptSellHub(props){
         {tab=="ai"?(
           <div>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:11}}>
-              <span style={{fontSize:12,fontWeight:800,color:CYAN}}>AI Daily Commentary</span>
-              <button onClick={speak} style={{background:"rgba(59,130,246,0.12)",border:"1px solid rgba(59,130,246,0.3)",borderRadius:9,padding:"6px 11px",color:CYAN,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>&#128266; Listen</button>
+              <span style={{fontSize:12,fontWeight:800,color:BLUE}}>AI Daily Commentary</span>
+              <button onClick={speak} style={{background:"rgba(59,130,246,0.12)",border:"1px solid rgba(59,130,246,0.3)",borderRadius:9,padding:"6px 11px",color:BLUE,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>&#128266; Listen</button>
             </div>
             {COMMENTARY.map(function(c,i){
               return (

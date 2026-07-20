@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 
 import { useTheme } from "../theme/ThemeProvider";
 var DB="#0A0E1A",CB="#0F1629",BD="#1E2D4A";
-var BLUE="#3B82F6",BLUE2="#60A5FA",PURPLE="#8B5CF6",PURPLE2="#A78BFA";
+var BLUE="#3B82F6",BLUE2="#60A5FA",BLUE="#8B5CF6",BLUE="#A78BFA";
 var GOLD="#F59E0B",UP="#22C55E",DOWN="#EF4444";
 var T1="#FFFFFF",T2="#8899BB",T3="#475569";
 
@@ -134,14 +134,14 @@ export default function VoiceAssistant(props){
         <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:20}}>
           <div style={{position:"relative",marginBottom:16}}>
             {listening&&(
-              <div style={{position:"absolute",inset:-16,borderRadius:"50%",border:"2px solid "+PURPLE,opacity:0.4,animation:"va-ring 1.2s ease-out infinite"}}></div>
+              <div style={{position:"absolute",inset:-16,borderRadius:"50%",border:"2px solid "+BLUE,opacity:0.4,animation:"va-ring 1.2s ease-out infinite"}}></div>
             )}
             {listening&&(
-              <div style={{position:"absolute",inset:-8,borderRadius:"50%",border:"2px solid "+PURPLE2,opacity:0.6,animation:"va-ring 1.2s ease-out infinite 0.4s"}}></div>
+              <div style={{position:"absolute",inset:-8,borderRadius:"50%",border:"2px solid "+BLUE,opacity:0.6,animation:"va-ring 1.2s ease-out infinite 0.4s"}}></div>
             )}
             <button
               onClick={listening?stopListening:startListening}
-              style={{width:90,height:90,borderRadius:"50%",background:listening?"linear-gradient(135deg,"+DOWN+",#B91C1C)":"linear-gradient(135deg,"+PURPLE+","+BLUE+")",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:36,boxShadow:listening?"0 0 30px rgba(239,68,68,0.5)":"0 0 20px rgba(124,58,237,0.4)",transition:"all 0.3s"}}
+              style={{width:90,height:90,borderRadius:"50%",background:listening?""+DOWN+"":""+BLUE+"",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:36,boxShadow:listening?"0 0 30px rgba(239,68,68,0.5)":"0 0 20px rgba(124,58,237,0.4)",transition:"all 0.3s"}}
             >
               {listening?"&#9632;":"&#127908;"}
             </button>
@@ -159,22 +159,22 @@ export default function VoiceAssistant(props){
 
         {/* AI Reply */}
         {(loading||aiReply)&&(
-          <div style={{background:"linear-gradient(135deg,rgba(124,58,237,0.1),rgba(59,130,246,0.08))",border:"1px solid rgba(124,58,237,0.25)",borderRadius:16,padding:"14px",marginBottom:14}}>
+          <div style={{background:theme.c.card,border:"1px solid rgba(124,58,237,0.25)",borderRadius:16,padding:"14px",marginBottom:14}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-              <div style={{width:24,height:24,borderRadius:7,background:"linear-gradient(135deg,"+PURPLE+","+BLUE+")",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <div style={{width:24,height:24,borderRadius:7,background:""+BLUE+"",display:"flex",alignItems:"center",justifyContent:"center"}}>
                 <span style={{fontSize:8,fontWeight:900,color:"#fff"}}>AI</span>
               </div>
-              <span style={{fontSize:10,fontWeight:700,color:PURPLE2}}>AI Answer</span>
+              <span style={{fontSize:10,fontWeight:700,color:BLUE}}>AI Answer</span>
               {speaking&&(
                 <div style={{display:"flex",gap:2,alignItems:"center",marginLeft:4}}>
-                  {[0,1,2].map(function(i){return <div key={i} style={{width:3,height:12,background:PURPLE2,borderRadius:2,animation:"va-wave 0.8s ease infinite",animationDelay:i*0.15+"s"}}></div>;})}
-                  <span style={{fontSize:8,color:PURPLE2,marginLeft:4}}>Speaking...</span>
+                  {[0,1,2].map(function(i){return <div key={i} style={{width:3,height:12,background:BLUE,borderRadius:2,animation:"va-wave 0.8s ease infinite",animationDelay:i*0.15+"s"}}></div>;})}
+                  <span style={{fontSize:8,color:BLUE,marginLeft:4}}>Speaking...</span>
                 </div>
               )}
             </div>
             {loading?(
               <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                <div style={{width:14,height:14,border:"2px solid "+BD,borderTopColor:PURPLE,borderRadius:"50%",animation:"va-spin 0.8s linear infinite"}}></div>
+                <div style={{width:14,height:14,border:"2px solid "+BD,borderTopColor:BLUE,borderRadius:"50%",animation:"va-spin 0.8s linear infinite"}}></div>
                 <span style={{fontSize:11,color:T2}}>Thinking...</span>
               </div>
             ):(

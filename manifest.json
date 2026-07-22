@@ -1,0 +1,14 @@
+{
+  "name": "Breakout Pro",
+  "short_name": "BreakoutPro",
+  "description": "India's Advanced Trading Education and Market Intelligence Platform. Educational only.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": ["education", "finance"],
+  "icons": [
+    { "src": "/favicon.ico", "sizes": "64x64", "type": "image/x-icon", "purpose": "any" }
+  ]
+}

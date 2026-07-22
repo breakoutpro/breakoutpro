@@ -38,23 +38,23 @@ export function StatTile(props){
   var t=useTheme().c;
   var col=props.tone=="up"?t.up:props.tone=="down"?t.down:props.tone=="warn"?t.warn:props.tone=="blue"?t.blue:t.text1;
   return (
-    <div style={{background:t.card,border:"1px solid "+t.border,borderRadius:radius.md,padding:"11px 6px",textAlign:"center"}}>
+    <div style={{background:t.card,border:"1px solid "+t.border,borderRadius:radius.md,padding:"12px 8px",textAlign:"center"}}>
       <div style={{fontSize:props.small?font.size.md:font.size.x2,fontWeight:font.weight.black,color:col}}>{props.value}</div>
-      <div style={{fontSize:font.size.xs,color:t.text2,marginTop:3}}>{props.label}</div>
-      {props.sub?<div style={{fontSize:7,color:t.text3}}>{props.sub}</div>:null}
+      <div style={{fontSize:font.size.xs,color:t.text2,marginTop:4}}>{props.label}</div>
+      {props.sub?<div style={{fontSize:12,color:t.text3}}>{props.sub}</div>:null}
     </div>
   );
 }
 
 export function Divider(){
   var t=useTheme().c;
-  return <div style={{height:1,background:t.border2,margin:"10px 0"}}></div>;
+  return <div style={{height:1,background:t.border2,margin:"12px 0"}}></div>;
 }
 
 export function Disclaimer(props){
   var t=useTheme().c;
   return (
-    <div style={{background:"rgba(249,115,22,0.06)",border:"1px solid rgba(249,115,22,0.15)",borderRadius:radius.md,padding:11,marginTop:6}}>
+    <div style={{background:"rgba(249,115,22,0.06)",border:"1px solid rgba(249,115,22,0.15)",borderRadius:radius.md,padding:12,marginTop:8}}>
       <div style={{fontSize:font.size.sm,color:t.warn,lineHeight:1.5}}>{props.text||"Educational Market Observation Only. Not Investment Advice."}</div>
     </div>
   );

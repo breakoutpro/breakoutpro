@@ -4,7 +4,7 @@ import { useTheme } from "../theme/ThemeProvider";
 // Uses cached AI summary (NOT a new AI call). Rules: no backtick, no ===, ASCII.
 
 var BG="#000000",CARD="#101318",CARD2="#0B0E13",BD="#1B2330";
-var UP="#22C55E",DOWN="#EF4444",BLUE="#3B82F6",CYAN="#60A5FA",T1="#FFFFFF",T2="#A0A7B4",T3="#5B6472";
+var UP="#22C55E",DOWN="#EF4444",BLUE="#3B82F6",T1="#FFFFFF",T2="#A0A7B4",T3="#5B6472";
 
 export default function WelcomeBack(props){
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system

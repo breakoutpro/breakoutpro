@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { nowT } from "../utils/helpers";
 
 function loadWatchlist() {
   try {
@@ -199,7 +200,7 @@ export default function useWatchlistAlerts(){
               type:found.type,
               conf:found.conf,
               price:nc.close,
-              time:new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"}),
+              time:nowT(),
               timestamp:Date.now(),
             };
 

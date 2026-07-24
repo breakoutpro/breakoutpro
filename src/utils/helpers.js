@@ -1,10 +1,9 @@
 export var G = "#00C853";
 export var R = "#EF4444";
-export var GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=";
 export var DISCLAIMER = "Educational only. Not SEBI registered. Not investment advice.";
 
-export function nowT() {
-  return new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+export function nowT(d) {
+  return (d || new Date()).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
 }
 export function fN(n) {
   var num = parseFloat(n) || 0;
@@ -15,20 +14,6 @@ export function fN(n) {
 }
 export function rnd(a, b) { return Math.random() * (b - a) + a; }
 export function sg() { return Math.random() > 0.5 ? 1 : -1; }
-export function getMkt() {
-  var now = new Date();
-  var day = now.getDay(); // 0=Sun, 6=Sat
-  if (day == 0 || day == 6) return { open: false, label: "Market Closed" };
-  // NSE Holidays 2026
-  var HOLIDAYS = ["2026-01-26","2026-02-19","2026-03-02","2026-03-20","2026-04-02","2026-04-06","2026-04-10","2026-04-14","2026-05-01","2026-06-13","2026-08-15","2026-09-07","2026-10-02","2026-10-21","2026-10-22","2026-11-05","2026-11-25","2026-12-25"];
-  var mm = now.getMonth()+1;
-  var dd = now.getDate();
-  var todayStr = now.getFullYear()+"-"+(mm<10?"0":"")+mm+"-"+(dd<10?"0":"")+dd;
-  if (HOLIDAYS.indexOf(todayStr) != -1) return { open: false, label: "Market Holiday" };
-  var m = now.getHours() * 60 + now.getMinutes();
-  if (m >= 555 && m < 930) return { open: true, label: "Market Open" };
-  return { open: false, label: "Market Closed" };
-}
 export function getSpark(ltp) {
   var a = [];
   for (var i = 0; i < 14; i++) a.push(ltp + sg() * rnd(0, ltp * 0.005) * i);

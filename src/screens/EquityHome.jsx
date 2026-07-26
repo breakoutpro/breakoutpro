@@ -125,53 +125,38 @@ export default function EquityHome(props){
         <span style={{fontSize:14,color:T3,display:"flex",alignItems:"center",paddingRight:12,flexShrink:0}}>&#8250;</span>
       </div>
 
-      {/* Responsive reflow - auto-fit columns per the app's own layout rules
-          (LAYOUT_RULES.gridStyle = "auto-fit-minmax", never fixed pixel columns).
-          Mobile stays a single column naturally since one card already exceeds
-          320px; tablet/laptop/desktop/large-monitor/TV now actually use the
-          extra width instead of sitting in one narrow centered column. */}
-      <div style={{display:"grid",gridTemplateColumns:responsive.isMobile?"1fr":"repeat(auto-fit, minmax(320px, 1fr))",gap:"16px 16px"}}>
+      {/* Single unified responsive dashboard grid. Every section below is a
+          grid item - on mobile they stack in one clean column (native-app
+          feel); on tablet/laptop/desktop the same items reflow into 2-3
+          columns automatically (auto-fit-minmax, never a fixed pixel count),
+          so wider screens genuinely become a dense multi-column dashboard
+          instead of one narrow column with wasted space either side. */}
+      <div style={{display:"grid",gridTemplateColumns:responsive.isMobile?"1fr":"repeat(auto-fit, minmax(320px, 1fr))",gap:16,padding:"16px 14px 0",alignItems:"start"}}>
 
-        {/* DYNAMIC AI BRIEFING - session-aware, reuses the same mm object below */}
+        {/* MORNING BRIEF - sits side by side with AI Market Mood on wide screens */}
+        <DynamicBriefingCard mm={mm}/>
+
+        {/* AI MARKET MOOD */}
+        <MarketMoodCard mm={mm} setTab={setTab}/>
+
+        {/* INDEX ROW - always spans the full dashboard width */}
         <div style={{gridColumn:"1 / -1"}}>
-          <DynamicBriefingCard mm={mm}/>
-        </div>
-
-        {/* TODAY'S GAME PLAN - 30 second market mood */}
-        <div style={{gridColumn:"1 / -1",marginTop:-4}}>
-          <MarketMoodCard mm={mm} setTab={setTab}/>
-        </div>
-
-        {/* QUICK ACTIONS */}
-        <div style={{gridColumn:"1 / -1",display:"flex",gap:8,padding:"12px 16px 0"}}>
-          {[["Scanner","scan","&#128269;"],["Watchlist","watchlist","&#11088;"],["Alerts","alerts","&#128276;"],["News","news","&#128240;"]].map(function(q){
-            return (
-              <button key={q[1]} onClick={function(){setTab(q[1]);}} style={{flex:1,background:CARD,border:"1px solid "+BD,borderRadius:12,padding:"12px 24px",display:"flex",flexDirection:"column",alignItems:"center",gap:4,cursor:"pointer",fontFamily:"inherit",minHeight:44}}>
-                <span style={{fontSize:16}} dangerouslySetInnerHTML={{__html:q[2]}}/>
-                <span style={{fontSize:12,fontWeight:700,color:T2}}>{q[0]}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* MARKET DASHBOARD - real snapshot from the shared mm object, preview only */}
-        <div style={{padding:"12px 0 0",alignSelf:"start"}}>
-          <div style={{padding:"0 14px 6px"}}>
+          <div style={{padding:"0 0 6px"}}>
             <span style={{fontSize:12,fontWeight:800,color:T1}}>Market Dashboard</span>
           </div>
           {(function(){
             var idxData = mm.data && mm.data.indices;
             if(mm.status=="error" && !mm.data){
-              return <div style={{padding:"0 14px",fontSize:12,color:DOWN}}>Market snapshot temporarily unavailable</div>;
+              return <div style={{fontSize:12,color:DOWN}}>Market snapshot temporarily unavailable</div>;
             }
             if(mm.status=="offline" && !mm.data){
-              return <div style={{padding:"0 14px",fontSize:12,color:T2}}>You are offline</div>;
+              return <div style={{fontSize:12,color:T2}}>You are offline</div>;
             }
             if(mm.status=="loading" && !mm.data){
-              return <div style={{padding:"0 14px",fontSize:12,color:T2}}>Loading market snapshot...</div>;
+              return <div style={{fontSize:12,color:T2}}>Loading market snapshot...</div>;
             }
             if(!mm.data){
-              return <div style={{padding:"0 14px",fontSize:12,color:T2}}>Market snapshot unavailable</div>;
+              return <div style={{fontSize:12,color:T2}}>Market snapshot unavailable</div>;
             }
             var rows = [
               {key:"NIFTY",label:"NIFTY 50"},
@@ -194,14 +179,14 @@ export default function EquityHome(props){
               });
             }).filter(function(x){return x;});
             if(rows.length==0){
-              return <div style={{padding:"0 14px",fontSize:12,color:T2}}>Market snapshot unavailable</div>;
+              return <div style={{fontSize:12,color:T2}}>Market snapshot unavailable</div>;
             }
             return (
-              <div style={{display:"flex",gap:12,overflowX:responsive.isMobile?"auto":"visible",flexWrap:responsive.isMobile?"nowrap":"wrap",padding:"0 14px 4px",WebkitOverflowScrolling:"touch"}}>
+              <div style={{display:"grid",gridTemplateColumns:responsive.isMobile?"repeat(2, 1fr)":"repeat(4, 1fr)",gap:12}}>
                 {rows.map(function(r){
                   var color = r.dir=="up"?UP:(r.dir=="down"?DOWN:T2);
                   return (
-                    <div key={r.key} style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:"12px",flexShrink:0,minWidth:120,flex:responsive.isMobile?"none":"1 1 160px"}}>
+                    <div key={r.key} style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:"12px"}}>
                       <div style={{fontSize:12,color:T2,marginBottom:4,fontWeight:600}}>{r.label}</div>
                       <div style={{fontSize:16,fontWeight:800,color:T1,fontFamily:"monospace",marginBottom:4}}>{r.ltp!=null?r.ltp.toLocaleString("en-IN",{maximumFractionDigits:2}):"--"}</div>
                       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -216,20 +201,80 @@ export default function EquityHome(props){
           })()}
         </div>
 
-        {/* OPTIONS INTELLIGENCE - hero premium feature */}
-        <div style={{alignSelf:"start"}}>
+        {/* QUICK ACTIONS - always spans the full dashboard width */}
+        <div style={{gridColumn:"1 / -1",display:"flex",gap:8}}>
+          {[["Scanner","scan","&#128269;"],["Watchlist","watchlist","&#11088;"],["Alerts","alerts","&#128276;"],["News","news","&#128240;"]].map(function(q){
+            return (
+              <button key={q[1]} onClick={function(){setTab(q[1]);}} style={{flex:1,background:CARD,border:"1px solid "+BD,borderRadius:12,padding:"12px 24px",display:"flex",flexDirection:"column",alignItems:"center",gap:4,cursor:"pointer",fontFamily:"inherit",minHeight:44}}>
+                <span style={{fontSize:16}} dangerouslySetInnerHTML={{__html:q[2]}}/>
+                <span style={{fontSize:12,fontWeight:700,color:T2}}>{q[0]}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* OPTIONS INTELLIGENCE - hero premium feature, own dashboard cell */}
+        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,overflow:"hidden"}}>
           <OptionsIntel symbol="NIFTY" onOpen={function(){setShowOptions(true);}}/>
         </div>
 
-      </div>
+        {/* FUTURES INTELLIGENCE - own dashboard cell */}
+        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,overflow:"hidden"}}>
+          <FuturesIntel symbol="NIFTY"/>
+        </div>
 
-      {/* FUTURES INTELLIGENCE */}
-      <div style={{marginTop:16}}>
-        <FuturesIntel symbol="NIFTY"/>
-      </div>
+        {/* TOP GAINERS - own dashboard cell */}
+        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:14}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+            <span style={{fontSize:14,fontWeight:800,color:T1}}>Top Gainers</span>
+            <button onClick={function(){setTab("markets");}} style={{background:"none",border:"none",color:BLUE,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",minHeight:44,padding:"0 2px"}}>View All &#8594;</button>
+          </div>
+          {GAINERS.slice(0,4).map(function(s){
+            return (
+              <div key={s.sym} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0"}}>
+                <span style={{fontSize:12,fontWeight:700,color:T1}}>{s.sym}</span>
+                <span style={{fontSize:12,fontWeight:700,color:UP}}>+{s.pct}%</span>
+              </div>
+            );
+          })}
+        </div>
 
-      {/* WATCHLIST PREVIEW - real symbols only, no prices, owner page is Watchlist.jsx */}
-      <div style={{marginTop:16,padding:"0 14px"}}>
+        {/* TOP LOSERS - own dashboard cell */}
+        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:14}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+            <span style={{fontSize:14,fontWeight:800,color:T1}}>Top Losers</span>
+            <button onClick={function(){setTab("markets");}} style={{background:"none",border:"none",color:BLUE,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",minHeight:44,padding:"0 2px"}}>View All &#8594;</button>
+          </div>
+          {LOSERS.slice(0,4).map(function(s){
+            return (
+              <div key={s.sym} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0"}}>
+                <span style={{fontSize:12,fontWeight:700,color:T1}}>{s.sym}</span>
+                <span style={{fontSize:12,fontWeight:700,color:DOWN}}>{s.pct}%</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* MARKET HEATMAP - own dashboard cell */}
+        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:14}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+            <span style={{fontSize:14,fontWeight:800,color:T1}}>Market Heatmap</span>
+            <button onClick={function(){setTab("heatmap");}} style={{background:"none",border:"none",color:BLUE,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",minHeight:44,padding:"0 2px"}}>View All &#8594;</button>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3, 1fr)",gap:8}}>
+            {GAINERS.concat(LOSERS).slice(0,6).map(function(s){
+              var up = s.pct>=0;
+              return (
+                <div key={s.sym} style={{background:up?"rgba(0,143,57,0.12)":"rgba(220,38,38,0.12)",border:"1px solid "+(up?UP:DOWN)+"40",borderRadius:10,padding:"8px 6px",textAlign:"center"}}>
+                  <div style={{fontSize:11,fontWeight:800,color:T1}}>{s.sym}</div>
+                  <div style={{fontSize:11,fontWeight:700,color:up?UP:DOWN}}>{up?"+":""}{s.pct}%</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* WATCHLIST PREVIEW - real symbols only, no prices, owner page is Watchlist.jsx */}
         <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:16}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -252,93 +297,39 @@ export default function EquityHome(props){
             </div>
           )}
         </div>
-      </div>
 
-      {/* TOP GAINERS / TOP LOSERS PREVIEW - demo data, owner page is Markets.jsx */}
-      <div style={{marginTop:16,padding:"0 14px"}}>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-          <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:14}}>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-              <span style={{fontSize:14,fontWeight:800,color:T1}}>Top Gainers</span>
-              <button onClick={function(){setTab("markets");}} style={{background:"none",border:"none",color:BLUE,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",minHeight:44,padding:"0 2px"}}>View All &#8594;</button>
-            </div>
-            {GAINERS.slice(0,4).map(function(s){
-              return (
-                <div key={s.sym} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0"}}>
-                  <span style={{fontSize:12,fontWeight:700,color:T1}}>{s.sym}</span>
-                  <span style={{fontSize:12,fontWeight:700,color:UP}}>+{s.pct}%</span>
-                </div>
-              );
-            })}
+        {/* LIVE MARKET NEWS - top 5 clean cards, always spans the full width (reads better as a list) */}
+        <div style={{gridColumn:"1 / -1"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+            <span style={{fontSize:14,fontWeight:800,color:T1}}>{t("top_news")}</span>
+            <button onClick={function(){setTab("news");}} style={{background:"none",border:"none",color:BLUE,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",minHeight:44,padding:"0 4px"}}>View All &#8594;</button>
           </div>
-          <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:14}}>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-              <span style={{fontSize:14,fontWeight:800,color:T1}}>Top Losers</span>
-              <button onClick={function(){setTab("markets");}} style={{background:"none",border:"none",color:BLUE,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",minHeight:44,padding:"0 2px"}}>View All &#8594;</button>
-            </div>
-            {LOSERS.slice(0,4).map(function(s){
+          <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,overflow:"hidden"}}>
+            {JUSTIN.slice(0,5).map(function(n,i){
+              var ic=n.impact=="Bullish"?UP:n.impact=="Bearish"?DOWN:T2;
               return (
-                <div key={s.sym} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0"}}>
-                  <span style={{fontSize:12,fontWeight:700,color:T1}}>{s.sym}</span>
-                  <span style={{fontSize:12,fontWeight:700,color:DOWN}}>{s.pct}%</span>
+                <div key={n.id} onClick={function(){setSelArticle(n);}} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderBottom:i<4?"1px solid "+BD:"none",cursor:"pointer"}}>
+                  <div style={{width:3,height:34,background:ic,borderRadius:2,flexShrink:0,opacity:0.8}}></div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:12,fontWeight:600,color:T1,lineHeight:1.4,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{n.headline}</div>
+                    <div style={{fontSize:12,color:T3,marginTop:4}}>{n.source}  &#8226;  {n.time}</div>
+                  </div>
                 </div>
               );
             })}
           </div>
         </div>
-      </div>
 
-      {/* MARKET HEATMAP PREVIEW - demo data, owner page is HeatmapScreen */}
-      <div style={{marginTop:16,padding:"0 14px"}}>
-        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:14}}>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-            <span style={{fontSize:14,fontWeight:800,color:T1}}>Market Heatmap</span>
-            <button onClick={function(){setTab("heatmap");}} style={{background:"none",border:"none",color:BLUE,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",minHeight:44,padding:"0 2px"}}>View All &#8594;</button>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3, 1fr)",gap:8}}>
-            {GAINERS.concat(LOSERS).slice(0,6).map(function(s){
-              var up = s.pct>=0;
-              return (
-                <div key={s.sym} style={{background:up?"rgba(0,143,57,0.12)":"rgba(220,38,38,0.12)",border:"1px solid "+(up?UP:DOWN)+"40",borderRadius:10,padding:"8px 6px",textAlign:"center"}}>
-                  <div style={{fontSize:11,fontWeight:800,color:T1}}>{s.sym}</div>
-                  <div style={{fontSize:11,fontWeight:700,color:up?UP:DOWN}}>{up?"+":""}{s.pct}%</div>
-                </div>
-              );
-            })}
-          </div>
+        {/* LEARN AND INVEST - always spans the full width (its own internal card row) */}
+        <div style={{gridColumn:"1 / -1"}}>
+          <HomeLearnCards setTab={setTab} onTopic={function(id){setLearnTopic(id);}}/>
         </div>
-      </div>
 
-      {/* LEARN AND INVEST */}
-      <div style={{marginTop:16}}>
-        <HomeLearnCards setTab={setTab} onTopic={function(id){setLearnTopic(id);}}/>
-      </div>
-
-      {/* LIVE MARKET NEWS - top 5 clean cards */}
-      <div style={{marginTop:16,padding:"0 14px"}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-          <span style={{fontSize:14,fontWeight:800,color:T1}}>{t("top_news")}</span>
-          <button onClick={function(){setTab("news");}} style={{background:"none",border:"none",color:BLUE,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",minHeight:44,padding:"0 4px"}}>View All &#8594;</button>
+        {/* QUICK TOOLS - always spans the full width (its own internal card row) */}
+        <div style={{gridColumn:"1 / -1"}}>
+          <HomeQuickTools setTab={setTab}/>
         </div>
-        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,overflow:"hidden"}}>
-          {JUSTIN.slice(0,5).map(function(n,i){
-            var ic=n.impact=="Bullish"?UP:n.impact=="Bearish"?DOWN:T2;
-            return (
-              <div key={n.id} onClick={function(){setSelArticle(n);}} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderBottom:i<4?"1px solid "+BD:"none",cursor:"pointer"}}>
-                <div style={{width:3,height:34,background:ic,borderRadius:2,flexShrink:0,opacity:0.8}}></div>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:12,fontWeight:600,color:T1,lineHeight:1.4,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{n.headline}</div>
-                  <div style={{fontSize:12,color:T3,marginTop:4}}>{n.source}  &#8226;  {n.time}</div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* QUICK TOOLS */}
-      <div style={{marginTop:16}}>
-        <HomeQuickTools setTab={setTab}/>
       </div>
 
       <div style={{height:24}}></div>
@@ -359,15 +350,4 @@ function MarketBadge(){
   var mins=d.getHours()*60+d.getMinutes();
   var day=d.getDay(); // 0 Sun, 6 Sat
   var st;
-  if(day==0||day==6){ st={label:"Closed",col:DOWN,dot:DOWN}; }
-  else if(mins>=9*60+15&&mins<15*60+30){ st={label:"Open",col:UP,dot:UP}; }
-  else if(mins>=9*60&&mins<9*60+15){ st={label:"Pre-Market",col:BLUE,dot:BLUE}; }
-  else if(mins>=15*60+30&&mins<16*60){ st={label:"Post-Market",col:BLUE,dot:BLUE}; }
-  else { st={label:"Closed",col:DOWN,dot:DOWN}; }
-  return (
-    <span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.05)",border:"1px solid "+BD,borderRadius:20,padding:"4px 8px"}}>
-      <span style={{width:6,height:6,borderRadius:"50%",background:st.dot,animation:st.label=="Open"?"pulse-dot 1.4s infinite":"none"}}></span>
-      <span style={{fontSize:12,fontWeight:800,color:st.col}}>{st.label}</span>
-    </span>
-  );
-}
+  if(d

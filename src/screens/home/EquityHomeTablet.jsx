@@ -4,6 +4,7 @@ import { GAINERS, LOSERS } from "../HomeData";
 import OptionsIntel from "../OptionsIntel";
 import { JUSTIN } from "../JustInData";
 import MarketBadge from "./MarketBadge";
+import { SkeletonCard } from "../../components/Skeleton";
 
 // BreakoutPro - EquityHomeTablet.jsx
 // Tablet Home layout - independent from Mobile and from Laptop/Desktop.
@@ -25,7 +26,7 @@ export default function EquityHomeTablet(props){
 
   function SummaryCard(p){
     return (
-      <div style={{background:CARD,border:"1px solid "+(p.hero?BLUE:BD),borderRadius:16,padding:p.hero?18:16,boxSizing:"border-box",minWidth:0,overflow:"hidden"}}>
+      <div style={{background:CARD,border:"1px solid "+(p.hero?BLUE:BD),borderRadius:16,padding:p.hero?18:16,boxSizing:"border-box",minWidth:0,overflow:"hidden",height:"100%",display:"flex",flexDirection:"column"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
             {p.icon ? <span style={{fontSize:16}} dangerouslySetInnerHTML={{__html:p.icon}}/> : null}
@@ -35,7 +36,7 @@ export default function EquityHomeTablet(props){
             <button onClick={p.onDetails} style={{background:"none",border:"none",color:BLUE,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",minHeight:36,padding:"0 2px",flexShrink:0}}>View Details &#8594;</button>
           ) : null}
         </div>
-        {p.children}
+        <div style={{flex:1}}>{p.children}</div>
       </div>
     );
   }
@@ -119,7 +120,9 @@ export default function EquityHomeTablet(props){
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(300px, 1fr))",gap:16,padding:"16px 16px 0",minWidth:0,boxSizing:"border-box"}}>
 
         <SummaryCard title="AI Market Mood" icon="&#129504;" onDetails={function(){setTab("more");}}>
-          {!mm.mood || mm.mood.score==null ? <div style={{fontSize:12,color:T2}}>Market mood unavailable</div> : (function(){
+          {mm.status=="loading" && !mm.data ? (
+            <SkeletonCard height={90}/>
+          ) : !mm.mood || mm.mood.score==null ? <div style={{fontSize:12,color:T2}}>Market mood unavailable</div> : (function(){
             var moodColor = mm.mood.label && mm.mood.label.indexOf("Bearish")>=0 ? DOWN : (mm.mood.label && mm.mood.label.indexOf("Bullish")>=0 ? UP : T2);
             return (
               <div>
@@ -188,7 +191,7 @@ export default function EquityHomeTablet(props){
           <div style={{fontSize:12,color:T2,lineHeight:1.5}}>No alerts yet - set one up from any chart or scanner result.</div>
         </SummaryCard>
 
-        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,overflow:"hidden",minWidth:0}}>
+        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,overflow:"hidden",minWidth:0,height:"100%",boxSizing:"border-box"}}>
           <OptionsIntel symbol="NIFTY" onOpen={function(){props.setShowOptions(true);}}/>
         </div>
         <SummaryCard title="Market Heatmap" icon="&#128293;" onDetails={function(){setTab("heatmap");}}>
@@ -220,4 +223,4 @@ export default function EquityHomeTablet(props){
       <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}"}</style>
     </div>
   );
-}
+                             }

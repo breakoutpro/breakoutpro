@@ -4,6 +4,7 @@ import { GAINERS, LOSERS } from "../HomeData";
 import OptionsIntel from "../OptionsIntel";
 import { JUSTIN } from "../JustInData";
 import MarketBadge from "./MarketBadge";
+import { SkeletonCard } from "../../components/Skeleton";
 
 // BreakoutPro - EquityHomeLaptop.jsx
 // Laptop Home layout - independent from Mobile, Tablet, and Desktop.
@@ -131,7 +132,9 @@ export default function EquityHomeLaptop(props){
         </div>
 
         <SummaryCard title="AI Market Mood" icon="&#129504;" onDetails={function(){setTab("more");}}>
-          {!mm.mood || mm.mood.score==null ? <div style={{fontSize:BODY,color:T2}}>Market mood unavailable</div> : (function(){
+          {mm.status=="loading" && !mm.data ? (
+            <SkeletonCard height={90}/>
+          ) : !mm.mood || mm.mood.score==null ? <div style={{fontSize:BODY,color:T2}}>Market mood unavailable</div> : (function(){
             var moodColor = mm.mood.label && mm.mood.label.indexOf("Bearish")>=0 ? DOWN : (mm.mood.label && mm.mood.label.indexOf("Bullish")>=0 ? UP : T2);
             return (
               <div>
@@ -254,4 +257,5 @@ export default function EquityHomeLaptop(props){
       <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}"}</style>
     </div>
   );
-}
+                }
+      

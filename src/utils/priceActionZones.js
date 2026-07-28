@@ -132,8 +132,10 @@ export function analyzeZones(candles){
 
   var support = validSupports[0] || null;
   var support2 = validSupports[1] || null;
+  var support3 = validSupports[2] || null;
   var resistance = validResistances[0] || null;
   var resistance2 = validResistances[1] || null;
+  var resistance3 = validResistances[2] || null;
 
   var trend = trendDirection(candles);
   var rr = null;
@@ -159,8 +161,10 @@ export function analyzeZones(candles){
     trend: trend,
     support: zoneOut(support),
     support2: zoneOut(support2),
+    support3: zoneOut(support3),
     resistance: zoneOut(resistance),
     resistance2: zoneOut(resistance2),
+    resistance3: zoneOut(resistance3),
     riskReward: rr,
     nextKeyLevel: resistance ? resistance.price : (support ? support.price : null)
   };

@@ -21,9 +21,11 @@ export default function PatternChartEngine(props){
   var CARD = theme.c.card;
 
   // candles: [{o,h,l,c,vol,breakout?}], lines:[{type,y1,y2,color,label}], markers:[{type,price,label}]
+  // zones (optional, new): [{y1,y2,color,label}] - filled horizontal bands, e.g. support/resistance zones
   var spec=props.spec||{};
   var candles=spec.candles||[];
   var lines=spec.lines||[];
+  var zones=spec.zones||[];
   var markers=spec.markers||[];
 
   var [shown,setShown]=useState(props.autoplay?0:candles.length);
@@ -87,6 +89,13 @@ export default function PatternChartEngine(props){
     <div>
       <div style={{background:CARD,border:"1px solid "+GRID,borderRadius:14,padding:"12px 8px 8px",overflow:"hidden"}}>
         <svg width="100%" viewBox={"0 0 "+W+" "+H} style={{display:"block"}}>
+          {/* support/resistance zone bands (optional, behind grid + candles) */}
+          {zones.map(function(zn,i){
+            var yTop = yPrice(Math.max(zn.y1, zn.y2));
+            var yBot = yPrice(Math.min(zn.y1, zn.y2));
+            return <rect key={"zn"+i} x={PADL} y={yTop} width={W-PADL-PADR} height={Math.max(1,yBot-yTop)} fill={zn.color||BLUE} opacity={zn.opacity!=undefined?zn.opacity:0.10}/>;
+          })}
+
           {/* grid lines */}
           {[0,0.25,0.5,0.75,1].map(function(g,i){
             var y=chartTop+g*chartH;
@@ -181,3 +190,4 @@ function ctrlBtn(primary){
   };
               }
 
+            

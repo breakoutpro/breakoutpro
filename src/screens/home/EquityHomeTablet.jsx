@@ -72,25 +72,6 @@ export default function EquityHomeTablet(props){
         </div>
       </div>
 
-      <div style={{padding:"16px 16px 0",minWidth:0,boxSizing:"border-box"}}>
-        <SummaryCard title="Today's Trading Edge" onDetails={function(){setTab("markets");}}>
-          {data.idxRows.length==0 ? <div style={{fontSize:12,color:T2}}>Snapshot unavailable</div> : (
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:10}}>
-              {data.idxRows.map(function(r){
-                var color = r.dir=="up"?UP:(r.dir=="down"?DOWN:T2);
-                return (
-                  <div key={r.key} style={{minWidth:0,background:theme.c.card2,border:"1px solid "+BD,borderRadius:12,padding:12}}>
-                    <div style={{fontSize:11,color:T2,marginBottom:3,fontWeight:600}}>{r.label}</div>
-                    <div style={{fontSize:16,fontWeight:900,color:T1,fontFamily:"monospace"}}>{r.ltp.toLocaleString("en-IN",{maximumFractionDigits:2})}</div>
-                    <div style={{fontSize:11,fontWeight:700,color:color}}>{r.chgPct!=null?((r.dir=="up"?"+":"")+r.chgPct+"%"):"--"}</div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </SummaryCard>
-      </div>
-
       <div style={{padding:"12px 16px 0",display:"flex",gap:8,minWidth:0,boxSizing:"border-box"}}>
         {[["Scanner","scan","&#128269;"],["Watchlist","watchlist","&#11088;"],["Alerts","alerts","&#128276;"],["Option Chain","oi","&#128200;"]].map(function(q){
           return (

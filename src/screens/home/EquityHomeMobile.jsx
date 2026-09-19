@@ -1,0 +1,336 @@
+import { useState, useEffect } from "react";
+import { useHomeData } from "./hooks/useHomeData";
+import { JUSTIN } from "../JustInData";
+import MarketBadge from "./MarketBadge";
+import ProvenanceBadge from "../../components/ProvenanceBadge";
+
+// BreakoutPro - EquityHomeMobile.jsx
+// The Mobile Home layout - UI only. All data comes from useHomeData(), the
+// single shared hook also used by Tablet/Laptop/Desktop. This file owns its
+// own presentational Card/Sparkline helpers so it can be edited
+// freely without ever affecting the other device layouts.
+// Rules: no backtick, no triple-equals, ASCII.
+
+export default function EquityHomeMobile(props){
+  // LIGHT PALETTE - per instruction to match the provided light/white
+  // fintech-terminal reference design. Scoped to this file's own local
+  // variables only - the shared ThemeProvider is untouched, so every other
+  // screen in the app keeps its existing dark theme exactly as before.
+  var BG="#F8F9FA", CARD="#FFFFFF", BD="#E5E7EB";
+  var BLUE="#2563EB", PROBLUE="#2563EB";
+  var UP="#16A34A", DOWN="#DC2626", WARN="#D97706";
+  var SENT_GREEN="#087443", SENT_RED="#C62828", SENT_YELLOW="#B45309";
+  var T1="#111827", T2="#4B5563", T3="#9CA3AF";
+  var setTab = props.setTab || function(){};
+  var data = useHomeData();
+  var mm = data.mm;
+
+  // LIVE BREAKOUTS - reuses the existing real /api/scanner-data endpoint,
+  // same one already used by EquityHomeDesktop.jsx/EquityHomeLaptop.jsx.
+  // No new polling system, no new provider.
+  var [scannerResults, setScannerResults] = useState(null);
+  useEffect(function(){
+    var cancelled = false;
+    fetch("/api/scanner-data").then(function(r){ return r.json(); }).then(function(j){
+      if(!cancelled && j && j.ok!==false && j.results) setScannerResults(j.results);
+    }).catch(function(){});
+    return function(){ cancelled = true; };
+  }, []);
+
+  function Card(p){
+    return (
+      <div onClick={p.onDetails||undefined} style={{width:"100%",boxSizing:"border-box",background:CARD,border:"1px solid "+(p.hero?BLUE:BD),borderRadius:14,padding:p.hero?11:9,marginBottom:7,cursor:p.onDetails?"pointer":"default",minHeight:p.minHeight||undefined}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:7}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0,flex:1}}>
+            {p.icon ? <span style={{fontSize:13,flexShrink:0,lineHeight:1}} dangerouslySetInnerHTML={{__html:p.icon}}/> : null}
+            <span style={{fontSize:14,fontWeight:800,color:T1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{p.title}</span>
+          </div>
+        </div>
+        {p.children}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{background:BG,minHeight:"100vh",width:"100%",boxSizing:"border-box",overflowX:"hidden",fontFamily:"'Inter',Arial,sans-serif",paddingBottom:84,color:T1}}>
+
+      {/* 1. HEADER */}
+      <div style={{width:"100%",boxSizing:"border-box",background:BG,borderBottom:"1px solid "+BD,padding:"10px 12px"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",minWidth:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0,flex:1}}>
+            <button onClick={function(){ if(props.onMenu){props.onMenu();} else {setTab("more");} }} style={{background:"none",border:"none",padding:2,cursor:"pointer",flexShrink:0,minWidth:36,minHeight:36}}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T1} strokeWidth="2.2" strokeLinecap="round">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            </button>
+            <div style={{fontSize:18,fontWeight:900,letterSpacing:-0.5,whiteSpace:"nowrap",flexShrink:0}}>
+              <span style={{color:T1}}>Breakout</span><span style={{color:PROBLUE}}>Pro</span>
+            </div>
+            <div style={{minWidth:0,overflow:"hidden"}}><MarketBadge/></div>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
+            <button onClick={function(){setTab("search");}} style={{background:"none",border:"none",padding:2,cursor:"pointer",minWidth:36,minHeight:36}}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T2} strokeWidth="2.2" strokeLinecap="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </button>
+            <button onClick={function(){setTab("alerts");}} style={{background:"none",border:"none",padding:2,cursor:"pointer",position:"relative",minWidth:36,minHeight:36}}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T1} strokeWidth="2" strokeLinecap="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+              <div style={{position:"absolute",top:0,right:0,width:5,height:5,borderRadius:"50%",background:BLUE,border:"1px solid "+BG}}/>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div style={{width:"100%",boxSizing:"border-box",padding:"7px 9px 0"}}>
+
+        {/* MARKET PULSE - moved to immediately below the header, above all
+            six cards, per instruction. Broad market context only, compact
+            and scrollable rather than more full cards. Market Breadth/FII/DII
+            are literal "UNAVAILABLE" in api/market-mood-data.js's own
+            response - no real provider exists for either. Global Markets IS
+            real (mm.data.global). Commodities/Economic Calendar are
+            confirmed DEMO-only elsewhere in this codebase, so honestly Not
+            connected here too rather than silently omitted. */}
+        {(function(){
+          var global = mm.data && mm.data.global;
+          var hasGlobal = global && global.status!=="UNAVAILABLE" && global.items && global.items.length;
+          var pulseItems = [
+            { label:"Market Breadth", node: <span style={{color:T3}}>Not connected</span> },
+            { label:"FII Flow", node: <span style={{color:T3}}>Not connected</span> },
+            { label:"DII Flow", node: <span style={{color:T3}}>Not connected</span> },
+            { label:"Global Markets", node: hasGlobal ? (
+                <span>{global.items.slice(0,2).map(function(g,i){
+                  return <span key={i} style={{marginRight:8}}>{g.name} <span style={{fontWeight:700,color:g.up==null?T2:(g.up?UP:DOWN)}}>{g.chgPct!=null?(g.chgPct>=0?"+":"")+g.chgPct+"%":"--"}</span></span>;
+                })}</span>
+              ) : <span style={{color:T3}}>Not connected</span> },
+            { label:"Commodities", node: <span style={{color:T3}}>Not connected</span> },
+            { label:"Economic Calendar", node: <span style={{color:T3}}>Not connected</span> }
+          ];
+          return (
+            <div style={{background:CARD,border:"1px solid "+BD,borderRadius:10,padding:"8px 10px",marginBottom:9,overflowX:"auto"}}>
+              <div style={{fontSize:10,fontWeight:800,color:T2,letterSpacing:0.5,marginBottom:6}}>MARKET PULSE</div>
+              <div style={{display:"flex",flexDirection:"column",gap:5}}>
+                {pulseItems.map(function(it){
+                  return (
+                    <div key={it.label} style={{display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:11}}>
+                      <span style={{color:T3}}>{it.label}</span>{it.node}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Subtle divider between Market Pulse and the six stacked cards -
+            consistent with the existing border color, thin, not a new
+            card or section. */}
+        <div style={{borderTop:"1px solid "+BD,marginBottom:9}}></div>
+
+        {/* 4. AI MARKET MOOD */}
+        <Card title="AI Market Mood" onDetails={function(){setTab("marketmood");}}>
+          {mm.status=="loading" && !mm.data ? (
+            <div style={{fontSize:11,color:T2}}>Loading...</div>
+          ) : (function(){
+            var hasReal = mm.mood && mm.mood.score!=null;
+            if(!hasReal){
+              return <div style={{fontSize:11,color:T2}}>Analysis loading...</div>;
+            }
+            var mood = mm.mood;
+            var ai = mm.ai;
+            var moodColor = mood.label.indexOf("Bullish")>=0?SENT_GREEN:(mood.label.indexOf("Bearish")>=0?SENT_RED:SENT_YELLOW);
+            return (
+              <div style={{width:"100%",boxSizing:"border-box"}}>
+                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+                  <span style={{width:8,height:8,borderRadius:"50%",background:moodColor,flexShrink:0}}></span>
+                  <span style={{fontSize:17,fontWeight:900,color:moodColor}}>{mood.label.toUpperCase()}</span>
+                </div>
+                <div style={{fontSize:11,color:T2,marginBottom:8}}>{mood.stage} &nbsp;&#183;&nbsp; {mood.confidence} Confidence &nbsp;&#183;&nbsp; AI Score: {mood.score}/100</div>
+                {(function(){
+                  var idx = mm.data && mm.data.indices;
+                  var tiles = [["NIFTY 50","NIFTY"],["BANK NIFTY","BANKNIFTY"],["INDIA VIX","VIX"]];
+                  return (
+                    <div style={{display:"grid",gridTemplateColumns:"repeat(3, 1fr)",gap:6,marginBottom:8}}>
+                      {tiles.map(function(t){
+                        var d = idx && idx[t[1]];
+                        var up = d && d.chgPct!=null ? d.chgPct>=0 : null;
+                        return (
+                          <div key={t[1]} style={{background:BG,border:"1px solid "+BD,borderRadius:6,padding:"4px 6px"}}>
+                            <div style={{fontSize:8,color:T3,fontWeight:700}}>{t[0]}</div>
+                            {d && d.ltp!=null ? (
+                              <div>
+                                <div style={{fontSize:11,fontWeight:800,color:T1}}>{typeof d.ltp==="number"?d.ltp.toLocaleString("en-IN"):d.ltp}</div>
+                                <div style={{fontSize:9,fontWeight:700,color:up==null?T2:(up?UP:DOWN)}}>{d.chgPct!=null?(d.chgPct>=0?"+":"")+d.chgPct+"%":"--"}</div>
+                              </div>
+                            ) : <div style={{fontSize:9,color:T3}}>Unavailable</div>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+                <div style={{marginBottom:8}}>
+                  <div style={{fontSize:10,color:T2,fontWeight:700,marginBottom:2}}>KEY SIGNAL</div>
+                  {ai && (ai.now || ai.whatChanged || (ai.keyDrivers && ai.keyDrivers.length)) ? (
+                    <div>
+                      {ai.now ? <div style={{fontSize:11,color:T1,lineHeight:1.4,marginBottom:4}}>{ai.now}</div> : null}
+                      {ai.whatChanged ? <div style={{fontSize:11,color:T2,lineHeight:1.4,marginBottom:4}}><b style={{color:T1}}>What changed: </b>{ai.whatChanged}</div> : null}
+                      {ai.keyDrivers && ai.keyDrivers.length ? (
+                        <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+                          {ai.keyDrivers.map(function(d,i){
+                            return <span key={i} style={{fontSize:10,color:T2,background:BG,border:"1px solid "+BD,borderRadius:6,padding:"2px 7px"}}>{d}</span>;
+                          })}
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : <div style={{fontSize:11,color:T2}}>Data unavailable right now.</div>}
+                </div>
+                <div>
+                  <div style={{fontSize:10,color:T2,fontWeight:700,marginBottom:2}}>WHAT TO WATCH?</div>
+                  {ai && ai.watchNext ? <div style={{fontSize:11,color:T1,lineHeight:1.4}}>{ai.watchNext}</div> : <div style={{fontSize:11,color:T2}}>Data unavailable right now.</div>}
+                </div>
+              </div>
+            );
+          })()}
+        </Card>
+
+        {/* RANGE INTELLIGENCE - card 2 of 6. Real data, same source as AI
+            Market Mood above. Pivot/R1/S1 use the standard pivot-point
+            formula over the same real high/low/ltp - this used to be a
+            separate "Key Levels" card; folded in here since Range
+            Intelligence owns this information. */}
+        {(function(){
+          var nifty = mm.data && mm.data.indices && mm.data.indices.NIFTY;
+          var hasRange = nifty && nifty.ltp!=null && nifty.high!=null && nifty.low!=null && nifty.high>nifty.low;
+          if(!hasRange){
+            return (
+              <Card title="Range Intelligence" icon="&#128640;" onDetails={function(){setTab("rangeintel");}}>
+                <div style={{fontSize:11,color:T2}}>No verified intraday range provider connected yet.</div>
+              </Card>
+            );
+          }
+          var width = nifty.high - nifty.low;
+          var rawPosPct = ((nifty.ltp - nifty.low) / width) * 100;
+          var posPct = Math.round(Math.max(0, Math.min(100, rawPosPct)));
+          var zone = posPct<=20?"Near Low":(posPct<=40?"Lower Range":(posPct<=60?"Mid Range":(posPct<=80?"Upper Range":"Near High")));
+          var state = posPct>=80?"Breakout Watch":(posPct<=20?"Breakdown Watch":"Balanced");
+          var stateColor = state==="Breakout Watch"?UP:(state==="Breakdown Watch"?DOWN:T1);
+          var pivot = (nifty.high + nifty.low + nifty.ltp) / 3;
+          var r1 = Math.round(((2*pivot) - nifty.low)*100)/100;
+          var s1 = Math.round(((2*pivot) - nifty.high)*100)/100;
+          var r2 = Math.round((pivot + (nifty.high - nifty.low))*100)/100;
+          var s2 = Math.round((pivot - (nifty.high - nifty.low))*100)/100;
+          var bc = Math.round(((nifty.high + nifty.low) / 2)*100)/100;
+          var tc = Math.round(((2*pivot) - bc)*100)/100;
+          return (
+            <Card title="Range Intelligence" icon="&#128640;" onDetails={function(){setTab("rangeintel");}}>
+              <div style={{fontSize:16,fontWeight:900,color:T1,marginBottom:3}}>{nifty.ltp.toLocaleString("en-IN")}</div>
+              <div style={{display:"flex",gap:12,fontSize:11,color:T2,marginBottom:4}}>
+                <span>High <span style={{color:T1,fontWeight:700}}>{nifty.high.toLocaleString("en-IN")}</span></span>
+                <span>Low <span style={{color:T1,fontWeight:700}}>{nifty.low.toLocaleString("en-IN")}</span></span>
+              </div>
+              <div style={{position:"relative",height:14,marginBottom:4}}>
+                <div style={{position:"absolute",top:6,left:0,right:0,height:2,background:BD}}></div>
+                <div style={{position:"absolute",top:2,left:"calc("+posPct+"% - 5px)",width:10,height:10,borderRadius:"50%",background:BLUE,border:"2px solid "+CARD}}></div>
+              </div>
+              <div style={{fontSize:14,fontWeight:800,color:stateColor,marginBottom:6}}>{posPct}% &middot; {zone} &middot; {state}</div>
+              <div style={{display:"flex",gap:8,fontSize:10,color:T2,borderTop:"1px solid "+BD,paddingTop:6,marginBottom:4,flexWrap:"wrap"}}>
+                <span>R2 <span style={{color:DOWN,fontWeight:700}}>{r2.toLocaleString("en-IN")}</span></span>
+                <span>R1 <span style={{color:DOWN,fontWeight:700}}>{r1.toLocaleString("en-IN")}</span></span>
+                <span>Pivot <span style={{color:T1,fontWeight:700}}>{Math.round(pivot*100)/100}</span></span>
+                <span>S1 <span style={{color:UP,fontWeight:700}}>{s1.toLocaleString("en-IN")}</span></span>
+                <span>S2 <span style={{color:UP,fontWeight:700}}>{s2.toLocaleString("en-IN")}</span></span>
+              </div>
+              <div style={{fontSize:10,color:T3}}>CPR: BC {bc.toLocaleString("en-IN")} &ndash; TC {tc.toLocaleString("en-IN")}</div>
+              <div style={{fontSize:10,color:T3}}>VWAP: Not available (no real intraday tick feed connected)</div>
+            </Card>
+          );
+        })()}
+
+        {/* OPTIONS INTELLIGENCE - card 3 of 6, now its own card (previously
+            folded inside Range Intelligence with fabricated DEMO PCR/Max
+            Pain numbers - removed; no verified options-chain provider
+            exists anywhere in this codebase, so this is an honest
+            unavailable state, matching Desktop/Laptop). */}
+        <Card title="Options Intelligence" icon="&#128202;">
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"2px 10px",marginBottom:6}}>
+            {["PCR","Max Pain","Call OI","Put OI","OI Change","Call Wall","Put Wall","IV","Gamma Flip","Expiry Volatility","Writer Trap","Short Covering"].map(function(f){
+              return (
+                <div key={f} style={{display:"flex",justifyContent:"space-between",fontSize:10,color:T3}}>
+                  <span>{f}</span><span>Not connected</span>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{fontSize:11,color:T2,borderTop:"1px solid "+BD,paddingTop:6}}>Live options-chain provider not connected.</div>
+        </Card>
+
+        {/* MARKET NEWS - card 4 of 6. Existing news data source kept as-is
+            per explicit instruction (real News API planned for later) -
+            labeled DEMO with the app's own existing ProvenanceBadge
+            convention since this is confirmed temporary placeholder
+            content - a truthful label on unchanged data. */}
+        <Card title="Market News" icon="&#128240;" onDetails={function(){setTab("news");}}>
+          <div style={{marginBottom:6}}><ProvenanceBadge type="demo"/></div>
+          {JUSTIN.length===0 ? (
+            <div style={{fontSize:11,color:T2}}>Market news unavailable</div>
+          ) : JUSTIN.slice(0,3).map(function(n){
+            var impactColor = n.impact==="Bullish"?UP:(n.impact==="Bearish"?DOWN:T3);
+            return (
+              <div key={n.id} style={{padding:"5px 0",borderBottom:"1px solid "+BD}}>
+                <div style={{fontSize:12,fontWeight:700,color:T1,marginBottom:2}}>{n.headline}</div>
+                {n.body && n.body[0] ? <div style={{fontSize:10,color:T3,marginBottom:2,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{n.body[0]}</div> : null}
+                <div style={{display:"flex",alignItems:"center",gap:6,fontSize:10,color:T2}}>
+                  <span>{n.time} &#183; {n.source}</span>
+                  {n.impact ? <span style={{fontWeight:700,color:impactColor}}>{n.impact}</span> : null}
+                </div>
+              </div>
+            );
+          })}
+        </Card>
+
+        {/* LIVE BREAKOUTS - card 5 of 6. Same real /api/scanner-data source
+            as Desktop/Laptop - was previously a horizontal strip at the
+            bottom of the page; now a proper stacked card in priority order
+            like the other five. */}
+        <Card title="Live Breakouts" icon="&#9889;" onDetails={function(){setTab("breakoutscan");}}>
+          {scannerResults && scannerResults.length ? scannerResults.slice(0,4).map(function(r){
+            var tagLabel = r.tags.indexOf("breakout")>=0?"Breakout":(r.tags.indexOf("breakdown")>=0?"Breakdown":"Vol Spike");
+            var tagColor = r.tags.indexOf("breakout")>=0?UP:(r.tags.indexOf("breakdown")>=0?DOWN:WARN);
+            return (
+              <div key={r.sym} style={{padding:"4px 0",borderBottom:"1px solid "+BD}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                  <span style={{fontSize:13,fontWeight:800,color:T1}}>{r.sym}</span>
+                  <span style={{fontSize:12,fontWeight:700,color:tagColor}}>{tagLabel}</span>
+                </div>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:10,color:T3}}>
+                  <span>{r.ltp!=null ? r.ltp.toLocaleString("en-IN") : "--"}{r.chgPct!=null ? <span style={{color:r.chgPct>=0?UP:DOWN,fontWeight:700}}> {r.chgPct>=0?"+":""}{r.chgPct}%</span> : null}</span>
+                  {r.volRatio!=null ? <span>Vol {r.volRatio}x avg</span> : null}
+                </div>
+              </div>
+            );
+          }) : (
+            <div style={{fontSize:11,color:T2}}>Scanning for breakouts...</div>
+          )}
+        </Card>
+
+        {/* MARKET ALERTS - card 6 of 6. No verified alert-generation source
+            exists anywhere in this codebase, matching Desktop/Laptop's
+            honest unavailable state. */}
+        <Card title="Market Alerts" icon="&#128276;">
+          <div style={{fontSize:11,color:T2}}>Alerts unavailable - no verified live alert provider connected.</div>
+        </Card>
+
+      </div>
+
+      <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}@keyframes ticker-fade{from{opacity:0}to{opacity:1}}"}</style>
+    </div>
+  );
+}

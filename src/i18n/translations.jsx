@@ -20,10 +20,16 @@ export var LANGUAGES = [
 ];
 
 export function getLang(){
-  return "en"; // ENGLISH-ONLY private beta: locked to English
+  try{
+    var stored = localStorage.getItem("bp_lang");
+    if(stored && LANGUAGES.some(function(l){ return l.code===stored; })) return stored;
+  }catch(e){}
+  return "en";
 }
 export function setLang(code){
-  try{ localStorage.setItem("bp_lang","en"); }catch(e){} // locked to English
+  try{
+    if(LANGUAGES.some(function(l){ return l.code===code; })) localStorage.setItem("bp_lang", code);
+  }catch(e){}
 }
 
 // TERMINOLOGY - always English in every language. Never translate these.
@@ -50,7 +56,15 @@ var STR = {
     not_advice:"Educational Market Intelligence Only. Not Investment Advice.",
     meaning:"Meaning",
     lbl_what:"WHAT IT MEANS", lbl_why:"WHY IT MATTERS", lbl_now:"CURRENT INTERPRETATION",
-    lbl_beginner:"BEGINNER", lbl_advanced:"ADVANCED", lbl_history:"HISTORICAL BEHAVIOR", lbl_risk:"RISK FACTORS"
+    lbl_beginner:"BEGINNER", lbl_advanced:"ADVANCED", lbl_history:"HISTORICAL BEHAVIOR", lbl_risk:"RISK FACTORS",
+    market_mood:"Market Mood", market_stage:"Market Stage", current_stage:"Current Stage",
+    confidence:"Confidence", ai_score:"AI Score", mood_breakdown:"Market Mood Breakdown",
+    market_snapshot:"Market Snapshot", prev_current_session:"Previous / Current Session",
+    sector_rotation:"Sector Rotation", market_breadth:"Market Breadth", global_markets:"Global Markets",
+    three_day_evolution:"3-Day Evolution", risk_level:"Risk Level", ai_trade_bias:"AI Trade Bias",
+    what_to_watch:"What to Watch", support_lvl:"Support", resistance_lvl:"Resistance",
+    data_unavailable:"Data unavailable", market_closed:"Market closed", market_live:"Market live",
+    delayed_status:"Delayed", stale_status:"Stale"
   },
   te:{
     home:"\u0C39\u0C4B\u0C2E\u0C4D", markets:"\u0C2E\u0C3E\u0C30\u0C4D\u0C15\u0C46\u0C1F\u0C4D\u0C32\u0C41", learn:"\u0C28\u0C47\u0C30\u0C4D\u0C1A\u0C41", alerts:"\u0C05\u0C32\u0C30\u0C4D\u0C1F\u0C4D\u0C32\u0C41", more:"\u0C2E\u0C30\u0C3F\u0C28\u0C4D\u0C28\u0C3F",
@@ -61,7 +75,10 @@ var STR = {
     not_advice:"\u0C15\u0C47\u0C35\u0C32\u0C02 \u0C35\u0C3F\u0C26\u0C4D\u0C2F\u0C3E \u0C2E\u0C3E\u0C30\u0C4D\u0C15\u0C46\u0C1F\u0C4D \u0C07\u0C02\u0C1F\u0C46\u0C32\u0C3F\u0C1C\u0C46\u0C28\u0C4D\u0C38\u0C4D. \u0C2A\u0C46\u0C1F\u0C4D\u0C1F\u0C41\u0C2C\u0C21\u0C3F \u0C38\u0C32\u0C39\u0C3E \u0C15\u0C3E\u0C26\u0C41.",
     meaning:"\u0C05\u0C30\u0C4D\u0C25\u0C02",
     lbl_what:"\u0C05\u0C30\u0C4D\u0C25\u0C02", lbl_why:"\u0C0E\u0C02\u0C26\u0C41\u0C15\u0C41 \u0C2E\u0C41\u0C16\u0C4D\u0C2F\u0C02", lbl_now:"\u0C2A\u0C4D\u0C30\u0C38\u0C4D\u0C24\u0C41\u0C24 \u0C05\u0C30\u0C4D\u0C25\u0C02",
-    lbl_beginner:"\u0C2A\u0C4D\u0C30\u0C3E\u0C30\u0C02\u0C2D\u0C3F\u0C15\u0C41\u0C32\u0C15\u0C41", lbl_advanced:"\u0C05\u0C21\u0C4D\u0C35\u0C3E\u0C28\u0C4D\u0C38\u0C4D\u0C21\u0C4D", lbl_history:"\u0C17\u0C24 \u0C2A\u0C4D\u0C30\u0C35\u0C30\u0C4D\u0C24\u0C28", lbl_risk:"\u0C30\u0C3F\u0C38\u0C4D\u0C15\u0C4D \u0C15\u0C3E\u0C30\u0C15\u0C3E\u0C32\u0C41"
+    lbl_beginner:"\u0C2A\u0C4D\u0C30\u0C3E\u0C30\u0C02\u0C2D\u0C3F\u0C15\u0C41\u0C32\u0C15\u0C41", lbl_advanced:"\u0C05\u0C21\u0C4D\u0C35\u0C3E\u0C28\u0C4D\u0C38\u0C4D\u0C21\u0C4D", lbl_history:"\u0C17\u0C24 \u0C2A\u0C4D\u0C30\u0C35\u0C30\u0C4D\u0C24\u0C28", lbl_risk:"\u0C30\u0C3F\u0C38\u0C4D\u0C15\u0C4D \u0C15\u0C3E\u0C30\u0C15\u0C3E\u0C32\u0C41",
+    current_stage:"ప్రస్తుత దశ",
+    confidence:"నమ్మకం", what_to_watch:"గమనించవలసినది",
+    data_unavailable:"డేటా అందుబాటులో లేదు"
   },
   hi:{
     home:"\u0939\u094B\u092E", markets:"\u092C\u093E\u095B\u093E\u0930", learn:"\u0938\u0940\u0916\u0947\u0902", alerts:"\u0905\u0932\u0930\u094D\u091F", more:"\u0914\u0930",
@@ -72,15 +89,19 @@ var STR = {
     not_advice:"\u0915\u0947\u0935\u0932 \u0936\u0948\u0915\u094D\u0937\u093F\u0915 \u092E\u093E\u0930\u094D\u0915\u0947\u091F \u091C\u093E\u0928\u0915\u093E\u0930\u0940\u0964 \u0928\u093F\u0935\u0947\u0936 \u0938\u0932\u093E\u0939 \u0928\u0939\u0940\u0902\u0964",
     meaning:"\u0905\u0930\u094D\u0925",
     lbl_what:"\u0905\u0930\u094D\u0925", lbl_why:"\u092F\u0939 \u0915\u094D\u092F\u094B\u0902 \u092E\u093E\u092F\u0928\u0947 \u0930\u0916\u0924\u093E \u0939\u0948", lbl_now:"\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0935\u094D\u092F\u093E\u0916\u094D\u092F\u093E",
-    lbl_beginner:"\u0936\u0941\u0930\u0941\u0906\u0924\u0940", lbl_advanced:"\u090F\u0921\u0935\u093E\u0902\u0938\u094D\u0921", lbl_history:"\u090C\u0924\u093F\u0939\u093E\u0938\u093F\u0915 \u0935\u094D\u092F\u0935\u0939\u093E\u0930", lbl_risk:"\u091C\u094B\u0916\u093F\u092E \u0915\u093E\u0930\u0915"
+    lbl_beginner:"\u0936\u0941\u0930\u0941\u0906\u0924\u0940", lbl_advanced:"\u090F\u0921\u0935\u093E\u0902\u0938\u094D\u0921", lbl_history:"\u090C\u0924\u093F\u0939\u093E\u0938\u093F\u0915 \u0935\u094D\u092F\u0935\u0939\u093E\u0930", lbl_risk:"\u091C\u094B\u0916\u093F\u092E \u0915\u093E\u0930\u0915",
+    current_stage:"वर्तमान चरण",
+    confidence:"आत्मविश्वास", what_to_watch:"क्या देखें",
+    data_unavailable:"डेटा उपलब्ध नहीं है"
   }
 };
 
 // Translate a key. Terminology returns English always. Others use selected language,
 // falling back to English, then to the key.
 export function t(key){
-  // ENGLISH-ONLY (private beta): always return English, ignore any selected language.
   if(TERMS[key]!=undefined) return TERMS[key];
+  var lang = getLang();
+  if(STR[lang] && STR[lang][key]!=undefined) return STR[lang][key];
   if(STR.en[key]!=undefined) return STR.en[key];
   return key;
 }

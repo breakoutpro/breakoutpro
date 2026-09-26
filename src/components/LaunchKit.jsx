@@ -3,7 +3,7 @@ import { getMarketStatus } from "../utils/marketStatus";
 
 import { useTheme } from "../theme/ThemeProvider";
 // BreakoutPro - LaunchKit.jsx
-// Launch polish: MarketBadge, ApiHealth, OfflineBanner, AlertHistory.
+// Launch polish: MarketBadge, ApiHealth, OfflineBanner, AlertHistory, FirstRunTutorial.
 // Lightweight, reusable. Rules: no backtick, no triple-equals, ASCII.
 
 var CARD="#101318",CARD2="#0B0E13",BD="#1B2330",BD2="#141821";
@@ -114,4 +114,43 @@ export function AlertHistory(props){
       </div>
     </div>
   );
+}
+
+// ---- 5. FIRST RUN TUTORIAL (30s walkthrough) ----
+var STEPS=[
+  {t:"Welcome to Breakout Pro",d:"Your personal AI market observation platform. Educational insights only, never buy or sell advice.",ic:"&#128075;"},
+  {t:"AI Market Guardian",d:"Watch live market structure across stocks, indices, options and futures. Uptrend and downtrend observations in one place.",ic:"&#128737;"},
+  {t:"Intelligence Modules",d:"Options Intelligence, Futures Intelligence and Gamma Blast give educational observations with detail pages.",ic:"&#128202;"},
+  {t:"Voice & Alerts",d:"Enable voice observations and priority alerts. Add stocks to your Watchlist for focused alerts.",ic:"&#128276;"},
+  {t:"You are ready",d:"Explore, learn and observe the markets. Everything here is for education only.",ic:"&#127881;"}
+];
+export function FirstRunTutorial(props){
+  var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
+  BD=theme.c.border;
+  // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
+  var BD2 = theme.c.border2, BRAND = theme.c.brand, CARD = theme.c.card, T2 = theme.c.text2;
+  var BLUE = theme.c.blue; T1=theme.c.text1;
+
+  var [i,setI]=useState(0);
+  var step=STEPS[i];
+  function done(){ try{ localStorage.setItem("bp_tutorial_done","1"); }catch(e){} props.onClose&&props.onClose(); }
+  return (
+    <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:10000,background:"rgba(0,0,0,0.85)",display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+      <div style={{width:"100%",maxWidth:340,background:CARD,border:"1px solid "+BD,borderRadius:16,padding:24}}>
+        <div style={{fontSize:32,textAlign:"center",marginBottom:16}} dangerouslySetInnerHTML={{__html:step.ic}}/>
+        <div style={{fontSize:18,fontWeight:900,color:T1,textAlign:"center",marginBottom:8}}>{step.t}</div>
+        <div style={{fontSize:12,color:T2,textAlign:"center",lineHeight:1.6,marginBottom:16}}>{step.d}</div>
+        <div style={{display:"flex",justifyContent:"center",gap:8,marginBottom:16}}>
+          {STEPS.map(function(s,idx){ return <span key={idx} style={{width:idx==i?18:6,height:6,borderRadius:3,background:idx==i?BLUE:BD2,transition:"all 0.2s"}}></span>; })}
+        </div>
+        <div style={{display:"flex",gap:8}}>
+          <button onClick={done} style={{flex:1,background:"none",border:"1px solid "+BD,borderRadius:11,padding:"12px",color:T2,fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>Skip</button>
+          <button onClick={function(){ if(i<STEPS.length-1){ setI(i+1); } else { done(); } }} style={{flex:2,background:BLUE,border:"none",borderRadius:12,padding:"12px 24px",color:"#fff",fontSize:12,fontWeight:800,cursor:"pointer",fontFamily:"inherit"}}>{i<STEPS.length-1?"Next":"Get Started"}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+export function shouldShowTutorial(){
+  try{ return localStorage.getItem("bp_tutorial_done")!="1"; }catch(e){ return false; }
 }

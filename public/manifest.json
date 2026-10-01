@@ -1,0 +1,20 @@
+{
+  "name": "Breakout Pro",
+  "short_name": "Breakout Pro",
+  "description": "India's Advanced Trading Education and Market Intelligence Platform. Educational only.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "lang": "en",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": ["education", "finance"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -38,8 +38,24 @@ var dataService = {
   // Many quotes at once (comma separated symbols).
   getQuotes: function(symbols){ return call("quotes", {symbols:symbols}); },
 
-  // Option chain for an underlying + expiry.
-  getOptionChain: function(symbol, expiry){ return call("optionchain", {symbol:symbol, expiry:expiry}); },
+  // Option chain for an underlying + expiry (DhanHQ-backed, ATM-windowed).
+  // Resolves to { status:"LIVE"|"STALE"|"UNAVAILABLE", message, underlying,
+  // underlyingLtp, expiry, updated, atmStrike, pcrOi, pcrVolume, maxPain,
+  // highestCallOi, highestPutOi, strikes:[...] } - or null only on a hard
+  // network/fetch failure (call() already reports ok:false as null; this
+  // endpoint otherwise always resolves with a status field, even when that
+  // status is UNAVAILABLE, so the UI should treat a null result itself as
+  // its own distinct "could not even reach the backend" case).
+  getOptionChain: function(symbol, expiry, windowSize){
+    var params = {symbol:symbol};
+    if(expiry) params.expiry = expiry;
+    if(windowSize) params.window = windowSize;
+    return call("optionchain", params);
+  },
+
+  // Expiry dates actually returned by DhanHQ for this underlying - never
+  // hardcoded. Resolves to { status, message, expiries:[...], updated }.
+  getExpiryList: function(symbol){ return call("expirylist", {symbol:symbol}); },
 
   // Market depth (bid/ask ladder).
   getMarketDepth: function(symbol){ return call("depth", {symbol:symbol}); },

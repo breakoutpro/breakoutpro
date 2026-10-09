@@ -20,6 +20,20 @@ export default async function handler(req, res){
   var action = (req.query && req.query.action) || "";
   var q = req.query || {};
 
+  // Dhan historical OHLC (daily + intraday). Handled before the generic
+  // path because it reports its own states (OK, EMPTY, INVALID_INPUT,
+  // CREDENTIALS_MISSING, CREDENTIALS_INVALID, DATA_API_NOT_SUBSCRIBED,
+  // RATE_LIMITED, PROVIDER_ERROR, TIMEOUT) with matching HTTP codes, and
+  // must never cache a failure. Params: symbol, timeframe (1D|1|5|10|15|25|60),
+  // from, to, optional oi. Read-only; credentials stay inside providers/dhan.js.
+  if(action == "historical"){
+    var hist = await dhan.getHistoricalCandles({ symbol:q.symbol, timeframe:q.timeframe, from:q.from, to:q.to, oi:q.oi });
+    var histOk = (hist.state == "OK" || hist.state == "EMPTY");
+    res.setHeader("Cache-Control", histOk ? "s-maxage=15, stale-while-revalidate=30" : "no-store");
+    if(histOk) return res.status(200).json({ ok:true, data:hist });
+    return res.status(hist.httpStatus || 502).json({ ok:false, reason:hist.state, code:hist.code, message:hist.message, providerCode:hist.providerCode || null });
+  }
+
   try{
     var data = null;
 

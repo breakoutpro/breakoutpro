@@ -50,6 +50,7 @@ import { useTheme } from "../../theme/ThemeProvider";
 import { ALL_NSE_STOCKS } from "../../data/marketsStocks";
 import ProvenanceBadge from "../../components/ProvenanceBadge";
 import PatternInfoModal from "../../components/PatternInfoModal";
+import { t as tx, useLang, termHelp } from "../../i18n/translations";
 import { detectCandlePatterns, summarizePatterns, ALL_PATTERN_NAMES } from "../../utils/candlePatterns";
 
 var INSTRUMENTS = [
@@ -1191,7 +1192,7 @@ function CandleChart(props){
           <span style={{color: hoveredPctChg>=0 ? SENT_GREEN : SENT_RED, fontWeight:700}}>{hoveredPctChg>=0?"+":""}{hoveredPctChg}%</span>
         ) : null}
         <span style={{color:hoveredPattern?hoveredPatternColor:theme.c.text3,fontWeight:700,overflow:"hidden",textOverflow:"ellipsis"}}>
-          {hoveredPattern ? displayPatternName(hoveredPattern.name) : "No pattern"}
+          {hoveredPattern ? displayPatternName(hoveredPattern.name) : tx("ri.no_pattern")}
         </span>
         {isPreview ? (<span style={{color:SENT_YELLOW,fontWeight:800}}>{previewLabel}</span>) : null}
       </div>
@@ -1205,9 +1206,9 @@ function CandleChart(props){
     </div>
   ) : null;
   var resetBtn = (
-    <button type="button" data-ri-ctl="1" onClick={resetView} aria-label="Reset chart to latest candles" title="Reset zoom and pan to the latest candles"
+    <button type="button" data-ri-ctl="1" onClick={resetView} aria-label={tx("ri.reset_aria")} title={tx("ri.reset_title")}
       style={{flex:"0 0 auto",background:"transparent",border:"1px solid "+theme.c.border,color:theme.c.text2,fontSize:roFs,fontWeight:700,borderRadius:5,padding:"2px 7px",cursor:"pointer",opacity:viewIsDefault?0.5:1,lineHeight:"14px"}}>
-      &#8634; Latest
+      &#8634; {tx("ri.latest_btn")}
     </button>
   );
 
@@ -1225,7 +1226,7 @@ function CandleChart(props){
     <div aria-live="polite" style={{flex:"0 0 auto",height:stripH,boxSizing:"border-box",display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:6,fontSize:roFs,lineHeight:"13px",color:theme.c.text2,overflow:"hidden",paddingBottom:2}}>
       <div style={{flex:"1 1 auto",minWidth:0}}>
         {readoutBody ? readoutBody : (
-          <span style={{color:theme.c.text3}}>{compact ? "Tap a candle for OHLC. Pinch to zoom, drag to pan." : "Hover or tap a candle for OHLC. Scroll or pinch to zoom, drag to pan."}</span>
+          <span style={{color:theme.c.text3}}>{compact ? tx("ri.hint_compact") : tx("ri.hint_full")}</span>
         )}
       </div>
       {resetBtn}
@@ -1233,7 +1234,7 @@ function CandleChart(props){
   ) : null;
   var chartEl = (
       <div ref={wrapRef} style={wrapStyle}>
-      <svg ref={svgRef} viewBox={"0 0 "+chW+" "+chH} preserveAspectRatio={fill ? "none" : "xMidYMid meet"} role="img" aria-label="Candlestick chart. Scroll or pinch to zoom, drag to pan, hover or tap a candle for its values."
+      <svg ref={svgRef} viewBox={"0 0 "+chW+" "+chH} preserveAspectRatio={fill ? "none" : "xMidYMid meet"} role="img" aria-label={tx("ri.chart_aria")}
         style={svgStyle}>
         <rect x="0" y="0" width={chW} height={chH} fill="transparent"/>
         {gridTicks.map(function(gp,i){
@@ -1440,16 +1441,16 @@ function ChartPane(props){
         ) : null}
         <span
           onClick={pattern && onPatternClick ? function(){ onPatternClick(pattern.name); } : undefined}
-          title={pattern ? "Tap for educational info" : undefined}
+          title={pattern ? tx("ri.tap_info") : undefined}
           style={{marginLeft:"auto",fontSize:9,fontWeight:800,color:patternColor,background:patternColor+"18",border:"1px solid "+patternColor+"55",borderRadius:5,padding:"2px 6px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:compact?90:220,cursor:pattern && onPatternClick ? "pointer":"default"}}>
-          {pattern ? pattern.name : "No Pattern"}
+          {pattern ? pattern.name : tx("ri.no_pattern_caps")}
         </span>
       </div>
       <div style={{flex:"1 1 auto",minHeight:0,position:"relative"}}>
         {candles.length>0 ? (
           <CandleChart theme={theme} candles={candles} mode="Candlestick" dayHigh={optionInfo?null:idx.high} dayLow={optionInfo?null:idx.low} cpr={optionInfo?null:cpr} ltp={optionInfo?(optionInfo.ltp):idx.ltp} isPreview={true} previewLabel={optionInfo?"SIM PREMIUM":"PREVIEW"} compact={compact} fill={true}/>
         ) : (
-          <div style={{padding:"20px 8px",textAlign:"center",fontSize:11,color:T2}}>No data.</div>
+          <div style={{padding:"20px 8px",textAlign:"center",fontSize:11,color:T2}}>{tx("ri.no_data")}</div>
         )}
       </div>
     </div>
@@ -1480,14 +1481,14 @@ function RangeSnapshot(props){
   return (
     <div style={{background:CARD,border:"1px solid "+BD,borderRadius:8,padding:"8px 10px",display:"flex",flexWrap:"wrap",gap:12,alignItems:"center"}}>
       {cell("CMP", fmtNum(range.ltp), BLUE)}
-      {cell("Day High", fmtNum(range.high), DOWN)}
-      {cell("Day Low", fmtNum(range.low), UP)}
-      {cell("Range", fmtNum(range.width))}
-      {cell("Position", range.posPct+"%")}
-      {cell("Zone", range.zone)}
-      {cell("Support", fmtNum(cpr.s1), UP)}
-      {cell("Resistance", fmtNum(cpr.r1), DOWN)}
-      <span style={{flexShrink:0,fontSize:9,fontWeight:800,color:stateColor,background:stateColor+"18",border:"1px solid "+stateColor+"55",borderRadius:6,padding:"3px 8px",whiteSpace:"nowrap"}}>{range.state}</span>
+      {cell(tx("ri.day_high"), fmtNum(range.high), DOWN)}
+      {cell(tx("ri.day_low"), fmtNum(range.low), UP)}
+      {cell(tx("ri.range"), fmtNum(range.width))}
+      {cell(tx("ri.position"), range.posPct+"%")}
+      {cell(tx("ri.zone"), tx("home.zone."+range.zone, range.zone))}
+      {cell(tx("ri.support"), fmtNum(cpr.s1), UP)}
+      {cell(tx("ri.resistance"), fmtNum(cpr.r1), DOWN)}
+      <span style={{flexShrink:0,fontSize:9,fontWeight:800,color:stateColor,background:stateColor+"18",border:"1px solid "+stateColor+"55",borderRadius:6,padding:"3px 8px",whiteSpace:"nowrap"}}>{tx("home.state."+range.state, range.state)}</span>
     </div>
   );
 }
@@ -1499,13 +1500,13 @@ function PatternSummaryPanel(props){
   if(!patternSummary || !patternSummary.totalCandles){
     return (
       <div style={{background:CARD,border:"1px solid "+BD,borderRadius:8,padding:"10px 12px"}}>
-        <div style={{fontSize:10,fontWeight:800,color:T2,letterSpacing:0.4}}>CANDLE PATTERN INTELLIGENCE</div>
-        <div style={{fontSize:11,color:T3,marginTop:6}}>Pattern analysis unavailable - candle data not connected.</div>
+        <div style={{fontSize:10,fontWeight:800,color:T2,letterSpacing:0.4}}>{tx("ri.pat_title")}</div>
+        <div style={{fontSize:11,color:T3,marginTop:6}}>{tx("ri.pat_unavail")}</div>
       </div>
     );
   }
   var current = patternSummary.current;
-  var currentName = current ? displayPatternName(current.name) : "No pattern";
+  var currentName = current ? displayPatternName(current.name) : tx("ri.no_pattern");
   var sessionCount = current ? patternSummary.counts[current.name] : "-";
   var lastDetected = current ? current.time : "-";
   var signalType = current ? (current.dir=="bull" ? "Bullish" : (current.dir=="bear" ? "Bearish" : "Neutral")) : "Neutral";
@@ -1515,10 +1516,10 @@ function PatternSummaryPanel(props){
   // Honest data-status wording (spec item 14): a preview/seeded series
   // must never be labeled as a verified "Today" count - only once a real
   // historical OHLC provider backs the series does the UI say "Today: X".
-  var countLabel = isPreview ? "Session Count" : "Today's Count";
+  var countLabel = isPreview ? tx("ri.session_count") : tx("ri.todays_count");
   var dataStatusLine = isPreview
-    ? "Interactive Pattern Preview - counts based on preview candles for the currently loaded session, not a verified live intraday feed."
-    : "Based on verified historical daily OHLC candles (not a live intraday count).";
+    ? tx("ri.preview_counts")
+    : tx("ri.verified_daily");
 
   function kv(label, value, color){
     return (
@@ -1531,19 +1532,19 @@ function PatternSummaryPanel(props){
 
   return (
     <div style={{background:CARD,border:"1px solid "+BD,borderRadius:8,padding:"10px 12px",display:"flex",flexDirection:"column",gap:8}}>
-      <div style={{fontSize:10,fontWeight:800,color:T2,letterSpacing:0.4}}>CANDLE PATTERN INTELLIGENCE</div>
+      <div style={{fontSize:10,fontWeight:800,color:T2,letterSpacing:0.4}}>{tx("ri.pat_title")}</div>
       <div style={{display:"flex",flexWrap:"wrap",gap:10}}>
-        {kv("Current Pattern", currentName, signalColor)}
+        {kv(tx("ri.current_pattern"), currentName, signalColor)}
         {kv(countLabel, sessionCount)}
-        {kv("Last Detected", lastDetected)}
-        {kv("Signal Type", signalType, signalColor)}
+        {kv(tx("ri.last_detected"), lastDetected)}
+        {kv(tx("ri.signal_type"), tx("ri.bias."+signalType, signalType), signalColor)}
       </div>
       <div style={{fontSize:9,color:isPreview?(theme.c.gold||T3):T3,fontWeight:isPreview?700:400}}>{dataStatusLine}</div>
       <div style={{fontSize:10,color:T3,borderTop:"1px solid "+BD,paddingTop:6}}>
-        W/M status: {wm ? wm : "No confirmed W/M pattern"}
+        {tx("ri.wm_status")} {wm ? wm : tx("ri.no_wm")}
       </div>
       {lowData ? (
-        <div style={{fontSize:9,color:theme.c.gold||T3,fontWeight:700}}>Insufficient candle data for a reliable pattern count on this timeframe yet.</div>
+        <div style={{fontSize:9,color:theme.c.gold||T3,fontWeight:700}}>{tx("ri.low_data")}</div>
       ) : null}
       {/* Responsive row-grid instead of a <table> - a real <table> sizes its
           columns to fit the longest Pattern name (e.g. "Three White
@@ -1557,10 +1558,10 @@ function PatternSummaryPanel(props){
           Same 4 columns, same data, nothing removed. */}
       <div style={{display:"flex",flexDirection:"column",fontSize:9,minWidth:0}}>
         <div style={{display:"grid",gridTemplateColumns:"minmax(0,1.6fr) minmax(0,0.6fr) minmax(0,0.9fr) minmax(0,0.8fr)",gap:4,color:T3,textAlign:"left"}}>
-          <div style={{fontWeight:700,padding:"3px 4px"}}>Pattern</div>
-          <div style={{fontWeight:700,padding:"3px 4px"}}>Count</div>
-          <div style={{fontWeight:700,padding:"3px 4px"}}>Latest</div>
-          <div style={{fontWeight:700,padding:"3px 4px"}}>Bias</div>
+          <div style={{fontWeight:700,padding:"3px 4px"}}>{tx("ri.col.pattern")}</div>
+          <div style={{fontWeight:700,padding:"3px 4px"}}>{tx("ri.col.count")}</div>
+          <div style={{fontWeight:700,padding:"3px 4px"}}>{tx("ri.col.latest")}</div>
+          <div style={{fontWeight:700,padding:"3px 4px"}}>{tx("ri.col.bias")}</div>
         </div>
         {ALL_PATTERN_NAMES.map(function(name){
           var bias = patternBias(name);
@@ -1570,7 +1571,7 @@ function PatternSummaryPanel(props){
               <div style={{padding:"3px 4px",color:T1,wordBreak:"break-word",overflowWrap:"break-word"}}>{name=="W Pattern"||name=="M Pattern" ? displayPatternName(name) : name}</div>
               <div style={{padding:"3px 4px",color:T1,fontWeight:700}}>{patternSummary.counts[name]}</div>
               <div style={{padding:"3px 4px",color:T2,wordBreak:"break-word",overflowWrap:"break-word"}}>{patternSummary.latest[name] || "-"}</div>
-              <div style={{padding:"3px 4px",color:biasColor,fontWeight:700}}>{bias}</div>
+              <div style={{padding:"3px 4px",color:biasColor,fontWeight:700}}>{tx("ri.bias."+bias, bias)}</div>
             </div>
           );
         })}
@@ -1594,20 +1595,20 @@ function RangePositionDetail(props){
   }
   return (
     <div style={{background:CARD,border:"1px solid "+BD,borderRadius:8,padding:"10px 12px"}}>
-      <div style={{fontSize:10,fontWeight:800,color:T2,letterSpacing:0.4,marginBottom:6}}>SUPPORT / RESISTANCE / RANGE POSITION</div>
+      <div style={{fontSize:10,fontWeight:800,color:T2,letterSpacing:0.4,marginBottom:6}}>{tx("ri.rp_title")}</div>
       <div style={{position:"relative",height:10,margin:"4px 0 10px"}}>
         <div style={{position:"absolute",top:4,left:0,right:0,height:2,background:BD}}></div>
         <div style={{position:"absolute",top:0,left:"calc("+range.posPct+"% - 5px)",width:10,height:10,borderRadius:"50%",background:BLUE,border:"1px solid "+CARD}}></div>
       </div>
-      {row("Zone", range.zone)}
-      {row("Status", range.state, range.state=="Breakout Watch" ? UP : (range.state=="Breakdown Watch" ? DOWN : T2))}
-      {row("Support (S1)", fmtNum(cpr.s1), UP)}
-      {row("Resistance (R1)", fmtNum(cpr.r1), DOWN)}
-      {row("Distance to High", fmtNum(range.distToHigh)+" ("+range.distToHighPct+"%)")}
-      {row("Distance to Low", fmtNum(range.distToLow)+" ("+range.distToLowPct+"%)")}
+      {row(tx("ri.zone"), tx("home.zone."+range.zone, range.zone))}
+      {row(tx("ri.status"), tx("home.state."+range.state, range.state), range.state=="Breakout Watch" ? UP : (range.state=="Breakdown Watch" ? DOWN : T2))}
+      {row(tx("ri.support_s1"), fmtNum(cpr.s1), UP)}
+      {row(tx("ri.resistance_r1"), fmtNum(cpr.r1), DOWN)}
+      {row(tx("ri.dist_high"), fmtNum(range.distToHigh)+" ("+range.distToHighPct+"%)")}
+      {row(tx("ri.dist_low"), fmtNum(range.distToLow)+" ("+range.distToLowPct+"%)")}
       <div style={{display:"flex",justifyContent:"space-between",fontSize:11,padding:"3px 0"}}>
-        <span style={{color:T3}}>CPR</span>
-        <span style={{color:cpr.status=="Narrow CPR"?SENT_YELLOW:T2,fontWeight:700}}>{cpr.status} - {cpr.note}</span>
+        <span title={termHelp("CPR")} style={{color:T3}}>CPR</span>
+        <span style={{color:cpr.status=="Narrow CPR"?SENT_YELLOW:T2,fontWeight:700}}>{tx("ri.cpr."+cpr.status, cpr.status)} - {tx("ri.cprnote."+cpr.note, cpr.note)}</span>
       </div>
     </div>
   );
@@ -1630,13 +1631,13 @@ function CandleConfirmationCard(props){
   var CARD = theme.c.card, BD = theme.c.border, T1 = theme.c.text1, T2 = theme.c.text2, T3 = theme.c.text3;
   var dir = pattern ? pattern.dir : null;
   var dotColor = dir=="bull" ? SENT_GREEN : (dir=="bear" ? SENT_RED : T2);
-  var dot = dir=="bull" ? "🟢" : (dir=="bear" ? "🔴" : "⚪");
-  var label = pattern ? displayPatternName(pattern.name) : "No confirmed pattern";
-  var statusText = pattern ? ("Confirmed" + (tfLabel ? " • " + tfLabel : "")) : "Waiting for confirmation";
-  var explanation = pattern ? (CANDLE_CONFIRMATION_NOTES[pattern.name] || "A confirmed price-action signal on the latest closed candle.") : CANDLE_CONFIRMATION_NO_PATTERN_NOTE;
+  var dot = dir=="bull" ? "\ud83d\udfe2" : (dir=="bear" ? "\ud83d\udd34" : "\u26aa");
+  var label = pattern ? displayPatternName(pattern.name) : tx("ri.cc_none_label");
+  var statusText = pattern ? (tx("ri.cc_confirmed") + (tfLabel ? " \u2022 " + tfLabel : "")) : tx("ri.cc_waiting");
+  var explanation = pattern ? tx("ri.note."+pattern.name, CANDLE_CONFIRMATION_NOTES[pattern.name] || tx("ri.cc_default")) : tx("ri.cc_no_pattern", CANDLE_CONFIRMATION_NO_PATTERN_NOTE);
   return (
     <div style={{background:CARD,border:"1px solid "+BD,borderRadius:8,padding:"10px 12px"}}>
-      <div style={{fontSize:10,fontWeight:800,color:T2,letterSpacing:0.4,marginBottom:6}}>CANDLE CONFIRMATION</div>
+      <div style={{fontSize:10,fontWeight:800,color:T2,letterSpacing:0.4,marginBottom:6}}>{tx("ri.cc_title")}</div>
       <div style={{display:"flex",alignItems:"center",gap:6}}>
         <span style={{fontSize:13,lineHeight:1}}>{dot}</span>
         <span style={{fontSize:12,fontWeight:800,color:dotColor}}>{label}</span>
@@ -1644,7 +1645,7 @@ function CandleConfirmationCard(props){
       <div style={{fontSize:10,color:T3,fontWeight:700,marginTop:3}}>{statusText}</div>
       <div style={{fontSize:10,color:T1,lineHeight:1.4,marginTop:4}}>{explanation}</div>
       {isPreview ? (
-        <div style={{fontSize:9,color:theme.c.gold||T3,fontWeight:700,marginTop:6,paddingTop:6,borderTop:"1px solid "+BD}}>Interactive Pattern Preview - based on preview candles, not a verified live intraday feed.</div>
+        <div style={{fontSize:9,color:theme.c.gold||T3,fontWeight:700,marginTop:6,paddingTop:6,borderTop:"1px solid "+BD}}>{tx("ri.cc_preview")}</div>
       ) : null}
     </div>
   );
@@ -1656,12 +1657,12 @@ function RangeHelpBox(props){
   return (
     <div style={{background:CARD,border:"1px solid "+BD,borderRadius:8,padding:"8px 10px"}}>
       <div onClick={onToggle} style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}}>
-        <span style={{fontSize:10,fontWeight:800,color:T2}}>What is Range Intelligence?</span>
+        <span style={{fontSize:10,fontWeight:800,color:T2}}>{tx("ri.help_title")}</span>
         <span style={{fontSize:11,color:T3}}>{open ? "-" : "+"}</span>
       </div>
       {open ? (
         <div style={{fontSize:10,color:T2,lineHeight:1.5,marginTop:6}}>
-          Range Intelligence tells the trader where the current price is positioned between the day's High and Low, how close it is to important support/resistance levels, and whether the price is showing a potential breakout, breakdown or reversal structure.
+          {tx("ri.help_body")}
         </div>
       ) : null}
     </div>
@@ -1729,7 +1730,7 @@ function SingleModeView(props){
           {singleCandles.length>0 ? (
             <CandleChart theme={theme} candles={singleCandles} mode={chartMode} dayHigh={idx.high} dayLow={idx.low} cpr={cpr} ltp={idx.ltp} isPreview={isPreview} compact={isMobileWidth} fill={true} readout="strip"/>
           ) : (
-            <div style={{padding:"40px 12px",textAlign:"center",fontSize:12,color:T2}}>No candle data available for this timeframe right now.</div>
+            <div style={{padding:"40px 12px",textAlign:"center",fontSize:12,color:T2}}>{tx("ri.no_candles")}</div>
           )}
         </div>
         {range && cpr ? (
@@ -1755,17 +1756,17 @@ function SingleModeView(props){
                 <span>H {fmtNum(range.high)}</span>
               </div>
             </div>
-            <span style={{flexShrink:0,fontSize:9,fontWeight:800,color:cpr.status=="Narrow CPR"?SENT_YELLOW:T2,background:(cpr.status=="Narrow CPR"?SENT_YELLOW:T2)+"18",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>{cpr.status}</span>
+            <span style={{flexShrink:0,fontSize:9,fontWeight:800,color:cpr.status=="Narrow CPR"?SENT_YELLOW:T2,background:(cpr.status=="Narrow CPR"?SENT_YELLOW:T2)+"18",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>{tx("ri.cpr."+cpr.status, cpr.status)}</span>
             <div style={{flexShrink:0,textAlign:"right"}}>
-              <div style={{fontSize:8,color:T3,lineHeight:1}}>Dist R1</div>
+              <div style={{fontSize:8,color:T3,lineHeight:1}}>{tx("ri.dist_r1")}</div>
               <div style={{fontSize:11,fontWeight:800,color:theme.c.down,lineHeight:1.1}}>{fmtNum(Math.round((cpr.r1-idx.ltp)*100)/100)}</div>
             </div>
             <div style={{flexShrink:0,textAlign:"right"}}>
-              <div style={{fontSize:8,color:T3,lineHeight:1}}>Dist S1</div>
+              <div style={{fontSize:8,color:T3,lineHeight:1}}>{tx("ri.dist_s1")}</div>
               <div style={{fontSize:11,fontWeight:800,color:theme.c.up,lineHeight:1.1}}>{fmtNum(Math.round((idx.ltp-cpr.s1)*100)/100)}</div>
             </div>
             <span style={{flexShrink:0,fontSize:8,fontWeight:700,color:pillColor,background:pillColor+"14",border:"1px solid "+pillColor+"40",borderRadius:5,padding:"2px 6px",whiteSpace:"nowrap"}}>
-              {current ? displayPatternName(current.name) : "No pattern"}
+              {current ? displayPatternName(current.name) : tx("ri.no_pattern")}
             </span>
           </div>
         ) : null}
@@ -1790,6 +1791,7 @@ function SingleModeView(props){
 // Main screen
 // ---------------------------------------------------------------------
 export default function RangeIntelligence(props){
+  useLang();
   var theme = useTheme();
   var BG=theme.c.bg, CARD=theme.c.card, BD=theme.c.border;
   var T1=theme.c.text1, T2=theme.c.text2, T3=theme.c.text3;
@@ -1977,14 +1979,14 @@ export default function RangeIntelligence(props){
   // Info-tooltip text - one shared source of the disclosure, shown via a
   // tiny (i) toggle in the ribbon instead of a permanent multi-line box.
   var infoText = !isIndex
-    ? "Static reference price, not a live tick. Only NIFTY 50, BANK NIFTY, SENSEX and FINNIFTY have a real live feed."
+    ? tx("ri.info.static")
     : layoutMode=="fno"
-      ? "SIM PREMIUM - there is no live option-chain feed in this app. Strikes are CALCULATED from the real "+instLabel+" spot LTP (rounded to the real strike step). Each option candle = real intrinsic value from the spot path + a disclosed simulated time-value that decays across the session. These are illustrative premiums for pattern practice only, never a broker quote - do not scalp real capital off these numbers."
+      ? tx("ri.info.fno",{inst:instLabel})
       : layoutMode=="split"
-      ? "INTERACTIVE PATTERN PREVIEW - no verified intraday feed connected yet. All panes are a deterministic model anchored to real open/prevClose, clamped to today's real high/low; each forming candle closes at the real live price."
+      ? tx("ri.info.split")
       : singleTf.kind=="preview"
-        ? "INTERACTIVE PATTERN PREVIEW - no verified intraday feed connected yet. This "+singleTf.label+" path is a deterministic model anchored to real open/prevClose, clamped to today's real high/low; the final bar always closes at the real live price."
-        : "CALCULATED - real daily high/low/close from the last "+(singleCandles.length+1)+" sessions. Daily open is not provided by the data source, so each candle's open is set to the previous session's close.";
+        ? tx("ri.info.single_preview",{tf:singleTf.label})
+        : tx("ri.info.daily",{n:singleCandles.length+1});
 
   return (
     <div style={{background:BG,height: reserveBottomNav ? "calc(100vh - 56px)" : "100vh",maxHeight: reserveBottomNav ? "calc(100vh - 56px)" : "100vh",overflow: layoutMode=="single" ? "auto" : "hidden",fontFamily:"Inter,Arial,sans-serif",display:"flex",flexDirection:"column",boxSizing:"border-box",padding:0,paddingBottom: reserveBottomNav ? "env(safe-area-inset-bottom)" : 0}}>
@@ -2022,7 +2024,7 @@ export default function RangeIntelligence(props){
                       <span style={{fontSize:11,fontWeight:700,color:T1}}>{item.label}</span>
                       <span style={{fontSize:9,color:T3,marginLeft:5}}>{item.sub}</span>
                     </div>
-                    <span style={{fontSize:8,fontWeight:800,color: item.kind=="index" ? UP : theme.c.gold,background:(item.kind=="index"?UP:theme.c.gold)+"18",borderRadius:4,padding:"1px 5px"}}>{item.kind=="index" ? "LIVE" : "DEMO"}</span>
+                    <span style={{fontSize:8,fontWeight:800,color: item.kind=="index" ? UP : theme.c.gold,background:(item.kind=="index"?UP:theme.c.gold)+"18",borderRadius:4,padding:"1px 5px"}}>{item.kind=="index" ? tx("ri.live") : tx("ri.demo")}</span>
                   </div>
                 );
               }) : (
@@ -2039,14 +2041,14 @@ export default function RangeIntelligence(props){
               <button key={p.kind+p.key} onClick={function(){ setSelected({ key:p.key, kind:p.kind }); }} style={{flexShrink:0,background:active?BLUE:"transparent",border:"1px solid "+(active?BLUE:BD),color:active?"#fff":T2,fontSize:9,fontWeight:700,borderRadius:5,padding:"4px 7px",cursor:"pointer"}}>{p.label}</button>
             );
           })}
-          <button onClick={function(){ setSearchOpen(true); try{ searchRef.current && searchRef.current.querySelector("input").focus(); }catch(e){} }} style={{flexShrink:0,background:"transparent",border:"1px dashed "+BD,color:T3,fontSize:9,fontWeight:700,borderRadius:5,padding:"4px 7px",cursor:"pointer"}}>+More</button>
+          <button onClick={function(){ setSearchOpen(true); try{ searchRef.current && searchRef.current.querySelector("input").focus(); }catch(e){} }} style={{flexShrink:0,background:"transparent",border:"1px dashed "+BD,color:T3,fontSize:9,fontWeight:700,borderRadius:5,padding:"4px 7px",cursor:"pointer"}}>{tx("ri.more_btn")}</button>
         </div>
 
         <div style={{width:1,alignSelf:"stretch",background:BD,flexShrink:0}}/>
 
         {isIndex && idx && idx.ltp!=null ? (
           <div style={{display:"flex",gap:3,flexShrink:0}}>
-            <button onClick={function(){ setLayoutMode("single"); }} style={{background:layoutMode=="single"?BLUE:theme.c.card2,color:layoutMode=="single"?"#fff":T2,border:"1px solid "+(layoutMode=="single"?BLUE:BD),borderRadius:5,padding:"4px 8px",fontSize:9,fontWeight:800,cursor:"pointer"}}>Single</button>
+            <button onClick={function(){ setLayoutMode("single"); }} style={{background:layoutMode=="single"?BLUE:theme.c.card2,color:layoutMode=="single"?"#fff":T2,border:"1px solid "+(layoutMode=="single"?BLUE:BD),borderRadius:5,padding:"4px 8px",fontSize:9,fontWeight:800,cursor:"pointer"}}>{tx("ri.single")}</button>
             <button onClick={function(){ setLayoutMode("split"); }} style={{background:layoutMode=="split"?BLUE:theme.c.card2,color:layoutMode=="split"?"#fff":T2,border:"1px solid "+(layoutMode=="split"?BLUE:BD),borderRadius:5,padding:"4px 8px",fontSize:9,fontWeight:800,cursor:"pointer"}}>Multi-TF</button>
             <button onClick={function(){ setLayoutMode("fno"); }} style={{background:layoutMode=="fno"?BLUE:theme.c.card2,color:layoutMode=="fno"?"#fff":T2,border:"1px solid "+(layoutMode=="fno"?BLUE:BD),borderRadius:5,padding:"4px 8px",fontSize:9,fontWeight:800,cursor:"pointer"}}>F&amp;O Scalper</button>
           </div>
@@ -2085,11 +2087,11 @@ export default function RangeIntelligence(props){
 
         <span style={{flexShrink:0,fontSize:9,fontWeight:800,color: isIndex ? (session.isOpen?UP:T3) : theme.c.gold,display:"flex",alignItems:"center",gap:4}}>
           <span style={{width:6,height:6,borderRadius:"50%",background: isIndex ? (session.isOpen?UP:T3) : theme.c.gold}}/>
-          {isIndex ? (session.isOpen?"LIVE":"CLOSED") : "DEMO"}
+          {isIndex ? (session.isOpen?tx("ri.live"):tx("ri.closed")) : tx("ri.demo")}
         </span>
 
         <div style={{position:"relative",flexShrink:0}}>
-          <button onClick={function(){ setInfoOpen(!infoOpen); }} style={{flexShrink:0,background:"transparent",border:"1px solid "+BD,color:T3,fontSize:9,fontWeight:800,borderRadius:5,padding:"2px 7px",cursor:"pointer"}}>&#9432; {layoutMode=="fno" ? "Sim" : (layoutMode=="split" || (idx && idx.ltp!=null && singleTf.kind=="preview") || !isIndex ? "Preview" : "Info")}</button>
+          <button onClick={function(){ setInfoOpen(!infoOpen); }} style={{flexShrink:0,background:"transparent",border:"1px solid "+BD,color:T3,fontSize:9,fontWeight:800,borderRadius:5,padding:"2px 7px",cursor:"pointer"}}>&#9432; {layoutMode=="fno" ? tx("ri.sim") : (layoutMode=="split" || (idx && idx.ltp!=null && singleTf.kind=="preview") || !isIndex ? tx("ri.preview") : tx("ri.info_btn"))}</button>
           {infoOpen ? (
             <div style={{position:"absolute",top:28,right:0,width:260,background:CARD,border:"1px solid "+BD,borderRadius:8,boxShadow:"0 8px 24px rgba(0,0,0,0.3)",zIndex:60,padding:"8px 10px",fontSize:10,color:T1,lineHeight:1.5}}>
               {infoText}
@@ -2097,7 +2099,7 @@ export default function RangeIntelligence(props){
           ) : null}
         </div>
 
-        <button onClick={function(){ props.setTab && props.setTab("home"); }} style={{flexShrink:0,background:"rgba(120,120,120,0.12)",border:"none",borderRadius:6,width:26,height:26,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:12,color:T1}} title="Home">&#8962;</button>
+        <button onClick={function(){ props.setTab && props.setTab("home"); }} style={{flexShrink:0,background:"rgba(120,120,120,0.12)",border:"none",borderRadius:6,width:26,height:26,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:12,color:T1}} title={tx("nav.home")}>&#8962;</button>
       </div>
       </div>
 
@@ -2129,7 +2131,7 @@ export default function RangeIntelligence(props){
           </div>
         ) : !idx || idx.ltp==null ? (
           <div style={{background:CARD,border:"1px solid "+BD,borderRadius:8,padding:"20px 12px",textAlign:"center",color:T2,fontSize:12}}>
-            No verified data available right now for {instLabel}.
+            {tx("ri.no_verified",{inst:instLabel})}
           </div>
         ) : layoutMode=="single" ? (
           <SingleModeView theme={theme} idx={idx} range={range} cpr={cpr} singleCandles={singleCandles} chartMode={chartMode} isPreview={singleTf.kind=="preview"} patternSummary={patternSummary} singlePattern={singlePattern} singleTfLabel={singleTf.label} isMobileWidth={isMobileWidth} helpOpen={helpOpen} setHelpOpen={setHelpOpen}/>
@@ -2199,7 +2201,7 @@ export default function RangeIntelligence(props){
                   {singleCandles.length>0 ? (
                     <CandleChart theme={theme} candles={singleCandles} mode={chartMode} dayHigh={idx.high} dayLow={idx.low} cpr={cpr} ltp={idx.ltp} isPreview={singleTf.kind=="preview"} fill={true} readout="strip"/>
                   ) : (
-                    <div style={{padding:"40px 12px",textAlign:"center",fontSize:12,color:T2}}>No candle data available for this timeframe right now.</div>
+                    <div style={{padding:"40px 12px",textAlign:"center",fontSize:12,color:T2}}>{tx("ri.no_candles")}</div>
                   )}
                 </div>
               )}
@@ -2223,21 +2225,21 @@ export default function RangeIntelligence(props){
                     <span>H {fmtNum(range.high)}</span>
                   </div>
                 </div>
-                <span style={{flexShrink:0,fontSize:9,fontWeight:800,color:cpr.status=="Narrow CPR"?SENT_YELLOW:T2,background:(cpr.status=="Narrow CPR"?SENT_YELLOW:T2)+"18",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>{cpr.status}</span>
+                <span style={{flexShrink:0,fontSize:9,fontWeight:800,color:cpr.status=="Narrow CPR"?SENT_YELLOW:T2,background:(cpr.status=="Narrow CPR"?SENT_YELLOW:T2)+"18",borderRadius:6,padding:"2px 7px",whiteSpace:"nowrap"}}>{tx("ri.cpr."+cpr.status, cpr.status)}</span>
                 <div style={{flexShrink:0,textAlign:"right"}}>
-                  <div style={{fontSize:8,color:T3,lineHeight:1}}>Dist R1</div>
+                  <div style={{fontSize:8,color:T3,lineHeight:1}}>{tx("ri.dist_r1")}</div>
                   <div style={{fontSize:11,fontWeight:800,color:DOWN,lineHeight:1.1}}>{fmtNum(Math.round((cpr.r1-idx.ltp)*100)/100)}</div>
                 </div>
                 <div style={{flexShrink:0,textAlign:"right"}}>
-                  <div style={{fontSize:8,color:T3,lineHeight:1}}>Dist S1</div>
+                  <div style={{fontSize:8,color:T3,lineHeight:1}}>{tx("ri.dist_s1")}</div>
                   <div style={{fontSize:11,fontWeight:800,color:UP,lineHeight:1.1}}>{fmtNum(Math.round((idx.ltp-cpr.s1)*100)/100)}</div>
                 </div>
                 {layoutMode=="single" ? (
                   <span
                     onClick={singlePattern ? function(){ setPatternModal(singlePattern.name); } : undefined}
-                    title={singlePattern ? "Tap for educational info" : undefined}
+                    title={singlePattern ? tx("ri.tap_info") : undefined}
                     style={{flexShrink:0,fontSize:8,fontWeight:700,color:singlePatternColor,background:singlePatternColor+"14",border:"1px solid "+singlePatternColor+"40",borderRadius:5,padding:"2px 6px",whiteSpace:"nowrap",cursor:singlePattern?"pointer":"default"}}>
-                    {singlePattern ? singlePattern.name : "No pattern"}
+                    {singlePattern ? singlePattern.name : tx("ri.no_pattern")}
                   </span>
                 ) : null}
               </div>

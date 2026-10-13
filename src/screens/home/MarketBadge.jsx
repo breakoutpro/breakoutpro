@@ -1,4 +1,5 @@
 import { useTheme } from "../../theme/ThemeProvider";
+import { t, useLang } from "../../i18n/translations";
 
 // BreakoutPro - MarketBadge.jsx
 // Auto market-status badge: Open / Pre-Market / Post-Market / Closed.
@@ -7,6 +8,7 @@ import { useTheme } from "../../theme/ThemeProvider";
 // Rules: no backtick, no triple-equals, ASCII.
 
 export default function MarketBadge(){
+  useLang();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   var BD = theme.c.border, BLUE = theme.c.blue;
   var UP = theme.c.up, DOWN = theme.c.down;
@@ -23,7 +25,7 @@ export default function MarketBadge(){
   return (
     <span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.05)",border:"1px solid "+BD,borderRadius:20,padding:"3px 7px",whiteSpace:"nowrap"}}>
       <span style={{width:5,height:5,borderRadius:"50%",background:st.dot,animation:st.label=="Open"?"pulse-dot 1.4s infinite":"none",flexShrink:0}}></span>
-      <span style={{fontSize:10,fontWeight:800,color:st.col}}>{st.label}</span>
+      <span style={{fontSize:10,fontWeight:800,color:st.col}}>{t(st.label=="Open"?"mkt.badge_open":(st.label=="Pre-Market"?"mkt.badge_pre":(st.label=="Post-Market"?"mkt.badge_post":"mkt.closed")), st.label)}</span>
     </span>
   );
 }

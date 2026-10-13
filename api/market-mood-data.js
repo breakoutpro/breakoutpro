@@ -127,7 +127,7 @@ function fetchQuoteBatch(symbols){
 // Fetch daily history (closes/highs/lows) for one symbol via Yahoo chart.
 function dailyHistory(symbolEnc){
   return getCrumb().then(function(auth){
-    var url = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbolEnc + "?range=10d&interval=1d";
+    var url = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbolEnc + "?range=3mo&interval=1d"; // ~60 sessions: 9/21 EMA needs more than the old 10d window
     if(auth.crumb) url += "&crumb=" + encodeURIComponent(auth.crumb);
     return fetchWithTimeout(url, auth.cookie).then(function(j){
     var res = j && j.chart && j.chart.result && j.chart.result[0];
@@ -136,9 +136,10 @@ function dailyHistory(symbolEnc){
     var closes = (q && q.close) || [];
     var highs = (q && q.high) || [];
     var lows = (q && q.low) || [];
+    var stamps = res.timestamp || [];
     var out = [];
     for(var i=0;i<closes.length;i++){
-      if(closes[i]!=null) out.push({ c:closes[i], h:highs[i], l:lows[i] });
+      if(closes[i]!=null) out.push({ c:closes[i], h:highs[i], l:lows[i], t:(stamps[i]!=null ? stamps[i]*1000 : null) });
     }
     return out.length ? out : null;
     });
@@ -154,6 +155,10 @@ var GLOBAL_SYMS = {
   "Dow Jones":"^DJI", "Nasdaq":"^IXIC", "Nikkei 225":"^N225",
   "Hang Seng":"^HSI", "Crude Oil (WTI)":"CL=F", "Dollar Index":"DX-Y.NYB"
 };
+// Secondary macro context for the Early Direction panel. Fetched inside the
+// SAME batched quote request as GLOBAL_SYMS (no extra upstream call) and kept
+// out of the Global Markets grid so that card is unchanged.
+var MACRO_SYMS = { natGas:"NG=F" };
 
 // NSE sector indices. Distinct from core indices (no Bank Nifty duplicate -
 // that already lives in the core group as an owned index, not a sector).
@@ -178,7 +183,7 @@ function buildGroup(symMap, quoteMap){
       var fresh = classifyGeneric(ts);
       if(SEVERITY[fresh] > SEVERITY[worst]) worst = fresh;
       var chg = raw.regularMarketChangePercent!=null ? Math.round(raw.regularMarketChangePercent*100)/100 : null;
-      items.push({ name:name, chgPct:chg, up: chg!=null ? chg>=0 : null, freshness:fresh });
+      items.push({ name:name, chgPct:chg, up: chg!=null ? chg>=0 : null, freshness:fresh, ts:ts });
     }
   }
   var status;
@@ -313,6 +318,7 @@ export default async function handler(req, res){
   try{
     if(!CACHE.global || (now - CACHE.globalAt) >= MODERATE_TTL){
       var gsyms = []; for(var gk in GLOBAL_SYMS){ if(GLOBAL_SYMS.hasOwnProperty(gk)) gsyms.push(GLOBAL_SYMS[gk]); }
+      for(var mk in MACRO_SYMS){ if(MACRO_SYMS.hasOwnProperty(mk)) gsyms.push(MACRO_SYMS[mk]); }
       CACHE.global = await fetchQuoteBatch(gsyms);
       CACHE.globalAt = now;
     }
@@ -330,6 +336,49 @@ export default async function handler(req, res){
     sectors = buildGroup(SECTOR_SYMS, CACHE.sectors || {});
   }catch(e){ sectors = { status:"UNAVAILABLE", items:[] }; }
 
+  // --- Early Direction inputs (additive; existing fields above are unchanged).
+  // directionHistory: daily OHLC bars (from the SAME cached dailyHistory
+  // results above) for 9/21 EMA and recent support/resistance. Daily bars are
+  // never LIVE: status is DELAYED and the last bar is flagged by the client
+  // as provisional while the session is open. ---
+  var directionHistory = {};
+  var dirKeys = ["NIFTY","BANKNIFTY"];
+  for(var di=0; di<dirKeys.length; di++){
+    var dk = dirKeys[di]; var dc = CACHE.hist[dk];
+    if(dc && dc.length>=30){
+      directionHistory[dk] = { status:"DELAYED", interval:"1d", fetchedAt:(CACHE.histAt[dk] || null), candles: dc.slice(-60).map(function(x){
+        return { t:x.t, h:(x.h!=null?Math.round(x.h*100)/100:null), l:(x.l!=null?Math.round(x.l*100)/100:null), c:Math.round(x.c*100)/100 };
+      }) };
+    } else { directionHistory[dk] = null; }
+  }
+  // Natural Gas (secondary context) from the shared global quote batch.
+  var macro = { natGas:null, crude:null };
+  try{
+    var ngq = (CACHE.global || {})[MACRO_SYMS.natGas];
+    if(ngq && ngq.regularMarketPrice!=null){
+      var ngTs = ngq.regularMarketTime ? ngq.regularMarketTime*1000 : null;
+      macro.natGas = { chgPct: ngq.regularMarketChangePercent!=null ? Math.round(ngq.regularMarketChangePercent*100)/100 : null, ts:ngTs, freshness:classifyGeneric(ngTs) };
+    }
+  }catch(e){ macro.natGas = null; }
+  // Crude Oil realized volatility: stdev of the last 10 daily % returns, from
+  // WTI daily closes (one cached history request, same endpoint as the rest).
+  try{
+    if(!CACHE.hist.CRUDE || (now - (CACHE.histAt.CRUDE||0)) > HIST_TTL){
+      CACHE.hist.CRUDE = await dailyHistory("CL%3DF");
+      CACHE.histAt.CRUDE = now;
+    }
+    var cc = CACHE.hist.CRUDE;
+    if(cc && cc.length>=12){
+      var cl = cc.slice(-11).map(function(x){ return x.c; });
+      var rets = [];
+      for(var ci=1; ci<cl.length; ci++){ rets.push(((cl[ci]-cl[ci-1])/cl[ci-1])*100); }
+      var mean = 0; for(var ri=0; ri<rets.length; ri++) mean += rets[ri]; mean = mean/rets.length;
+      var vsum = 0; for(var rj=0; rj<rets.length; rj++) vsum += (rets[rj]-mean)*(rets[rj]-mean);
+      var sd = Math.sqrt(vsum/(rets.length-1));
+      macro.crude = { vol10Pct: Math.round(sd*100)/100, sessions: rets.length, status:"DELAYED", lastBarTs: cc[cc.length-1].t || null };
+    }
+  }catch(e){ macro.crude = null; }
+
   if(vixHistory && vixHistory.points) indexHistory.VIX = { status:vixHistory.status, points:vixHistory.points, candles:vixHistory.candles, sessions:vixHistory.sessions };
 
   return res.status(200).json({
@@ -342,6 +391,8 @@ export default async function handler(req, res){
     indexHistory:indexHistory,
     global:global,
     sectors:sectors,
+    directionHistory:directionHistory,
+    macro:macro,
     unavailable:{
       breadth:"UNAVAILABLE",  // no verified advance/decline provider connected
       fiiDii:"UNAVAILABLE",   // T+1 delayed, not connected, never labeled live

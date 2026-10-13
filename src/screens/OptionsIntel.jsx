@@ -1,4 +1,4 @@
-import { t } from "../i18n/translations";
+import { t, useLang, termHelp } from "../i18n/translations";
 import { useTheme } from "../theme/ThemeProvider";
 // BreakoutPro - OptionsIntel.jsx
 // Options Intelligence. No verified options-chain provider exists anywhere
@@ -12,6 +12,7 @@ var UP="#22C55E",DOWN="#EF4444",BLUE="#3B82F6";
 var T1="#FFFFFF",T2="#A0A7B4",T3="#5B6472";
 
 export default function OptionsIntel(props){
+  useLang();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   BD=theme.c.border; DOWN=theme.c.down;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
@@ -34,18 +35,18 @@ export default function OptionsIntel(props){
         <span style={{fontSize:16,fontWeight:900,color:T1}}>{t("options_intel")}</span>
       </div>
       <div style={{background:CARD,border:"1px solid "+BD,borderRadius:8,padding:16}}>
-        <div style={{fontSize:13,fontWeight:800,color:T2,marginBottom:10}}>Provider not connected</div>
+        <div style={{fontSize:13,fontWeight:800,color:T2,marginBottom:10}}>{t("oi.provider_none")}</div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:10}}>
           {["PCR","Max Pain","Call OI","Put OI","IV","Greeks"].map(function(label){
             return (
               <div key={label}>
-                <div style={{fontSize:10,color:T3}}>{label}</div>
+                <div title={termHelp(label)} style={{fontSize:10,color:T3}}>{label}</div>
                 <div style={{fontSize:14,fontWeight:800,color:T2}}>&#8212;</div>
               </div>
             );
           })}
         </div>
-        <div style={{fontSize:11,color:T3,lineHeight:1.6}}>Connect a verified options-chain provider to activate live PCR, Max Pain, OI, and Greeks.</div>
+        <div style={{fontSize:11,color:T3,lineHeight:1.6}}>{t("oi.provider_connect")}</div>
       </div>
     </div>
   );

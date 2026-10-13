@@ -3,6 +3,7 @@ import { useAcademyProgress } from "../hooks/useAcademyProgress";
 import { useResponsive } from "../hooks/useResponsive";
 import { GREEKS, STRATEGY_CARDS, MAX_PAIN_SAMPLE, QUIZ_QUESTIONS } from "./OptionsIntelProData";
 import { useTheme } from "../theme/ThemeProvider";
+import { t, useLang } from "../i18n/translations";
 
 // BreakoutPro - OptionsIntelPro.jsx
 // Fully offline Options Intelligence Pro. No live option chain, no fake
@@ -60,6 +61,7 @@ export default function OptionsIntelPro(props){
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   CARD=theme.c.card; BD=theme.c.border;
   T1=theme.c.text1; T2=theme.c.text2; T3=theme.c.text3; BLUE=theme.c.blue; UP=theme.c.up; R=theme.c.down; T2=theme.c.text2;
+  useLang();
   var onBack = props.onBack || function(){};
   var onOpenLiveChain = props.onOpenLiveChain || null;
   var progress = useAcademyProgress(); // same hook/storage as the rest of Academy
@@ -74,7 +76,7 @@ export default function OptionsIntelPro(props){
           <button onClick={onBack} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:44,height:44,color:T1,fontSize:16,cursor:"pointer"}}>&#8592;</button>
           <div>
             <div style={{fontSize:16,fontWeight:800,color:T1}}>Options Intelligence Pro</div>
-            <div style={{fontSize:12,color:T2}}>{onOpenLiveChain ? "Educational lessons are fully offline. Live option chain available below." : "Fully offline. Educational only. No live option chain."}</div>
+            <div style={{fontSize:12,color:T2}}>{onOpenLiveChain ? t("opt.sub_live") : t("opt.sub_off")}</div>
           </div>
         </div>
         <div style={{padding:responsive.isMobile?12:16}}>
@@ -83,8 +85,8 @@ export default function OptionsIntelPro(props){
               <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0}}>
                 <span style={{width:8,height:8,borderRadius:"50%",background:UP,flexShrink:0}}></span>
                 <div style={{minWidth:0}}>
-                  <div style={{fontSize:13,fontWeight:800,color:T1}}>View Live Option Chain</div>
-                  <div style={{fontSize:11,color:T2}}>Real DhanHQ OI, Greeks, PCR and Max Pain for NIFTY, BANK NIFTY, SENSEX, FINNIFTY - opens OI Chain</div>
+                  <div style={{fontSize:13,fontWeight:800,color:T1}}>{t("opt.live_chain")}</div>
+                  <div style={{fontSize:11,color:T2}}>{t("opt.live_chain_sub")}</div>
                 </div>
               </div>
               <span style={{color:T3,fontSize:16,flexShrink:0}}>&#8250;</span>
@@ -95,14 +97,14 @@ export default function OptionsIntelPro(props){
               <div key={s.id} onClick={function(){setSection(s.id);}} style={{background:CARD,border:"1px solid "+BD,borderRadius:14,padding:responsive.isMobile?"12px 14px":16,marginBottom:10,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}>
                 <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0}}>
                   <span style={{fontSize:16,flexShrink:0}} dangerouslySetInnerHTML={{__html:s.ic}}/>
-                  <span style={{fontSize:12,fontWeight:700,color:T1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{s.label}</span>
+                  <span style={{fontSize:12,fontWeight:700,color:T1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{t("opt.m."+s.id, s.label)}</span>
                 </div>
-                {s.id=="quiz" && quizDone ? <span style={{fontSize:11,fontWeight:700,color:BLUE,flexShrink:0}}>Completed</span> : <span style={{color:T3,fontSize:16,flexShrink:0}}>&#8250;</span>}
+                {s.id=="quiz" && quizDone ? <span style={{fontSize:11,fontWeight:700,color:BLUE,flexShrink:0}}>{t("opt.completed")}</span> : <span style={{color:T3,fontSize:16,flexShrink:0}}>&#8250;</span>}
               </div>
             );
           })}
           <div style={{background:"rgba(249,115,22,0.06)",border:"1px solid rgba(249,115,22,0.15)",borderRadius:10,padding:12,marginTop:12}}>
-            <div style={{fontSize:12,color:T2,lineHeight:1.5}}>Educational only. No live market data anywhere in this module. Not investment advice.</div>
+            <div style={{fontSize:12,color:T2,lineHeight:1.5}}>{t("opt.disclaimer")}</div>
           </div>
         </div>
       </div>
@@ -113,7 +115,7 @@ export default function OptionsIntelPro(props){
     <div style={{background:theme.c.bg,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:40}}>
       <div style={{background:CARD,padding:"12px 16px",borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",gap:12}}>
         <button onClick={function(){setSection(null);}} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:44,height:44,color:T1,fontSize:16,cursor:"pointer"}}>&#8592;</button>
-        <div style={{fontSize:14,fontWeight:800,color:T1}}>{SECTIONS.filter(function(s){return s.id==section;})[0].label}</div>
+        <div style={{fontSize:14,fontWeight:800,color:T1}}>{t("opt.m."+section, SECTIONS.filter(function(s){return s.id==section;})[0].label)}</div>
       </div>
       <div style={{padding:16}}>
         {section=="greeks" ? <GreeksLearning/> : null}
@@ -168,7 +170,7 @@ function Field(props){
 
   return (
     <div style={{marginBottom:8}}>
-      <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:4}}>{props.label.toUpperCase()}</div>
+      <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:4}}>{t("opt.f."+props.label, props.label).toUpperCase()}</div>
       <div style={{fontSize:12,color:T1,lineHeight:1.6}}>{props.text}</div>
     </div>
   );
@@ -191,30 +193,30 @@ function GreeksSimulator(){
   return (
     <div>
       <div style={{fontSize:12,color:T3,marginBottom:16,lineHeight:1.5}}>Enter practice values below. This uses a standard simplified approximation formula for educational illustration only - never a live or guaranteed value.</div>
-      <label style={labelStyle()}>Spot Price</label>
+      <label style={labelStyle()}>{t("opt.l.spot")}</label>
       <input style={inputStyle()} type="number" value={spot} onChange={function(e){setSpot(e.target.value);}}/>
-      <label style={labelStyle()}>Strike Price</label>
+      <label style={labelStyle()}>{t("opt.l.strike")}</label>
       <input style={inputStyle()} type="number" value={strike} onChange={function(e){setStrike(e.target.value);}}/>
-      <label style={labelStyle()}>Premium (reference only)</label>
+      <label style={labelStyle()}>{t("opt.l.premium")}</label>
       <input style={inputStyle()} type="number" value={premium} onChange={function(e){setPremium(e.target.value);}}/>
-      <label style={labelStyle()}>Days to Expiry</label>
+      <label style={labelStyle()}>{t("opt.l.days")}</label>
       <input style={inputStyle()} type="number" value={days} onChange={function(e){setDays(e.target.value);}}/>
-      <label style={labelStyle()}>IV (%)</label>
+      <label style={labelStyle()}>{t("opt.l.iv")}</label>
       <input style={inputStyle()} type="number" value={iv} onChange={function(e){setIv(e.target.value);}}/>
       <div style={{display:"flex",gap:8,marginBottom:12}}>
-        <button onClick={function(){setIsCall(true);}} style={{flex:1,background:isCall?BLUE:"transparent",border:"1px solid "+(isCall?BLUE:BD),borderRadius:9,padding:8,color:isCall?"#fff":T2,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit",minHeight:44}}>Call</button>
-        <button onClick={function(){setIsCall(false);}} style={{flex:1,background:!isCall?BLUE:"transparent",border:"1px solid "+(!isCall?BLUE:BD),borderRadius:9,padding:8,color:!isCall?"#fff":T2,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit",minHeight:44}}>Put</button>
+        <button onClick={function(){setIsCall(true);}} style={{flex:1,background:isCall?BLUE:"transparent",border:"1px solid "+(isCall?BLUE:BD),borderRadius:9,padding:8,color:isCall?"#fff":T2,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit",minHeight:44}}>{t("opt.call")}</button>
+        <button onClick={function(){setIsCall(false);}} style={{flex:1,background:!isCall?BLUE:"transparent",border:"1px solid "+(!isCall?BLUE:BD),borderRadius:9,padding:8,color:!isCall?"#fff":T2,fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit",minHeight:44}}>{t("opt.put")}</button>
       </div>
 
       <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:16}}>
-        <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:12}}>APPROXIMATE EDUCATIONAL IMPACT</div>
+        <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:12}}>{t("opt.impact")}</div>
         {r ? (
           <div>
-            <Row label="Approx. Delta" value={r.delta.toFixed(3)}/>
-            <Row label="Approx. Vega (per 1% IV)" value={r.vega.toFixed(3)}/>
-            <Row label="Approx. Theta (per day)" value={r.thetaPerDay.toFixed(3)} last={true}/>
+            <Row label={t("opt.r.delta")} value={r.delta.toFixed(3)}/>
+            <Row label={t("opt.r.vega")} value={r.vega.toFixed(3)}/>
+            <Row label={t("opt.r.theta")} value={r.thetaPerDay.toFixed(3)} last={true}/>
           </div>
-        ) : <div style={{fontSize:12,color:T3}}>Enter valid values above to see an approximation.</div>}
+        ) : <div style={{fontSize:12,color:T3}}>{t("opt.enter_valid")}</div>}
       </div>
     </div>
   );
@@ -287,13 +289,13 @@ function PCRLearning(){
     <div>
       <Field label="Definition" text="Put Call Ratio (PCR) is calculated as Put OI (or volume) divided by Call OI (or volume). It is an observational sentiment gauge some chart readers watch, never a guaranteed signal."/>
       <div style={{marginTop:12}}>
-        <label style={labelStyle()}>Put OI / Volume (your input)</label>
+        <label style={labelStyle()}>{t("opt.pcr_put")}</label>
         <input style={inputStyle()} type="number" value={putVal} onChange={function(e){setPutVal(e.target.value);}}/>
-        <label style={labelStyle()}>Call OI / Volume (your input)</label>
+        <label style={labelStyle()}>{t("opt.pcr_call")}</label>
         <input style={inputStyle()} type="number" value={callVal} onChange={function(e){setCallVal(e.target.value);}}/>
       </div>
       <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:16}}>
-        <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:8}}>YOUR PCR</div>
+        <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:8}}>{t("opt.your_pcr")}</div>
         <div style={{fontSize:18,fontWeight:800,color:T1}}>{pcr!=null?pcr.toFixed(2):"--"}</div>
       </div>
     </div>
@@ -319,18 +321,18 @@ function IVCrushSimulator(){
   return (
     <div>
       <Field label="Definition" text="IV Crush describes a sharp drop in implied volatility, often right after a known event like earnings, which can reduce an option's premium even if the underlying price barely moves."/>
-      <label style={labelStyle()}>Before IV (%)</label>
+      <label style={labelStyle()}>{t("opt.iv_before")}</label>
       <input style={inputStyle()} type="number" value={before} onChange={function(e){setBefore(e.target.value);}}/>
-      <label style={labelStyle()}>After IV (%)</label>
+      <label style={labelStyle()}>{t("opt.iv_after")}</label>
       <input style={inputStyle()} type="number" value={after} onChange={function(e){setAfter(e.target.value);}}/>
-      <label style={labelStyle()}>Spot (practice)</label>
+      <label style={labelStyle()}>{t("opt.spot_practice")}</label>
       <input style={inputStyle()} type="number" value={spot} onChange={function(e){setSpot(e.target.value);}}/>
-      <label style={labelStyle()}>Strike (practice)</label>
+      <label style={labelStyle()}>{t("opt.strike_practice")}</label>
       <input style={inputStyle()} type="number" value={strike} onChange={function(e){setStrike(e.target.value);}}/>
-      <label style={labelStyle()}>Days to Expiry</label>
+      <label style={labelStyle()}>{t("opt.l.days")}</label>
       <input style={inputStyle()} type="number" value={days} onChange={function(e){setDays(e.target.value);}}/>
       <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:16}}>
-        <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:8}}>APPROXIMATE PREMIUM IMPACT (vega-based)</div>
+        <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:8}}>{t("opt.premium_impact")}</div>
         <div style={{fontSize:16,fontWeight:800,color:impact!=null?(impact>=0?UP:R):T1}}>{impact!=null?(impact>=0?"+":"")+impact.toFixed(3):"--"}</div>
       </div>
     </div>
@@ -351,8 +353,8 @@ function CallPutWalls(){
       <Field label="Definition" text="A Call Wall is the strike with unusually high call open interest, sometimes studied as an area of potential resistance-side interest. A Put Wall is the strike with unusually high put open interest, sometimes studied as an area of potential support-side interest. Neither is a guarantee."/>
       <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:16,marginTop:12}}>
         <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:8}}>{MAX_PAIN_SAMPLE.label.toUpperCase()}</div>
-        <Row label="Call Wall (highest call OI)" value={"Strike "+callWall.strike}/>
-        <Row label="Put Wall (highest put OI)" value={"Strike "+putWall.strike} last={true}/>
+        <Row label={t("opt.w.call")} value={t("opt.strike_n",{n:callWall.strike})}/>
+        <Row label={t("opt.w.put")} value={t("opt.strike_n",{n:putWall.strike})} last={true}/>
       </div>
     </div>
   );
@@ -382,11 +384,11 @@ function OIBuilder(){
 
   return (
     <div>
-      <div style={{fontSize:12,color:T3,marginBottom:16,lineHeight:1.5}}>Build your own practice option chain below, then see the resulting educational read.</div>
+      <div style={{fontSize:12,color:T3,marginBottom:16,lineHeight:1.5}}>{t("opt.build_hint")}</div>
       {rows.map(function(r,i){
         return (
           <div key={i} style={{display:"flex",gap:8,marginBottom:8}}>
-            <input placeholder="Strike" style={Object.assign({},inputStyle(),{marginBottom:4})} type="number" value={r.strike} onChange={function(e){updateRow(i,"strike",e.target.value);}}/>
+            <input placeholder={t("opt.ph.strike")} style={Object.assign({},inputStyle(),{marginBottom:4})} type="number" value={r.strike} onChange={function(e){updateRow(i,"strike",e.target.value);}}/>
             <input placeholder="Call OI" style={Object.assign({},inputStyle(),{marginBottom:4})} type="number" value={r.callOI} onChange={function(e){updateRow(i,"callOI",e.target.value);}}/>
             <input placeholder="Put OI" style={Object.assign({},inputStyle(),{marginBottom:4})} type="number" value={r.putOI} onChange={function(e){updateRow(i,"putOI",e.target.value);}}/>
           </div>
@@ -396,9 +398,9 @@ function OIBuilder(){
 
       {valid.length>0 ? (
         <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:16}}>
-          <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:8}}>YOUR EDUCATIONAL READ</div>
-          <Row label="Likely resistance-side interest" value={"Strike "+callWall.strike}/>
-          <Row label="Likely support-side interest" value={"Strike "+putWall.strike} last={true}/>
+          <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:8}}>{t("opt.read_title")}</div>
+          <Row label={t("opt.res_side")} value={t("opt.strike_n",{n:callWall.strike})}/>
+          <Row label={t("opt.sup_side")} value={t("opt.strike_n",{n:putWall.strike})} last={true}/>
         </div>
       ) : null}
     </div>
@@ -457,15 +459,15 @@ function MiniQuiz(props){
     var score = QUIZ_QUESTIONS.filter(function(qq,i){ return answers[i]==qq.correct; }).length;
     return (
       <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:16,textAlign:"center"}}>
-        <div style={{fontSize:14,fontWeight:800,color:BLUE,marginBottom:8}}>Quiz Complete</div>
-        <div style={{fontSize:12,color:T2}}>{score} of {QUIZ_QUESTIONS.length} correct</div>
+        <div style={{fontSize:14,fontWeight:800,color:BLUE,marginBottom:8}}>{t("opt.quiz_done")}</div>
+        <div style={{fontSize:12,color:T2}}>{t("opt.quiz_score",{s:score,n:QUIZ_QUESTIONS.length})}</div>
       </div>
     );
   }
 
   return (
     <div>
-      <div style={{fontSize:12,color:T3,marginBottom:12}}>Question {idx+1} of {QUIZ_QUESTIONS.length}</div>
+      <div style={{fontSize:12,color:T3,marginBottom:12}}>{t("opt.quiz_q",{i:idx+1,n:QUIZ_QUESTIONS.length})}</div>
       <div style={{fontSize:14,fontWeight:700,color:T1,marginBottom:16}}>{q.q}</div>
       {q.options.map(function(opt,oi){
         var picked = answers[idx]==oi;
@@ -473,7 +475,7 @@ function MiniQuiz(props){
           <div key={oi} onClick={function(){pick(oi);}} style={{border:"1px solid "+(picked?BLUE:BD),background:picked?"rgba(59,130,246,0.1)":"transparent",borderRadius:9,padding:"12px 12px",marginBottom:8,fontSize:12,color:T1,cursor:"pointer"}}>{opt}</div>
         );
       })}
-      <button onClick={next} disabled={answers[idx]==null} style={{width:"100%",background:answers[idx]!=null?BLUE:CARD,border:"none",borderRadius:10,padding:12,color:answers[idx]!=null?"#fff":T3,fontSize:12,fontWeight:800,cursor:answers[idx]!=null?"pointer":"default",fontFamily:"inherit",marginTop:8,minHeight:44}}>{idx+1<QUIZ_QUESTIONS.length?"Next":"Finish Quiz"}</button>
+      <button onClick={next} disabled={answers[idx]==null} style={{width:"100%",background:answers[idx]!=null?BLUE:CARD,border:"none",borderRadius:10,padding:12,color:answers[idx]!=null?"#fff":T3,fontSize:12,fontWeight:800,cursor:answers[idx]!=null?"pointer":"default",fontFamily:"inherit",marginTop:8,minHeight:44}}>{idx+1<QUIZ_QUESTIONS.length?t("opt.next"):t("opt.finish")}</button>
     </div>
   );
 }

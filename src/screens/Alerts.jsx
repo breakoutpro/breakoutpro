@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { EQ, ALERT_CATEGORIES, TIMEFRAMES, VOICE_MODES, playSound, speakAlert, loadAlertSettings, saveAlertSettings } from "./AlertsData";
 import { useWatchlist } from "../hooks/useWatchlist";
 import { useSmartAlerts } from "../hooks/useSmartAlerts";
+import { t, useLang } from "../i18n/translations";
 
 import { useTheme } from "../theme/ThemeProvider";
 var BG="#050505",CARD="#101318",CARD2="#0B0E13",BD="rgba(255,255,255,0.07)",BD2="#141821";
@@ -17,6 +18,7 @@ function loadWatchlist(){
 }
 
 export default function SmartAlerts(props){
+  useLang();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   BLUE2=theme.c.blue; DOWN=theme.c.down; T2=theme.c.text2;
   BLUE=theme.c.blue; 
@@ -104,43 +106,43 @@ export default function SmartAlerts(props){
 
       {/* Header */}
       <div style={{background:CARD,padding:"16px 16px",borderBottom:"1px solid "+BD}}>
-        <div style={{fontSize:18,fontWeight:900,color:T1,marginBottom:4}}>&#128276; Smart Alerts</div>
-        <div style={{fontSize:12,color:T3}}>Watchlist: {watchlist.length} instruments &bull; {Object.keys(enabledCats).filter(function(k){return enabledCats[k];}).length} active categories</div>
+        <div style={{fontSize:18,fontWeight:900,color:T1,marginBottom:4}}>&#128276; {t("al.title")}</div>
+        <div style={{fontSize:12,color:T3}}>{t("al.sub",{n:watchlist.length,c:Object.keys(enabledCats).filter(function(k){return enabledCats[k];}).length})}</div>
       </div>
 
       {/* STATUS BANNER - read only. Master switch lives ONLY in Settings. */}
       <div style={{display:"flex",alignItems:"center",gap:8,background:master?"rgba(34,197,94,0.08)":"rgba(239,68,68,0.06)",border:"1px solid "+(master?"rgba(34,197,94,0.3)":"rgba(239,68,68,0.25)"),borderRadius:12,margin:"12px 16px 0",padding:"12px 16px"}}>
         <span style={{width:9,height:9,borderRadius:"50%",background:master?UP:DOWN,flexShrink:0}}></span>
         <div>
-          <div style={{fontSize:14,fontWeight:800,color:master?UP:DOWN}}>Smart Alerts {master?"Enabled":"Disabled"}</div>
-          <div style={{fontSize:12,color:T3,marginTop:4}}>{master?"Scanning, voice, notifications and bubble active":"Enable in Settings to resume observation"}</div>
+          <div style={{fontSize:14,fontWeight:800,color:master?UP:DOWN}}>{master?t("al.enabled"):t("al.disabled")}</div>
+          <div style={{fontSize:12,color:T3,marginTop:4}}>{master?t("al.on_note"):t("al.off_note")}</div>
         </div>
       </div>
 
       {!master?(
         <div style={{padding:"40px 24px",textAlign:"center"}}>
           <div style={{fontSize:32,marginBottom:12}} dangerouslySetInnerHTML={{__html:"&#128277;"}}/>
-          <div style={{fontSize:16,fontWeight:800,color:T1,marginBottom:8}}>Smart Alerts Disabled</div>
-          <div style={{fontSize:12,color:T3,lineHeight:1.6,maxWidth:260,margin:"0 auto"}}>Scanning, voice, notifications and the floating bubble are all off. Turn on Smart Alerts in Settings to resume educational observation.</div>
+          <div style={{fontSize:16,fontWeight:800,color:T1,marginBottom:8}}>{t("al.disabled")}</div>
+          <div style={{fontSize:12,color:T3,lineHeight:1.6,maxWidth:260,margin:"0 auto"}}>{t("al.off_body")}</div>
         </div>
       ):(
       <div>
       {/* STATUS SUMMARY */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,padding:"12px 16px 0"}}>
-        <Stat label="Watching" value={watchlist.length+" Stocks"} tone="blue"/>
-        <Stat label="Scanning" value={master?"Running":"Stopped"} tone={master?"up":"muted"}/>
-        <Stat label="Timeframe" value={timeframe} tone="gold"/>
-        <Stat label="Voice" value={voiceMode=="silent"?"OFF":"ON"} tone={voiceMode=="silent"?"muted":"up"}/>
-        <Stat label="Notifications" value={master?"ON":"OFF"} tone={master?"up":"muted"}/>
-        <Stat label="Priority" value={voiceMode=="priority"?"Priority":voiceMode=="silent"?"Normal":"Voice"} tone="blue"/>
+        <Stat label={t("al.stat.watching")} value={t("al.stat.stocks",{n:watchlist.length})} tone="blue"/>
+        <Stat label={t("al.stat.scanning")} value={master?t("al.stat.running"):t("al.stat.stopped")} tone={master?"up":"muted"}/>
+        <Stat label={t("al.tab.tf")} value={timeframe} tone="gold"/>
+        <Stat label={t("al.tab.voice")} value={voiceMode=="silent"?t("al.off"):t("al.on")} tone={voiceMode=="silent"?"muted":"up"}/>
+        <Stat label={t("al.stat.notif")} value={master?t("al.on"):t("al.off")} tone={master?"up":"muted"}/>
+        <Stat label={t("al.stat.priority")} value={voiceMode=="priority"?t("al.stat.priority"):voiceMode=="silent"?t("al.stat.normal"):t("al.tab.voice")} tone="blue"/>
       </div>
 
       {/* Top tabs */}
       <div style={{display:"flex",borderBottom:"1px solid "+BD,background:CARD}}>
-        {["feed","voice","categories","timeframe"].map(function(t){
-          var labels={feed:"&#128200; Feed",voice:"&#127908; Voice",categories:"&#9881;&#65039; Alert Types",timeframe:"&#9203; Timeframe"};
+        {["feed","voice","categories","timeframe"].map(function(tbk){
+          var labels={feed:"&#128200; "+t("al.tab.feed"),voice:"&#127908; "+t("al.tab.voice"),categories:"&#9881;&#65039; "+t("al.tab.cats"),timeframe:"&#9203; "+t("al.tab.tf")};
           return (
-            <button key={t} onClick={function(){setActiveTab(t);}} style={{flex:1,background:"none",border:"none",borderBottom:activeTab==t?"2px solid "+BLUE2:"2px solid transparent",padding:"12px 4px",color:activeTab==t?BLUE2:T3,fontSize:12,fontWeight:activeTab==t?700:500,cursor:"pointer",fontFamily:"inherit"}} dangerouslySetInnerHTML={{__html:labels[t]}}/>
+            <button key={tbk} onClick={function(){setActiveTab(tbk);}} style={{flex:1,minWidth:0,background:"none",border:"none",borderBottom:activeTab==tbk?"2px solid "+BLUE2:"2px solid transparent",padding:"12px 4px",color:activeTab==tbk?BLUE2:T3,fontSize:12,fontWeight:activeTab==tbk?700:500,cursor:"pointer",fontFamily:"inherit",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} dangerouslySetInnerHTML={{__html:labels[tbk]}}/>
           );
         })}
       </div>
@@ -152,7 +154,7 @@ export default function SmartAlerts(props){
         {/* VOICE MODE TAB */}
         {activeTab=="voice"&&(
           <div>
-            <div style={{fontSize:12,fontWeight:700,color:T2,marginBottom:12}}>Select Alert Mode</div>
+            <div style={{fontSize:12,fontWeight:700,color:T2,marginBottom:12}}>{t("al.pick_mode")}</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
               {VOICE_MODES.map(function(vm){
                 var act=voiceMode==vm.id;
@@ -174,7 +176,7 @@ export default function SmartAlerts(props){
         {/* CATEGORIES TAB */}
         {activeTab=="categories"&&(
           <div>
-            <div style={{fontSize:12,fontWeight:700,color:T2,marginBottom:12}}>Enable / Disable Alert Types</div>
+            <div style={{fontSize:12,fontWeight:700,color:T2,marginBottom:12}}>{t("al.toggle_types")}</div>
             {ALERT_CATEGORIES.map(function(cat){
               var on=!!enabledCats[cat.id];
               return (
@@ -182,15 +184,15 @@ export default function SmartAlerts(props){
                   <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px"}}>
                     <span style={{fontSize:16}} dangerouslySetInnerHTML={{__html:cat.icon}}/>
                     <div style={{flex:1}}>
-                      <div style={{fontSize:12,fontWeight:700,color:T1}}>{cat.label}</div>
-                      <div style={{fontSize:12,color:T3,marginTop:4}}>{cat.types.length} alert types</div>
+                      <div style={{fontSize:12,fontWeight:700,color:T1}}>{t("al.cat."+cat.id, cat.label)}</div>
+                      <div style={{fontSize:12,color:T3,marginTop:4}}>{t("al.n_types",{n:cat.types.length})}</div>
                     </div>
                     <button onClick={function(){toggleCat(cat.id);}} style={{background:on?UP:CARD2,border:"1px solid "+(on?UP:BD2),borderRadius:20,padding:"4px 16px",color:on?"#fff":T2,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{on?"ON":"OFF"}</button>
                   </div>
                   {on&&(
                     <div style={{padding:"0 14px 10px",display:"flex",flexWrap:"wrap",gap:4}}>
-                      {cat.types.map(function(t){
-                        return <span key={t} style={{background:"rgba(59,130,246,0.08)",border:"1px solid rgba(59,130,246,0.2)",borderRadius:6,padding:"4px 8px",fontSize:12,color:BLUE2}}>{t}</span>;
+                      {cat.types.map(function(ty){
+                        return <span key={ty} style={{background:"rgba(59,130,246,0.08)",border:"1px solid rgba(59,130,246,0.2)",borderRadius:6,padding:"4px 8px",fontSize:12,color:BLUE2}}>{ty}</span>;
                       })}
                     </div>
                   )}
@@ -203,7 +205,7 @@ export default function SmartAlerts(props){
         {/* TIMEFRAME TAB */}
         {activeTab=="timeframe"&&(
           <div>
-            <div style={{fontSize:12,fontWeight:700,color:T2,marginBottom:12}}>Select Timeframe</div>
+            <div style={{fontSize:12,fontWeight:700,color:T2,marginBottom:12}}>{t("al.pick_tf")}</div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
               {TIMEFRAMES.map(function(tf){
                 var act=timeframe==tf.id;
@@ -212,7 +214,7 @@ export default function SmartAlerts(props){
                 );
               })}
             </div>
-            <div style={{fontSize:12,color:T3,marginTop:12,padding:"8px 12px",background:"rgba(255,255,255,0.03)",borderRadius:10}}>Selected: <span style={{color:BLUE2,fontWeight:700}}>{TIMEFRAMES.find(function(t){return t.id==timeframe;}).label}</span> chart for pattern detection</div>
+            <div style={{fontSize:12,color:T3,marginTop:12,padding:"8px 12px",background:"rgba(255,255,255,0.03)",borderRadius:10}}>{t("al.selected_tf",{tf:t("al.tf."+timeframe, TIMEFRAMES.find(function(x){return x.id==timeframe;}).label)})}</div>
           </div>
         )}
 
@@ -224,19 +226,19 @@ export default function SmartAlerts(props){
                 <div style={{width:60,height:60,borderRadius:"50%",background:"rgba(37,99,235,0.08)",border:"1px solid rgba(37,99,235,0.2)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px"}}>
                   <span style={{fontSize:22}} dangerouslySetInnerHTML={{__html:"&#128276;"}}/>
                 </div>
-                <div style={{fontSize:14,fontWeight:800,color:T1,marginBottom:8}}>Alerts Unavailable</div>
-                <div style={{fontSize:12,color:T3,lineHeight:1.6,maxWidth:250,margin:"0 auto"}}>Real market alerts are being rebuilt - check back soon.</div>
+                <div style={{fontSize:14,fontWeight:800,color:T1,marginBottom:8}}>{t("al.unavail")}</div>
+                <div style={{fontSize:12,color:T3,lineHeight:1.6,maxWidth:250,margin:"0 auto"}}>{t("al.unavail_body")}</div>
               </div>
             ):(
               groupAlerts(alerts).map(function(grp){
                 if(!grp.items.length) return null;
                 return (
                   <div key={grp.label}>
-                    <div style={{fontSize:12,fontWeight:800,color:T3,letterSpacing:0.6,margin:"16px 4px 8px"}}>{grp.label}</div>
+                    <div style={{fontSize:12,fontWeight:800,color:T3,letterSpacing:0.6,margin:"16px 4px 8px"}}>{t("al.grp."+grp.label, grp.label)}</div>
                     {grp.items.map(function(al){
                       var pc=alertPriority(al);
                       var col=pc.col;
-                      var confTier=al.conf>=80?"High":al.conf>=65?"Medium":"Low";
+                      var confTier=al.conf>=80?"High":al.conf>=65?"Medium":"Low"; // stays English (logic); shown via t()
                       var confCol=al.conf>=80?UP:al.conf>=65?BLUE:DOWN;
                       var inWl=wl.has(al.sym);
                       return (
@@ -248,28 +250,28 @@ export default function SmartAlerts(props){
                             <div style={{flex:1,minWidth:0}}>
                               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
                                 <span style={{fontSize:12,fontWeight:800,color:T1}}>{al.sym}</span>
-                                <span style={{background:col+"22",borderRadius:5,padding:"4px 8px",fontSize:12,fontWeight:800,color:col}}>{pc.label}</span>
+                                <span style={{background:col+"22",borderRadius:5,padding:"4px 8px",fontSize:12,fontWeight:800,color:col}} title={t("al.k."+(pc.cat||"default"), pc.explain)}>{pc.label}</span>
                                 {al.unread?<span style={{width:6,height:6,borderRadius:"50%",background:BLUE2,flexShrink:0}}></span>:null}
                               </div>
                               <div style={{fontSize:12,color:T3}}>{al.type}</div>
                             </div>
                             <div style={{textAlign:"right",flexShrink:0}}>
                               <div style={{fontSize:12,color:T3}}>{al.time}</div>
-                              <div style={{fontSize:12,fontWeight:800,color:confCol,marginTop:4}}>{confTier}</div>
+                              <div style={{fontSize:12,fontWeight:800,color:confCol,marginTop:4}}>{t("al.conf."+confTier)}</div>
                             </div>
                           </div>
                           {/* trading details */}
                           <div style={{display:"flex",gap:12,marginTop:8,paddingTop:8,borderTop:"1px solid "+BD2}}>
-                            <div><div style={{fontSize:12,color:T3}}>Trigger</div><div style={{fontSize:12,fontWeight:700,color:T1,fontFamily:"monospace"}}>{al.trig?"\u20B9"+al.trig:"--"}</div></div>
-                            <div><div style={{fontSize:12,color:T3}}>Current</div><div style={{fontSize:12,fontWeight:700,color:T1,fontFamily:"monospace"}}>{al.cur?"\u20B9"+al.cur:"--"}</div></div>
-                            <div><div style={{fontSize:12,color:T3}}>Change</div><div style={{fontSize:12,fontWeight:700,color:parseFloat(al.chg)>=0?UP:DOWN}}>{al.chg?(parseFloat(al.chg)>=0?"+":"")+al.chg+"%":"--"}</div></div>
+                            <div><div style={{fontSize:12,color:T3}}>{t("al.trigger")}</div><div style={{fontSize:12,fontWeight:700,color:T1,fontFamily:"monospace"}}>{al.trig?"\u20B9"+al.trig:"--"}</div></div>
+                            <div><div style={{fontSize:12,color:T3}}>{t("al.current")}</div><div style={{fontSize:12,fontWeight:700,color:T1,fontFamily:"monospace"}}>{al.cur?"\u20B9"+al.cur:"--"}</div></div>
+                            <div><div style={{fontSize:12,color:T3}}>{t("al.change")}</div><div style={{fontSize:12,fontWeight:700,color:parseFloat(al.chg)>=0?UP:DOWN}}>{al.chg?(parseFloat(al.chg)>=0?"+":"")+al.chg+"%":"--"}</div></div>
                             <div style={{flex:1}}></div>
-                            <div style={{textAlign:"right"}}><div style={{fontSize:12,color:T3}}>Volume</div><div style={{fontSize:12,fontWeight:700,color:al.vol?UP:T3}}>{al.vol?"Confirmed":"Normal"}</div></div>
+                            <div style={{textAlign:"right"}}><div style={{fontSize:12,color:T3}}>{t("al.volume")}</div><div style={{fontSize:12,fontWeight:700,color:al.vol?UP:T3}}>{al.vol?t("al.vol_conf"):t("al.vol_norm")}</div></div>
                           </div>
                           {/* actions */}
                           <div style={{display:"flex",gap:8,marginTop:8}}>
-                            <button onClick={function(){setTab("markets");}} style={{flex:1,background:"rgba(59,130,246,0.12)",border:"1px solid rgba(59,130,246,0.3)",borderRadius:9,padding:"8px",color:BLUE2,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>View Chart</button>
-                            <button onClick={function(){ if(!inWl) wl.add(al.sym); dismissAlert(al.id); }} style={{flex:1,background:inWl?"rgba(34,197,94,0.12)":CARD2,border:"1px solid "+(inWl?"rgba(34,197,94,0.3)":BD),borderRadius:9,padding:"8px",color:inWl?UP:T2,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{inWl?"In Watchlist":"Add to Watchlist"}</button>
+                            <button onClick={function(){setTab("markets");}} style={{flex:1,background:"rgba(59,130,246,0.12)",border:"1px solid rgba(59,130,246,0.3)",borderRadius:9,padding:"8px",color:BLUE2,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{t("al.view_chart")}</button>
+                            <button onClick={function(){ if(!inWl) wl.add(al.sym); dismissAlert(al.id); }} style={{flex:1,background:inWl?"rgba(34,197,94,0.12)":CARD2,border:"1px solid "+(inWl?"rgba(34,197,94,0.3)":BD),borderRadius:9,padding:"8px",color:inWl?UP:T2,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{inWl?t("al.in_wl"):t("al.add_wl")}</button>
                             <button onClick={function(){dismissAlert(al.id);}} style={{background:CARD2,border:"1px solid "+BD,borderRadius:12,padding:"12px 24px",color:T3,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>&#10005;</button>
                           </div>
                         </div>
@@ -316,6 +318,7 @@ function alertPriority(al){
     candle:{col:"#F59E0B",label:"PATTERN",icon:"&#128208;",explain:"A candlestick pattern was detected"}
   };
   var d=map[cat]||{col:up?"#22C55E":"#EF4444",label:(al.category||"ALERT").toUpperCase(),icon:"&#128200;",explain:"Educational observation detected"};
+  d.cat=map[cat]?cat:"default";
   return d;
 }
 

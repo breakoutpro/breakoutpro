@@ -1,7 +1,7 @@
 import { useState } from "react";
-// LanguageSelector import removed - English-only private beta.
+import LanguageSelector from "../components/LanguageSelector";
 import LegalModals from "./LegalModals";
-import { getLang } from "../i18n/translations";
+import { t, useLang, LANGUAGES } from "../i18n/translations";
 import VoiceAlertWidget from "./VoiceAlertWidget";
 import SettingsAlerts from "./SettingsAlerts";
 import { useTheme } from "../theme/ThemeProvider";
@@ -106,7 +106,8 @@ export default function SettingsScreen(props) {
   }
   var [showPrivacy, setShowPrivacy] = useState(false);
   var [showSebi, setShowSebi] = useState(false);
-  var [curLang, setCurLang] = useState(getLang());
+  var curLang = useLang();
+  var curLangRow = LANGUAGES.filter(function(l){ return l.code==curLang; })[0] || LANGUAGES[0];
   var [st, setSt] = useState(function() {
     var saved = loadSettings();
     return Object.assign({}, defaults, saved);
@@ -126,7 +127,7 @@ export default function SettingsScreen(props) {
       Notification.requestPermission().then(function(perm) {
         if (perm == "granted") {
           update("pushNotif", true);
-          try { new Notification("Breakout Pro", {body:"Notifications enabled! You will get live alerts."}); } catch(e) {}
+          try { new Notification("Breakout Pro", {body:t("set.notif_enabled_msg")}); } catch(e) {}
         }
       });
     }
@@ -141,19 +142,19 @@ export default function SettingsScreen(props) {
       <div style={{background:CB,padding:"16px 16px",borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",gap:12}}>
         <button onClick={function(){props.setTab&&props.setTab("home");}} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:44,height:44,color:T1,fontSize:14,cursor:"pointer",flexShrink:0}}>&#8592;</button>
         <div>
-          <div style={{fontSize:18,fontWeight:900,color:T1}}>Settings</div>
+          <div style={{fontSize:18,fontWeight:900,color:T1}}>{t("set.title")}</div>
           <div style={{fontSize:12,color:T2,marginTop:4}}>Breakout Pro v1.0</div>
         </div>
       </div>
 
       {/* Theme Settings */}
       <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,margin:"16px 16px 0",padding:16}}>
-        <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:12}}>APPEARANCE</div>
+        <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:12}}>{t("set.appearance")}</div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
           {[
-            {id:"light", label:"Light"},
-            {id:"dark", label:"Dark"},
-            {id:"system", label:"System Default"}
+            {id:"light", label:t("set.light")},
+            {id:"dark", label:t("set.dark")},
+            {id:"system", label:t("set.system")}
           ].map(function(m){
             var act = theme.mode==m.id;
             return (
@@ -173,59 +174,63 @@ export default function SettingsScreen(props) {
           <div style={{fontSize:12,color:T2,marginTop:4}}>{user.email || "admin@breakoutpro.in"}</div>
           <div style={{marginTop:8}}>
             {isPrem
-              ? <span style={{background:"rgba(37,99,235,0.15)",color:BLUE,borderRadius:20,padding:"4px 12px",fontSize:12,fontWeight:700,border:"1px solid rgba(37,99,235,0.3)"}}>PRO Member</span>
-              : <span style={{background:"rgba(255,255,255,0.06)",color:T2,borderRadius:20,padding:"4px 12px",fontSize:12,border:"1px solid "+BD}}>Free Plan</span>
+              ? <span style={{background:"rgba(37,99,235,0.15)",color:BLUE,borderRadius:20,padding:"4px 12px",fontSize:12,fontWeight:700,border:"1px solid rgba(37,99,235,0.3)"}}>{t("set.pro_member")}</span>
+              : <span style={{background:"rgba(255,255,255,0.06)",color:T2,borderRadius:20,padding:"4px 12px",fontSize:12,border:"1px solid "+BD}}>{t("set.free_plan")}</span>
             }
           </div>
         </div>
         {!isPrem ? (
-          <button onClick={function(){props.setTab && props.setTab("sub");}} style={{background:BLUE,border:"none",borderRadius:12,padding:"12px 24px",color:"#000",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>Upgrade</button>
+          <button onClick={function(){props.setTab && props.setTab("sub");}} style={{background:BLUE,border:"none",borderRadius:12,padding:"12px 24px",color:"#000",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{t("set.upgrade")}</button>
         ) : null}
       </div>
 
       {/* VOICE SMART ALERTS */}
-      <SectionHeader title="VOICE SMART ALERTS"/>
+      <SectionHeader title={t("set.voice_alerts")}/>
       <VoiceAlertWidget/>
 
       {/* ALERTS SECTION */}
-      <SectionHeader title="ALERT SETTINGS"/>
+      <SectionHeader title={t("set.alert_settings")}/>
       <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,margin:"0 14px",overflow:"hidden"}}>
-        <SettingRow icon="&#128276;" label="Alert Sound" sub="Bell sound on every alert" toggle={st.alertSound} onChange={function(){toggle("alertSound");}} iconBg="rgba(59,130,246,0.1)" iconBorder="rgba(59,130,246,0.2)"/>
-        <SettingRow icon="&#128243;" label="Vibration" sub="Phone vibrates on alert" toggle={st.alertVibrate} onChange={function(){toggle("alertVibrate");}} iconBg="rgba(59,130,246,0.1)" iconBorder="rgba(59,130,246,0.2)"/>
+        <SettingRow icon="&#128276;" label={t("set.alert_sound")} sub={t("set.alert_sound_sub")} toggle={st.alertSound} onChange={function(){toggle("alertSound");}} iconBg="rgba(59,130,246,0.1)" iconBorder="rgba(59,130,246,0.2)"/>
+        <SettingRow icon="&#128243;" label={t("set.vibration")} sub={t("set.vibration_sub")} toggle={st.alertVibrate} onChange={function(){toggle("alertVibrate");}} iconBg="rgba(59,130,246,0.1)" iconBorder="rgba(59,130,246,0.2)"/>
         <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderBottom:"1px solid "+BD}}>
           <div style={{width:36,height:36,borderRadius:10,background:"rgba(37,99,235,0.1)",border:"1px solid rgba(37,99,235,0.2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
             <span style={{fontSize:16}} dangerouslySetInnerHTML={{__html:"&#128241;"}}/>
           </div>
           <div style={{flex:1}}>
-            <div style={{fontSize:12,fontWeight:600,color:T1}}>Push Notifications</div>
+            <div style={{fontSize:12,fontWeight:600,color:T1}}>{t("set.push")}</div>
             <div style={{fontSize:12,color:T2,marginTop:4}}>
-              {notifPerm=="granted"?"Enabled - alerts come even when app is closed":notifPerm=="denied"?"Blocked in browser settings":"Tap to enable phone notifications"}
+              {notifPerm=="granted"?t("set.push_on"):notifPerm=="denied"?t("set.push_denied"):t("set.push_tap")}
             </div>
           </div>
           {notifPerm=="granted"
-            ? <div style={{fontSize:12,fontWeight:700,color:G2}}>ON</div>
-            : <button onClick={requestNotif} style={{background:notifPerm=="denied"?R:BLUE,border:"none",borderRadius:8,padding:"8px 12px",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{notifPerm=="denied"?"Blocked":"Enable"}</button>
+            ? <div style={{fontSize:12,fontWeight:700,color:G2}}>{t("set.on")}</div>
+            : <button onClick={requestNotif} style={{background:notifPerm=="denied"?R:BLUE,border:"none",borderRadius:8,padding:"8px 12px",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{notifPerm=="denied"?t("set.blocked"):t("set.enable")}</button>
           }
         </div>
-        <SettingRow icon="&#9200;" label="Market Open Reminder" sub="9:00 AM reminder before market opens" toggle={st.marketReminder} onChange={function(){toggle("marketReminder");}} iconBg="rgba(139,92,246,0.1)" iconBorder="rgba(139,92,246,0.2)"/>
+        <SettingRow icon="&#9200;" label={t("set.reminder")} sub={t("set.reminder_sub")} toggle={st.marketReminder} onChange={function(){toggle("marketReminder");}} iconBg="rgba(139,92,246,0.1)" iconBorder="rgba(139,92,246,0.2)"/>
       </div>
 
       {/* ALERT TYPES */}
-      <SectionHeader title="ALERT TYPES"/>
+      <SectionHeader title={t("set.alert_types")}/>
       <SettingsAlerts st={st} toggle={toggle}/>
 
       {/* APP SETTINGS */}
-      <SectionHeader title="APP SETTINGS"/>
+      <SectionHeader title={t("set.app_settings")}/>
       <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,margin:"0 14px",overflow:"hidden"}}>
-        {/* Language selector removed - app is English-only for private beta. */}
+        {/* Language: opens the shared selector; applies instantly, no reload. */}
+        <div onClick={function(){setShowLang(true);}} style={{cursor:"pointer"}}>
+          <SettingRow icon="&#127760;" label={t("set.language_row")} sub={t("set.language_sub")} value={curLangRow.native} arrow={true} iconBg="rgba(59,130,246,0.1)" iconBorder="rgba(59,130,246,0.2)"/>
+        </div>
+        {showLang?<LanguageSelector onClose={function(){setShowLang(false);}} onUpgrade={function(){setShowLang(false); props.setTab && props.setTab("sub");}}/>:null}
 
         {/* BRIGHTNESS CONTROL */}
         <div style={{padding:"12px 16px",borderBottom:"1px solid "+BD}}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
             <span style={{fontSize:14}} dangerouslySetInnerHTML={{__html:"&#9728;"}}/>
             <div style={{flex:1}}>
-              <div style={{fontSize:12,fontWeight:600,color:T1}}>Brightness</div>
-              <div style={{fontSize:12,color:T2}}>Adjust overall UI brightness</div>
+              <div style={{fontSize:12,fontWeight:600,color:T1}}>{t("set.brightness")}</div>
+              <div style={{fontSize:12,color:T2}}>{t("set.brightness_sub")}</div>
             </div>
             <span style={{fontSize:12,fontWeight:800,color:BLUE}}>{brightness}%</span>
           </div>
@@ -240,21 +245,21 @@ export default function SettingsScreen(props) {
         <LegalModals showPrivacy={showPrivacy} showSebi={showSebi} onClosePrivacy={function(){setShowPrivacy(false);}} onCloseSebi={function(){setShowSebi(false);}}/>
 
         <div style={{padding:"12px 16px",borderBottom:"1px solid "+BD}}>
-          <div style={{fontSize:12,fontWeight:600,color:T1,marginBottom:8}}>Alert Frequency</div>
+          <div style={{fontSize:12,fontWeight:600,color:T1,marginBottom:8}}>{t("set.alert_freq")}</div>
           <div style={{display:"flex",gap:8}}>
             {["All","High Only","Critical"].map(function(f){
               var act=st.alertFreq==f;
-              return <button key={f} onClick={function(){update("alertFreq",f);}} style={{background:act?BLUE:"rgba(255,255,255,0.05)",border:"1px solid "+(act?BLUE:BD),borderRadius:20,padding:"4px 12px",color:act?"#fff":T2,fontSize:12,fontWeight:act?700:400,cursor:"pointer",fontFamily:"inherit"}}>{f}</button>;
+              return <button key={f} onClick={function(){update("alertFreq",f);}} style={{background:act?BLUE:"rgba(255,255,255,0.05)",border:"1px solid "+(act?BLUE:BD),borderRadius:20,padding:"4px 12px",color:act?"#fff":T2,fontSize:12,fontWeight:act?700:400,cursor:"pointer",fontFamily:"inherit"}}>{t("set.freq."+f, f)}</button>;
             })}
           </div>
         </div>
         <div style={{padding:"12px 16px",borderBottom:"1px solid "+BD}}>
-          <div style={{fontSize:12,fontWeight:600,color:T1,marginBottom:4}}>Watchlist Scan Interval</div>
-          <div style={{fontSize:12,color:T2,marginBottom:8}}>How often to check your watchlist stocks for candlestick patterns</div>
+          <div style={{fontSize:12,fontWeight:600,color:T1,marginBottom:4}}>{t("set.scan_interval")}</div>
+          <div style={{fontSize:12,color:T2,marginBottom:8}}>{t("set.scan_interval_sub")}</div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-            {[["1","1 min"],["3","3 min"],["5","5 min"],["10","10 min"]].map(function(f){
+            {[["1","1"],["3","3"],["5","5"],["10","10"]].map(function(f){
               var act=st.scanInterval==f[0];
-              return <button key={f[0]} onClick={function(){update("scanInterval",f[0]);}} style={{background:act?BLUE:"rgba(255,255,255,0.05)",border:"1px solid "+(act?BLUE:BD),borderRadius:20,padding:"4px 12px",color:act?"#fff":T2,fontSize:12,fontWeight:act?700:400,cursor:"pointer",fontFamily:"inherit"}}>{f[1]}</button>;
+              return <button key={f[0]} onClick={function(){update("scanInterval",f[0]);}} style={{background:act?BLUE:"rgba(255,255,255,0.05)",border:"1px solid "+(act?BLUE:BD),borderRadius:20,padding:"4px 12px",color:act?"#fff":T2,fontSize:12,fontWeight:act?700:400,cursor:"pointer",fontFamily:"inherit"}}>{f[1]+" "+t("set.min")}</button>;
             })}
           </div>
         </div>
@@ -283,23 +288,23 @@ export default function SettingsScreen(props) {
       ):null}
 
       {/* ABOUT */}
-      <SectionHeader title="ABOUT"/>
+      <SectionHeader title={t("set.about")}/>
       <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,margin:"0 14px",overflow:"hidden"}}>
-        <SettingRow icon="&#8505;" label="App Version" value="v1.0.0" iconBg="rgba(255,255,255,0.05)" iconBorder={BD}/>
+        <SettingRow icon="&#8505;" label={t("set.app_version")} value="v1.0.0" iconBg="rgba(255,255,255,0.05)" iconBorder={BD}/>
         <div onClick={function(){setShowPrivacy(true);}} style={{cursor:"pointer"}}>
-          <SettingRow icon="&#128196;" label="Privacy Policy" arrow={true} iconBg="rgba(255,255,255,0.05)" iconBorder={BD}/>
+          <SettingRow icon="&#128196;" label={t("set.privacy")} arrow={true} iconBg="rgba(255,255,255,0.05)" iconBorder={BD}/>
         </div>
         <div onClick={function(){setShowSebi(true);}} style={{cursor:"pointer"}}>
-          <SettingRow icon="&#128737;" label="SEBI Disclaimer" arrow={true} iconBg="rgba(249,115,22,0.1)" iconBorder="rgba(249,115,22,0.2)"/>
+          <SettingRow icon="&#128737;" label={t("set.sebi")} arrow={true} iconBg="rgba(249,115,22,0.1)" iconBorder="rgba(249,115,22,0.2)"/>
         </div>
         <div style={{padding:"12px 16px",cursor:"pointer"}} onClick={function(){props.onLogout && props.onLogout();}}>
-          <div style={{fontSize:12,fontWeight:700,color:R,textAlign:"center"}}>Logout</div>
+          <div style={{fontSize:12,fontWeight:700,color:R,textAlign:"center"}}>{t("set.logout")}</div>
         </div>
       </div>
 
       {/* Disclaimer */}
       <div style={{background:"rgba(249,115,22,0.08)",border:"1px solid rgba(249,115,22,0.2)",borderRadius:10,margin:"16px 16px 0",padding:12}}>
-        <div style={{fontSize:12,color:theme.c.warn,lineHeight:1.7}}>Breakout Pro is for educational purposes only. Not SEBI registered. Not investment advice. All alerts are educational signals only.</div>
+        <div style={{fontSize:12,color:theme.c.warn,lineHeight:1.7}}>{t("set.disclaimer")}</div>
       </div>
 
     </div>

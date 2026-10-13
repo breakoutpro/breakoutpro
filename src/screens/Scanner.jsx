@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "../theme/ThemeProvider";
 import { genSpark } from "../utils/genSpark";
+import { t, useLang } from "../i18n/translations";
 
 var DB = "#050505";
 var CB = "#101318";
@@ -85,6 +86,7 @@ function SparkLine(props) {
 }
 
 function StockDetail(props) {
+  useLang();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   G=theme.c.up; G2=theme.c.up; R=theme.c.down; T1=theme.c.text1; T2=theme.c.text2;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
@@ -121,7 +123,7 @@ function StockDetail(props) {
             <SparkLine data={spark} color={s.up?G:R} w={90} h={50}/>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-            {[["52W High","Rs"+d.high52],["52W Low","Rs"+d.low52],["P/E Ratio",d.pe],["P/B Ratio",d.pb],["Market Cap",d.mcap],["Sector",d.sector]].map(function(r){
+            {[["52W High","Rs"+d.high52],["52W Low","Rs"+d.low52],[t("sc.pe"),d.pe],[t("sc.pb"),d.pb],[t("sc.mcap"),d.mcap],[t("sc.sector"),d.sector]].map(function(r){
               return (
                 <div key={r[0]} style={{background:"rgba(255,255,255,0.04)",borderRadius:8,padding:"8px 12px"}}>
                   <div style={{fontSize:12,color:T2,marginBottom:4}}>{r[0]}</div>
@@ -133,19 +135,19 @@ function StockDetail(props) {
         </div>
 
         <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,padding:16,marginBottom:16}}>
-          <div style={{fontSize:12,fontWeight:700,color:T1,marginBottom:12}}>Scanner Signal</div>
+          <div style={{fontSize:12,fontWeight:700,color:T1,marginBottom:12}}>{t("sc.signal_title")}</div>
           <div style={{background:s.up?"rgba(0,200,83,0.1)":"rgba(239,68,68,0.1)",border:"1px solid "+(s.up?"rgba(0,200,83,0.3)":"rgba(239,68,68,0.3)"),borderRadius:10,padding:12}}>
-            <div style={{fontSize:12,fontWeight:700,color:s.up?G2:R,marginBottom:4}}>{s.up?"Bullish Signal":"Bearish Signal"}</div>
+            <div style={{fontSize:12,fontWeight:700,color:s.up?G2:R,marginBottom:4}}>{s.up?t("sc.bull_signal"):t("sc.bear_signal")}</div>
             <div style={{fontSize:12,color:T2,lineHeight:1.7}}>
               {s.up
-                ?"Price showing strength with above-average volume. Momentum is bullish. Watch for continuation above current levels."
-                :"Price showing weakness with above-average volume. Momentum is bearish. Watch for continuation below current levels."}
+                ?t("sc.bull_text")
+                :t("sc.bear_text")}
             </div>
           </div>
         </div>
 
         <div style={{background:"rgba(249,115,22,0.08)",border:"1px solid rgba(249,115,22,0.2)",borderRadius:10,padding:12}}>
-          <div style={{fontSize:12,color:theme.c.warn,lineHeight:1.7}}>Educational only. Not SEBI registered. Not investment advice. Do your own research before trading.</div>
+          <div style={{fontSize:12,color:theme.c.warn,lineHeight:1.7}}>{t("c.edu_only_short")}</div>
         </div>
       </div>
     </div>
@@ -153,6 +155,7 @@ function StockDetail(props) {
 }
 
 export default function ScannerScreen(props) {
+  useLang();
 
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   var DB=theme.c.bg, CB=theme.c.card, BD=theme.c.border;
@@ -225,19 +228,19 @@ export default function ScannerScreen(props) {
 
       {/* Scan description */}
       <div style={{background:"rgba(37,99,235,0.05)",borderBottom:"1px solid rgba(37,99,235,0.1)",padding:"8px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <span style={{fontSize:12,color:T2}}>{activeScan.desc}</span>
-        <span style={{fontSize:12,fontWeight:700,color:BLUE}}>{results.length} found</span>
+        <span style={{fontSize:12,color:T2}}>{t("sc."+activeScan.id+".d", activeScan.desc)}</span>
+        <span style={{fontSize:12,fontWeight:700,color:BLUE}}>{results.length} {t("sc.found")}</span>
       </div>
 
       <div style={{padding:"12px 16px"}}>
         <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
-          <span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 8px",borderRadius:5,letterSpacing:0.5}}>DEMO DATA</span>
-          <span style={{fontSize:12,color:T3}}>Simulated scan results for preview. Not live market values.</span>
+          <span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 8px",borderRadius:5,letterSpacing:0.5}}>{t("c.demo_data")}</span>
+          <span style={{fontSize:12,color:T3}}>{t("sc.simulated")}</span>
         </div>
         {results.length==0?(
           <div style={{textAlign:"center",padding:"40px 0"}}>
-            <div style={{fontSize:14,color:T2,marginBottom:8}}>No stocks match this scanner</div>
-            <div style={{fontSize:12,color:T3}}>Try a different scan type</div>
+            <div style={{fontSize:14,color:T2,marginBottom:8}}>{t("sc.none")}</div>
+            <div style={{fontSize:12,color:T3}}>{t("sc.try_other")}</div>
           </div>
         ):(
           <div style={{background:CB,borderRadius:16,border:"1px solid "+BD,overflow:"hidden"}}>

@@ -6,10 +6,12 @@ import { genSpark, MiniChart, StockRow, CommodityDetail, SectorDetail } from "./
 import StockProfile from "./StockProfile";
 import IndexFullPage from "./IndexFullPage";
 import MarketsTop from "./MarketsTop";
+import { t, useLang } from "../i18n/translations";
 
 // Colors come from the theme via useTheme() inside the component.
 
 export default function MarketsScreen(props) {
+  useLang();
   var TH=useTheme().c;
   var DB=TH.bg,CB=TH.card,BD=TH.border;
   var G=TH.up,G2=TH.up,R=TH.down;
@@ -23,8 +25,8 @@ export default function MarketsScreen(props) {
 
   useEffect(function(){
     fetchLive();
-    var t = setInterval(fetchLive, 30000);
-    return function(){clearInterval(t);};
+    var pollTimer = setInterval(fetchLive, 30000);
+    return function(){clearInterval(pollTimer);};
   },[]);
 
   function fetchLive(){
@@ -125,14 +127,14 @@ export default function MarketsScreen(props) {
   });
 
   var TABS = [
-    {id:"stocks",     label:"Stocks ("+ALL_NSE_STOCKS.length+")"},
-    {id:"indices",    label:"Indices"},
-    {id:"sectors",    label:"Sectors"},
-    {id:"52w",        label:"52W H/L"},
-    {id:"circuit",    label:"Circuit"},
-    {id:"volume",     label:"Volume Leaders"},
-    {id:"delivery",   label:"Delivery"},
-    {id:"commodities",label:"Commodities"},
+    {id:"stocks",     label:t("mk.tab.stocks")+" ("+ALL_NSE_STOCKS.length+")"},
+    {id:"indices",    label:t("mk.tab.indices")},
+    {id:"sectors",    label:t("mk.tab.sectors")},
+    {id:"52w",        label:t("mk.tab.52w")},
+    {id:"circuit",    label:t("mk.tab.circuit")},
+    {id:"volume",     label:t("mk.tab.volume")},
+    {id:"delivery",   label:t("mk.tab.delivery")},
+    {id:"commodities",label:t("mk.tab.commodities")},
   ];
 
   var W52_HIGH = ALL_NSE_STOCKS.filter(function(s){ return s.up; }).slice(0,12).map(function(s){
@@ -159,16 +161,16 @@ export default function MarketsScreen(props) {
       <div style={{background:CB,padding:"12px 16px",borderBottom:"1px solid "+BD}}>
         <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",border:"1px solid "+BD,borderRadius:9,padding:"8px 12px",marginBottom:12}}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T2} strokeWidth="2.2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input style={{flex:1,background:"none",border:"none",outline:"none",fontSize:12,color:T1,fontFamily:"inherit"}} placeholder="Search stocks, sectors..." value={search} onChange={function(e){setSearch(e.target.value);}}/>
+          <input style={{flex:1,background:"none",border:"none",outline:"none",fontSize:12,color:T1,fontFamily:"inherit"}} placeholder={t("mk.search")} value={search} onChange={function(e){setSearch(e.target.value);}}/>
           {search?<button onClick={function(){setSearch("");}} style={{background:"none",border:"none",cursor:"pointer",color:T2,fontSize:12}}>X</button>:null}
         </div>
         <div style={{display:"flex",gap:8,overflowX:"auto"}}>
-          {TABS.map(function(t){
-            var act=activeTab==t.id;
-            return <button key={t.id} onClick={function(){setActiveTab(t.id);}} style={{background:act?G:"rgba(255,255,255,0.06)",border:"1px solid "+(act?G:BD),borderRadius:20,padding:"4px 12px",color:act?"#fff":T2,fontSize:12,fontWeight:act?700:500,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{t.label}</button>;
+          {TABS.map(function(tb){
+            var act=activeTab==tb.id;
+            return <button key={tb.id} onClick={function(){setActiveTab(tb.id);}} style={{background:act?G:"rgba(255,255,255,0.06)",border:"1px solid "+(act?G:BD),borderRadius:20,padding:"4px 12px",color:act?"#fff":T2,fontSize:12,fontWeight:act?700:500,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{tb.label}</button>;
           })}
           <div style={{flex:1}}></div>
-          {activeTab=="stocks"?[["pct","% Chg"],["ltp","Price"]].map(function(s){
+          {activeTab=="stocks"?[["pct",t("mk.sort.pct")],["ltp",t("mk.sort.ltp")]].map(function(s){
             var act=sort==s[0];
             return <button key={s[0]} onClick={function(){setSort(s[0]);}} style={{background:act?"rgba(0,200,83,0.15)":"rgba(255,255,255,0.06)",border:"1px solid "+(act?G:BD),borderRadius:20,padding:"4px 12px",color:act?G:T2,fontSize:12,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{s[1]}</button>;
           }):null}
@@ -181,12 +183,12 @@ export default function MarketsScreen(props) {
       {activeTab=="stocks"?(
         <div style={{margin:"12px 16px 0"}}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-            <span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 8px",borderRadius:5,letterSpacing:0.5}}>DEMO DATA</span>
-            <span style={{fontSize:12,color:T3}}>Simulated prices and volume for preview. Not live market values.</span>
+            <span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 8px",borderRadius:5,letterSpacing:0.5}}>{t("c.demo_data")}</span>
+            <span style={{fontSize:12,color:T3}}>{t("mk.demo_note")}</span>
           </div>
           <div style={{background:CB,borderRadius:16,border:"1px solid "+BD,overflow:"hidden"}}>
             {filtered.length==0?(
-              <div style={{padding:24,textAlign:"center",color:T2,fontSize:12}}>No stocks found</div>
+              <div style={{padding:24,textAlign:"center",color:T2,fontSize:12}}>{t("mk.no_stocks")}</div>
             ):filtered.map(function(s){
               return <StockRow key={s.sym} s={s} onClick={function(){setSelStock(s);}}/>;
             })}
@@ -199,7 +201,7 @@ export default function MarketsScreen(props) {
         <div style={{display:"flex",justifyContent:"flex-end",padding:"4px 16px 0"}}>
           <div style={{background:liveStatus=="live"?"rgba(0,200,83,0.15)":liveStatus=="closed"?"rgba(255,255,255,0.06)":"rgba(37,99,235,0.1)",border:"1px solid "+(liveStatus=="live"?"rgba(0,200,83,0.3)":liveStatus=="closed"?"rgba(255,255,255,0.1)":"rgba(37,99,235,0.25)"),borderRadius:20,padding:"4px 8px",display:"flex",alignItems:"center",gap:4}}>
             <div style={{width:5,height:5,borderRadius:"50%",background:liveStatus=="live"?G:liveStatus=="closed"?T2:BLUE}}></div>
-            <span style={{fontSize:12,fontWeight:700,color:liveStatus=="live"?G:liveStatus=="closed"?T2:BLUE}}>{liveStatus=="live"?"LIVE":liveStatus=="closed"?"MARKET CLOSED":"CONNECTING"}</span>
+            <span style={{fontSize:12,fontWeight:700,color:liveStatus=="live"?G:liveStatus=="closed"?T2:BLUE}}>{liveStatus=="live"?t("mk.live"):liveStatus=="closed"?t("mk.closed"):t("mk.connecting")}</span>
           </div>
         </div>
       ):null}
@@ -252,7 +254,7 @@ export default function MarketsScreen(props) {
       {activeTab=="commodities"?(
         <div style={{padding:"12px 16px"}}>
           <div style={{background:"rgba(37,99,235,0.06)",border:"1px solid rgba(37,99,235,0.2)",borderRadius:10,padding:"8px 12px",marginBottom:12}}>
-            <div style={{fontSize:12,color:BLUE}}>MCX Commodities  Demo data. Live data on market days.</div>
+            <div style={{fontSize:12,color:BLUE}}>{t("mk.mcx_demo")}</div>
           </div>
           <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,overflow:"hidden"}}>
             {COMMODITIES.map(function(s){
@@ -264,7 +266,7 @@ export default function MarketsScreen(props) {
                   </div>
                   <div style={{flex:1}}>
                     <div style={{fontSize:12,fontWeight:700,color:T1}}>{s.sym}</div>
-                    <div style={{fontSize:12,color:T2,marginTop:4}}>{s.sect} - per {s.unit}</div>
+                    <div style={{fontSize:12,color:T2,marginTop:4}}>{s.sect} - {t("mk.per")} {s.unit}</div>
                   </div>
                   <MiniChart data={spark} color={s.up?G:R} w={44} h={20}/>
                   <div style={{textAlign:"right",minWidth:80}}>
@@ -283,7 +285,7 @@ export default function MarketsScreen(props) {
       {/* 52W HIGH/LOW */}
       {activeTab=="52w"?(
         <div style={{padding:"12px 16px"}}>
-          <div style={{fontSize:12,fontWeight:700,color:G2,letterSpacing:0.8,marginBottom:8}}>&#128200; 52-WEEK HIGH (Near High)</div>
+          <div style={{fontSize:12,fontWeight:700,color:G2,letterSpacing:0.8,marginBottom:8}}>&#128200; {t("mk.52w_high")}</div>
           <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,overflow:"hidden",marginBottom:16}}>
             {W52_HIGH.map(function(s,i){
               var pctFrom52H = ((s.ltp-s.w52h)/s.w52h*100).toFixed(1);
@@ -295,13 +297,13 @@ export default function MarketsScreen(props) {
                   </div>
                   <div style={{textAlign:"right"}}>
                     <div style={{fontSize:12,fontWeight:700,color:T1,fontFamily:"monospace"}}>{s.ltp.toLocaleString("en-IN",{maximumFractionDigits:2})}</div>
-                    <div style={{fontSize:12,fontWeight:700,color:G2}}>{pctFrom52H}% from H</div>
+                    <div style={{fontSize:12,fontWeight:700,color:G2}}>{pctFrom52H}{t("mk.from_h")}</div>
                   </div>
                 </div>
               );
             })}
           </div>
-          <div style={{fontSize:12,fontWeight:700,color:R,letterSpacing:0.8,marginBottom:8}}>&#128201; 52-WEEK LOW (Near Low)</div>
+          <div style={{fontSize:12,fontWeight:700,color:R,letterSpacing:0.8,marginBottom:8}}>&#128201; {t("mk.52w_low")}</div>
           <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,overflow:"hidden"}}>
             {W52_LOW.map(function(s,i){
               var pctFrom52L = ((s.ltp-s.w52l)/s.w52l*100).toFixed(1);
@@ -313,7 +315,7 @@ export default function MarketsScreen(props) {
                   </div>
                   <div style={{textAlign:"right"}}>
                     <div style={{fontSize:12,fontWeight:700,color:T1,fontFamily:"monospace"}}>{s.ltp.toLocaleString("en-IN",{maximumFractionDigits:2})}</div>
-                    <div style={{fontSize:12,fontWeight:700,color:R}}>+{pctFrom52L}% from L</div>
+                    <div style={{fontSize:12,fontWeight:700,color:R}}>+{pctFrom52L}{t("mk.from_l")}</div>
                   </div>
                 </div>
               );
@@ -325,7 +327,7 @@ export default function MarketsScreen(props) {
       {/* CIRCUIT */}
       {activeTab=="circuit"?(
         <div style={{padding:"12px 16px"}}>
-          <div style={{fontSize:12,fontWeight:700,color:G2,letterSpacing:0.8,marginBottom:8}}>&#9650; UPPER CIRCUIT</div>
+          <div style={{fontSize:12,fontWeight:700,color:G2,letterSpacing:0.8,marginBottom:8}}>&#9650; {t("mk.upper_circuit")}</div>
           <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,overflow:"hidden",marginBottom:16}}>
             {CIRCUIT_UP.length>0?CIRCUIT_UP.map(function(s,i){
               return (
@@ -335,7 +337,7 @@ export default function MarketsScreen(props) {
                   </div>
                   <div style={{flex:1}}>
                     <div style={{fontSize:12,fontWeight:700,color:T1}}>{s.sym}</div>
-                    <div style={{fontSize:12,color:T2}}>Limit: {s.limit.toLocaleString("en-IN")}</div>
+                    <div style={{fontSize:12,color:T2}}>{t("mk.limit")} {s.limit.toLocaleString("en-IN")}</div>
                   </div>
                   <div style={{textAlign:"right"}}>
                     <div style={{fontSize:12,fontWeight:700,color:T1,fontFamily:"monospace"}}>{s.ltp.toLocaleString("en-IN",{maximumFractionDigits:2})}</div>
@@ -343,9 +345,9 @@ export default function MarketsScreen(props) {
                   </div>
                 </div>
               );
-            }):<div style={{padding:24,textAlign:"center",color:T2,fontSize:12}}>No upper circuit stocks today</div>}
+            }):<div style={{padding:24,textAlign:"center",color:T2,fontSize:12}}>{t("mk.no_uc")}</div>}
           </div>
-          <div style={{fontSize:12,fontWeight:700,color:R,letterSpacing:0.8,marginBottom:8}}>&#9660; LOWER CIRCUIT</div>
+          <div style={{fontSize:12,fontWeight:700,color:R,letterSpacing:0.8,marginBottom:8}}>&#9660; {t("mk.lower_circuit")}</div>
           <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,overflow:"hidden"}}>
             {CIRCUIT_DOWN.length>0?CIRCUIT_DOWN.map(function(s,i){
               return (
@@ -355,7 +357,7 @@ export default function MarketsScreen(props) {
                   </div>
                   <div style={{flex:1}}>
                     <div style={{fontSize:12,fontWeight:700,color:T1}}>{s.sym}</div>
-                    <div style={{fontSize:12,color:T2}}>Limit: {s.limit.toLocaleString("en-IN")}</div>
+                    <div style={{fontSize:12,color:T2}}>{t("mk.limit")} {s.limit.toLocaleString("en-IN")}</div>
                   </div>
                   <div style={{textAlign:"right"}}>
                     <div style={{fontSize:12,fontWeight:700,color:T1,fontFamily:"monospace"}}>{s.ltp.toLocaleString("en-IN",{maximumFractionDigits:2})}</div>
@@ -363,7 +365,7 @@ export default function MarketsScreen(props) {
                   </div>
                 </div>
               );
-            }):<div style={{padding:24,textAlign:"center",color:T2,fontSize:12}}>No lower circuit stocks today</div>}
+            }):<div style={{padding:24,textAlign:"center",color:T2,fontSize:12}}>{t("mk.no_lc")}</div>}
           </div>
         </div>
       ):null}
@@ -371,7 +373,7 @@ export default function MarketsScreen(props) {
       {/* VOLUME LEADERS */}
       {activeTab=="volume"?(
         <div style={{padding:"12px 16px"}}>
-          <div style={{fontSize:12,fontWeight:700,color:T3,letterSpacing:0.8,marginBottom:8}}>TOP VOLUME STOCKS</div>
+          <div style={{fontSize:12,fontWeight:700,color:T3,letterSpacing:0.8,marginBottom:8}}>{t("mk.top_volume")}</div>
           <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,overflow:"hidden"}}>
             {VOL_LEADERS.map(function(s,i){
               var barW = Math.round((s.vol/VOL_LEADERS[0].vol)*100);
@@ -404,7 +406,7 @@ export default function MarketsScreen(props) {
       {activeTab=="delivery"?(
         <div style={{padding:"12px 16px"}}>
           <div style={{background:"rgba(139,92,246,0.08)",border:"1px solid rgba(139,92,246,0.2)",borderRadius:10,padding:"8px 12px",marginBottom:12}}>
-            <div style={{fontSize:12,color:BLUE}}>High delivery % = strong institutional interest. Above 50% is bullish signal.</div>
+            <div style={{fontSize:12,color:BLUE}}>{t("mk.delivery_note")}</div>
           </div>
           <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,overflow:"hidden"}}>
             {DELIVERY.map(function(s,i){
@@ -419,7 +421,7 @@ export default function MarketsScreen(props) {
                     </div>
                     <div style={{textAlign:"right"}}>
                       <div style={{fontSize:16,fontWeight:900,color:col}}>{s.delPct}%</div>
-                      <div style={{fontSize:12,color:T3}}>Delivery</div>
+                      <div style={{fontSize:12,color:T3}}>{t("mk.delivery_label")}</div>
                     </div>
                   </div>
                   <div style={{height:4,background:"rgba(255,255,255,0.06)",borderRadius:2}}>

@@ -1,4 +1,4 @@
-import { t } from "../i18n/translations";
+import { t, useLang, termHelp } from "../i18n/translations";
 
 import { useTheme } from "../theme/ThemeProvider";
 // BreakoutPro - HomeMarketIntel.jsx
@@ -22,6 +22,7 @@ var GLOBAL=[
 ];
 
 export default function HomeMarketIntel(props){
+  useLang();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   BD=theme.c.border; DOWN=theme.c.down;
   BLUE=theme.c.blue; 
@@ -36,26 +37,26 @@ export default function HomeMarketIntel(props){
     <div style={{padding:"0 14px",marginTop:24}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
         <span style={{fontSize:16,fontWeight:900,color:T1}}>{t("market_intel")}</span>
-        <button onClick={function(){setTab("markets");}} style={{background:"none",border:"none",color:theme.c.blue,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>Markets &#8594;</button>
+        <button onClick={function(){setTab("markets");}} style={{background:"none",border:"none",color:theme.c.blue,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{t("hmi.markets")} &#8594;</button>
       </div>
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
-        <span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 8px",borderRadius:5,letterSpacing:0.5}}>DEMO DATA</span>
-        <span style={{fontSize:12,color:T3}}>Simulated for preview. Not live market values.</span>
+        <span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 8px",borderRadius:5,letterSpacing:0.5}}>{t("c.demo_data")}</span>
+        <span style={{fontSize:12,color:T3}}>{t("hmi.sim")}</span>
       </div>
 
       {/* FII / DII */}
       <div onClick={function(){setTab("fiidii");}} style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:12,marginBottom:8,cursor:"pointer"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-          <span style={{fontSize:12,fontWeight:700,color:T2}}>FII / DII Activity (Rs Cr)</span>
-          <span style={{fontSize:12,color:BLUE,fontWeight:700}}>Details &#8594;</span>
+          <span style={{fontSize:12,fontWeight:700,color:T2}}>{t("hmi.fiidii_activity")}</span>
+          <span style={{fontSize:12,color:BLUE,fontWeight:700}}>{t("hmi.details")} &#8594;</span>
         </div>
         <div style={{display:"flex",gap:12}}>
           <div style={{flex:1,background:CARD2,borderRadius:16,padding:"12px 12px"}}>
-            <div style={{fontSize:12,color:T3,marginBottom:4}}>FII</div>
+            <div title={termHelp("FII")} style={{fontSize:12,color:T3,marginBottom:4}}>FII</div>
             <div style={{fontSize:16,fontWeight:800,color:FII.fii>=0?UP:DOWN,fontFamily:"monospace"}}>{FII.fii>=0?"+":""}{FII.fii}</div>
           </div>
           <div style={{flex:1,background:CARD2,borderRadius:16,padding:"12px 12px"}}>
-            <div style={{fontSize:12,color:T3,marginBottom:4}}>DII</div>
+            <div title={termHelp("DII")} style={{fontSize:12,color:T3,marginBottom:4}}>DII</div>
             <div style={{fontSize:16,fontWeight:800,color:FII.dii>=0?UP:DOWN,fontFamily:"monospace"}}>{FII.dii>=0?"+":""}{FII.dii}</div>
           </div>
         </div>
@@ -64,27 +65,27 @@ export default function HomeMarketIntel(props){
       {/* MARKET BREADTH */}
       <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:12,marginBottom:8}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-          <span style={{fontSize:12,fontWeight:700,color:T2}}>Market Breadth</span>
-          <span style={{fontSize:12,color:T2}}><span style={{color:UP,fontWeight:700}}>{BREADTH.adv}</span> adv / <span style={{color:DOWN,fontWeight:700}}>{BREADTH.dec}</span> dec</span>
+          <span style={{fontSize:12,fontWeight:700,color:T2}}>{t("hmi.breadth")}</span>
+          <span style={{fontSize:12,color:T2}}><span style={{color:UP,fontWeight:700}}>{BREADTH.adv}</span> {t("hmi.adv")} / <span style={{color:DOWN,fontWeight:700}}>{BREADTH.dec}</span> {t("hmi.dec")}</span>
         </div>
         <div style={{display:"flex",height:8,borderRadius:4,overflow:"hidden"}}>
           <div style={{width:advPct+"%",background:UP}}></div>
           <div style={{flex:1,background:DOWN}}></div>
         </div>
-        <div style={{fontSize:12,color:T3,marginTop:8}}>{advPct}% stocks advancing. Breadth is {advPct>=55?"positive":advPct<=45?"weak":"mixed"}.</div>
+        <div style={{fontSize:12,color:T3,marginTop:8}}>{t("hmi.pct_advancing",{p:advPct,w:advPct>=55?t("hmi.b.positive"):advPct<=45?t("hmi.b.weak"):t("hmi.b.mixed")})}</div>
       </div>
 
       {/* SECTOR PERFORMANCE */}
       <div onClick={function(){setTab("heatmap");}} style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:12,marginBottom:8,cursor:"pointer"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-          <span style={{fontSize:12,fontWeight:700,color:T2}}>Sector Performance</span>
-          <span style={{fontSize:12,color:BLUE,fontWeight:700}}>Heatmap &#8594;</span>
+          <span style={{fontSize:12,fontWeight:700,color:T2}}>{t("hmi.sector_perf")}</span>
+          <span style={{fontSize:12,color:BLUE,fontWeight:700}}>{t("hmi.heatmap")} &#8594;</span>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
           {SECTORS.map(function(s){
             return (
               <div key={s.name} style={{background:CARD2,borderRadius:16,padding:"8px 8px"}}>
-                <div style={{fontSize:12,color:T1,fontWeight:600}}>{s.name}</div>
+                <div style={{fontSize:12,color:T1,fontWeight:600}}>{t("hmi.sec."+s.name, s.name)}</div>
                 <div style={{fontSize:12,fontWeight:800,color:s.up?UP:DOWN,marginTop:4}}>{s.up?"+":""}{s.chg}%</div>
               </div>
             );
@@ -95,14 +96,14 @@ export default function HomeMarketIntel(props){
       {/* GLOBAL MARKETS */}
       <div onClick={function(){setTab("global");}} style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:12,cursor:"pointer"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-          <span style={{fontSize:12,fontWeight:700,color:T2}}>Global Markets</span>
-          <span style={{fontSize:12,color:BLUE,fontWeight:700}}>View All &#8594;</span>
+          <span style={{fontSize:12,fontWeight:700,color:T2}}>{t("hmi.global")}</span>
+          <span style={{fontSize:12,color:BLUE,fontWeight:700}}>{t("hmi.view_all")} &#8594;</span>
         </div>
         <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:4}}>
           {GLOBAL.map(function(g){
             return (
               <div key={g.name} style={{background:CARD2,borderRadius:16,padding:"8px 12px",flexShrink:0,minWidth:78}}>
-                <div style={{fontSize:12,color:T2}}>{g.name}</div>
+                <div style={{fontSize:12,color:T2}}>{t("hmi.g."+g.name, g.name)}</div>
                 <div style={{fontSize:12,fontWeight:700,color:T1,marginTop:4,fontFamily:"monospace"}}>{g.val}</div>
                 <div style={{fontSize:12,fontWeight:700,color:g.up?UP:DOWN,marginTop:4}}>{g.up?"+":""}{g.chg}%</div>
               </div>

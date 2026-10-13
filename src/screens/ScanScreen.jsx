@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { SECTIONS } from "./ScannerData";
-import { hasAccess } from "../i18n/translations";
+import { hasAccess, t, useLang } from "../i18n/translations";
 import ScannerDetailPro from "./ScannerDetailPro";
 
 import { useTheme } from "../theme/ThemeProvider";
@@ -16,6 +16,7 @@ var T1="#FFFFFF",T2="#A0A7B4",T3="#5B6472";
 var SEC_ICON=["&#128202;","&#128200;","&#127919;","&#129302;","&#128218;","&#128176;","&#129518;","&#128640;"];
 
 export default function ScanScreen(props){
+  useLang();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   BD=theme.c.border;
   BLUE=theme.c.blue; 
@@ -37,11 +38,11 @@ export default function ScanScreen(props){
   return (
     <div style={{background:BG,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:90}}>
       <div style={{background:BG,padding:"16px 16px 12px",borderBottom:"1px solid "+BD,position:"sticky",top:0,zIndex:10}}>
-        <div style={{fontSize:18,fontWeight:900,color:T1}}>Tools Hub</div>
-        <div style={{fontSize:12,color:T2,marginTop:4}}>Professional market intelligence tools</div>
+        <div style={{fontSize:18,fontWeight:900,color:T1}}>{t("hub.title")}</div>
+        <div style={{fontSize:12,color:T2,marginTop:4}}>{t("hub.subtitle")}</div>
         <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8}}>
-          <span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 8px",borderRadius:5,letterSpacing:0.5}}>DEMO DATA</span>
-          <span style={{fontSize:12,color:T3}}>Scan results are simulated for preview. Not live market values.</span>
+          <span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 8px",borderRadius:5,letterSpacing:0.5}}>{t("c.demo_data")}</span>
+          <span style={{fontSize:12,color:T3}}>{t("hub.sim")}</span>
         </div>
       </div>
 
@@ -51,8 +52,8 @@ export default function ScanScreen(props){
             <div key={sec.name} style={{marginBottom:24}}>
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
                 <span style={{fontSize:14}} dangerouslySetInnerHTML={{__html:SEC_ICON[si]||"&#128202;"}}/>
-                <span style={{fontSize:12,fontWeight:800,color:T1,letterSpacing:0.3}}>{sec.name}</span>
-                {sec.pro?<span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 8px",borderRadius:4}}>PRO</span>:null}
+                <span style={{fontSize:12,fontWeight:800,color:T1,letterSpacing:0.3}}>{t("hub.sec."+sec.name.toLowerCase().replace(/[^a-z]+/g,"_"), sec.name)}</span>
+                {sec.pro?<span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 8px",borderRadius:4}}>{t("hub.pro")}</span>:null}
               </div>
 
               <div style={{display:"grid",gridTemplateColumns:"1fr",gap:8}}>
@@ -66,10 +67,10 @@ export default function ScanScreen(props){
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{display:"flex",alignItems:"center",gap:8}}>
                           <span style={{fontSize:12,fontWeight:700,color:T1}}>{it.title}</span>
-                          {it.pro?<span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.1)",padding:"4px 4px",borderRadius:3}}>PRO</span>:null}
-                          {it.live?<span style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:12,fontWeight:800,color:UP,background:"rgba(34,197,94,0.1)",border:"1px solid rgba(34,197,94,0.3)",padding:"4px 4px",borderRadius:3}}><span style={{width:4,height:4,borderRadius:"50%",background:UP,display:"inline-block"}}></span>LIVE</span>:null}
+                          {it.pro?<span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.1)",padding:"4px 4px",borderRadius:3}}>{t("hub.pro")}</span>:null}
+                          {it.live?<span style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:12,fontWeight:800,color:UP,background:"rgba(34,197,94,0.1)",border:"1px solid rgba(34,197,94,0.3)",padding:"4px 4px",borderRadius:3}}><span style={{width:4,height:4,borderRadius:"50%",background:UP,display:"inline-block"}}></span>{t("hub.live")}</span>:null}
                         </div>
-                        <div style={{fontSize:12,color:T2,marginTop:4,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{it.desc}</div>
+                        <div style={{fontSize:12,color:T2,marginTop:4,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{t("hub.item."+it.id+".d", it.desc)}</div>
                       </div>
                       {locked?
                         <span style={{fontSize:12,flexShrink:0}} dangerouslySetInnerHTML={{__html:"&#128274;"}}/>
@@ -84,7 +85,7 @@ export default function ScanScreen(props){
         })}
 
         <div style={{background:"rgba(249,115,22,0.06)",border:"1px solid rgba(249,115,22,0.15)",borderRadius:10,padding:12}}>
-          <div style={{fontSize:12,color:theme.c.warn}}>Educational Market Intelligence Only. Not Investment Advice.</div>
+          <div style={{fontSize:12,color:theme.c.warn}}>{t("not_advice")}</div>
         </div>
       </div>
     </div>

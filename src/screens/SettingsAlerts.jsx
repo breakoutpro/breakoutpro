@@ -1,4 +1,5 @@
 import { useTheme } from "../theme/ThemeProvider";
+import { t, useLang } from "../i18n/translations";
 // BreakoutPro - SettingsAlerts.jsx
 // Alert Types section for Settings (breakout, breakdown, pattern, volume, vwap, rsi).
 // Rules: no backtick, no triple-equals, ASCII only.
@@ -35,21 +36,22 @@ function Row(props){
 }
 
 var TYPES=[
-  {key:"breakoutAlert", icon:"&#9650;",   label:"Breakout Alerts", sub:"Price breaks above resistance", bg:"rgba(0,200,83,0.1)",  bd:"rgba(0,200,83,0.2)"},
-  {key:"breakdownAlert",icon:"&#9660;",   label:"Breakdown Alerts",sub:"Price breaks below support",    bg:"rgba(239,68,68,0.1)", bd:"rgba(239,68,68,0.2)"},
-  {key:"patternAlert",  icon:"&#128208;", label:"Pattern Alerts",  sub:"Doji, Hammer, Engulfing etc",   bg:"rgba(37,99,235,0.1)",bd:"rgba(37,99,235,0.2)"},
-  {key:"volumeAlert",   icon:"&#128202;", label:"Volume Spike",    sub:"2x+ average volume detected",   bg:"rgba(59,130,246,0.1)",bd:"rgba(59,130,246,0.2)"},
-  {key:"vwapAlert",     icon:"&#128201;", label:"VWAP Cross Alert",sub:"Price crosses VWAP level",      bg:"rgba(139,92,246,0.1)",bd:"rgba(139,92,246,0.2)"},
-  {key:"rsiAlert",      icon:"&#128293;", label:"RSI Extreme Alert",sub:"RSI above 70 or below 30",     bg:"rgba(249,115,22,0.1)",bd:"rgba(249,115,22,0.2)"},
+  {key:"breakoutAlert", k:"breakout", icon:"&#9650;",   label:"Breakout Alerts", sub:"Price breaks above resistance", bg:"rgba(0,200,83,0.1)",  bd:"rgba(0,200,83,0.2)"},
+  {key:"breakdownAlert",k:"breakdown", icon:"&#9660;",   label:"Breakdown Alerts",sub:"Price breaks below support",    bg:"rgba(239,68,68,0.1)", bd:"rgba(239,68,68,0.2)"},
+  {key:"patternAlert",  k:"pattern", icon:"&#128208;", label:"Pattern Alerts",  sub:"Doji, Hammer, Engulfing etc",   bg:"rgba(37,99,235,0.1)",bd:"rgba(37,99,235,0.2)"},
+  {key:"volumeAlert",   k:"volume", icon:"&#128202;", label:"Volume Spike",    sub:"2x+ average volume detected",   bg:"rgba(59,130,246,0.1)",bd:"rgba(59,130,246,0.2)"},
+  {key:"vwapAlert",     k:"vwap", icon:"&#128201;", label:"VWAP Cross Alert",sub:"Price crosses VWAP level",      bg:"rgba(139,92,246,0.1)",bd:"rgba(139,92,246,0.2)"},
+  {key:"rsiAlert",      k:"rsi", icon:"&#128293;", label:"RSI Extreme Alert",sub:"RSI above 70 or below 30",     bg:"rgba(249,115,22,0.1)",bd:"rgba(249,115,22,0.2)"},
 ];
 
 export default function SettingsAlerts(props){
+  useLang();
   var st=props.st||{};
   var toggle=props.toggle||function(){};
   return (
     <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,margin:"0 14px",overflow:"hidden"}}>
-      {TYPES.map(function(t){
-        return <Row key={t.key} icon={t.icon} label={t.label} sub={t.sub} bg={t.bg} bd={t.bd} value={st[t.key]} onChange={function(){toggle(t.key);}}/>;
+      {TYPES.map(function(ty){
+        return <Row key={ty.key} icon={ty.icon} label={t("set.t."+ty.k, ty.label)} sub={t("set.t."+ty.k+"_sub", ty.sub)} bg={ty.bg} bd={ty.bd} value={st[ty.key]} onChange={function(){toggle(ty.key);}}/>;
       })}
     </div>
   );

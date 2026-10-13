@@ -9,6 +9,7 @@ import { useWatchlist } from "./hooks/useWatchlist";
 import { DEMO_STOCKS } from "./data/marketsStocks";
 import ProvenanceBadge from "./components/ProvenanceBadge";
 import { ThemeProvider, useTheme } from "./theme/ThemeProvider";
+import { t, useLang } from "./i18n/translations";
 import DisclaimerTicker from "./components/DisclaimerTicker";
 // SAFETY PATCH: useWatchlistAlerts import removed - fabricated candle-based
 // pattern detection was firing real OS notifications on simulated data.
@@ -371,6 +372,7 @@ function FiiScreen() {
 
 function MoreScreen(props) {
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
+  useLang();
 
   var BG = theme.c.bg;
   var CARD = theme.c.card;
@@ -405,14 +407,14 @@ function MoreScreen(props) {
   };
 
   var sections = [
-    {title:"Practice & Learning", items:[
+    {title:"Practice & Learning", sk:"practice", items:[
       {id:"portfolio",  label:"Portfolio Analytics",  sub:"AI analyzes your holdings (educational)"},
       {id:"paper",      label:"Paper Trading",         sub:"Virtual Rs 5L  practice free"},
       {id:"quiz",       label:"Daily Quiz",            sub:"Earn XP and badges"},
       {id:"challenges", label:"Challenges",            sub:"Skill milestones and XP rewards"},
       {id:"watchlist",  label:"My Watchlist",          sub:"Track favorite stocks"},
     ]},
-    {title:"Tools & Calculators", items:[
+    {title:"Tools & Calculators", sk:"tools", items:[
       {id:"datahub",  label:"Data Hub",             sub:"100+ data points, 15 categories"},
       {id:"voice",    label:"AI Voice Assistant",  sub:"Ask market questions by voice"},
       {id:"backtest", label:"Backtesting",          sub:"Test strategies on historical data"},
@@ -420,7 +422,7 @@ function MoreScreen(props) {
       {id:"journal",  label:"Trading Journal",      sub:"Track trades and P&L history"},
       {id:"tools",    label:"Risk Calculator",      sub:"R:R ratio, position size, Greeks"},
     ]},
-    {title:"Account & Settings", items:[
+    {title:"Account & Settings", sk:"account", items:[
       {id:"profile",    label:"Profile",            sub:"Personal info, KYC, preferences"},
       {id:"morning",    label:"Morning Pulse",      sub:"AI overnight + market briefing"},
       {id:"marketclose",label:"Market Close Summary",sub:"Today's recap and tomorrow's watch"},
@@ -452,14 +454,14 @@ function MoreScreen(props) {
   return (
     <div style={{background:BG,minHeight:"100vh",paddingBottom:80,fontFamily:"Inter,Arial,sans-serif"}}>
       <div style={{background:BG,padding:"24px 16px 16px",borderBottom:"1px solid "+BORDER}}>
-        <div style={{fontSize:22,fontWeight:900,color:T1}}>More Features</div>
-        <div style={{fontSize:12,color:T2,marginTop:4}}>Tools, practice, account settings</div>
+        <div style={{fontSize:22,fontWeight:900,color:T1}}>{t("more.title")}</div>
+        <div style={{fontSize:12,color:T2,marginTop:4}}>{t("more.subtitle")}</div>
       </div>
       <div style={{padding:"12px 16px"}}>
         {sections.map(function(sec){
           return (
             <div key={sec.title} style={{marginBottom:16}}>
-              <div style={{fontSize:12,fontWeight:700,color:T3,letterSpacing:1,marginBottom:12,paddingLeft:4}}>{sec.title.toUpperCase()}</div>
+              <div style={{fontSize:12,fontWeight:700,color:T3,letterSpacing:1,marginBottom:12,paddingLeft:4}}>{t("more.sec."+sec.sk, sec.title).toUpperCase()}</div>
               <div style={{background:CARD,border:"1px solid "+BORDER,borderRadius:16,overflow:"hidden"}}>
                 {sec.items.map(function(item,i){
                   var isAction = !!item.action;
@@ -470,8 +472,8 @@ function MoreScreen(props) {
                     <div key={item.id} onClick={function(){props.setTab(item.id);}} style={{display:"flex",alignItems:"center",gap:12,padding:"16px 16px",borderBottom:i<sec.items.length-1?"1px solid "+BORDER2:"none",cursor:"pointer"}}>
                       <div style={{width:40,height:40,borderRadius:12,background:iconBg,border:"1px solid "+iconBorder,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,color:iconColor}} dangerouslySetInnerHTML={{__html:ICONS[item.id]||ICONS.tools}}/>
                       <div style={{flex:1}}>
-                        <div style={{fontSize:14,fontWeight:700,color:isAction?BLUE:T1}}>{item.label}</div>
-                        <div style={{fontSize:12,color:T2,marginTop:4}}>{item.sub}</div>
+                        <div style={{fontSize:14,fontWeight:700,color:isAction?BLUE:T1}}>{t("more."+item.id+".l", item.label)}</div>
+                        <div style={{fontSize:12,color:T2,marginTop:4}}>{t("more."+item.id+".s", item.sub)}</div>
                       </div>
                       <span style={{color:T3,fontSize:18}}>&#8250;</span>
                     </div>
@@ -488,6 +490,7 @@ function MoreScreen(props) {
 
 function AppInner() {
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
+  useLang(); // whole app re-renders the moment the language changes (no reload)
 
   var liveNewsData = useLiveNews();
   var mm = useMarketMood();
@@ -528,7 +531,7 @@ function AppInner() {
   var trialDays  = Math.max(0,7-Math.floor((Date.now()-trialStart)/(1000*60*60*24)));
 
   useEffect(function(){
-    var t=setTimeout(function(){setSplash(false);},1500);
+    var splashTimer=setTimeout(function(){setSplash(false);},1500);
     // Register service worker
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(function(){});
@@ -540,7 +543,7 @@ function AppInner() {
       el.textContent = "@keyframes slideDown{from{opacity:0;transform:translateY(-100%)}to{opacity:1;transform:translateY(0)}} @keyframes slideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}} @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}} @keyframes fadeIn{from{opacity:0}to{opacity:1}} @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}} body{background:#07111F!important;} * {-webkit-tap-highlight-color:transparent;} input,select,textarea{background:rgba(16,27,46,0.9)!important;color:#fff!important;border-color:#1E3A5F!important;} ::-webkit-scrollbar{width:2px;height:2px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:#1E3A5F;border-radius:10px}";
       document.head.appendChild(el);
     }
-    return function(){clearTimeout(t);};
+    return function(){clearTimeout(splashTimer);};
   },[]);
 
   // Browser back button support
@@ -739,15 +742,15 @@ function AppInner() {
           <div style={{background:theme.c.card,border:"1px solid "+theme.c.border,borderRadius:14,padding:"12px 16px",display:"flex",alignItems:"center",gap:12,boxShadow:"0 -4px 20px rgba(0,0,0,0.15)"}}>
             <div style={{fontSize:22}}>&#128276;</div>
             <div style={{flex:1}}>
-              <div style={{fontSize:12,fontWeight:700,color:theme.c.text1,marginBottom:4}}>Enable Alert Notifications</div>
-              <div style={{fontSize:12,color:theme.c.text2}}>Get breakout & pattern alerts on your phone</div>
+              <div style={{fontSize:12,fontWeight:700,color:theme.c.text1,marginBottom:4}}>{t("notif.title","Enable Alert Notifications")}</div>
+              <div style={{fontSize:12,color:theme.c.text2}}>{t("notif.body","Get breakout & pattern alerts on your phone")}</div>
             </div>
             <button onClick={function(){
               setNotifAsked(true);
               if (typeof Notification != "undefined") {
                 Notification.requestPermission();
               }
-            }} style={{background:theme.c.brand,border:"none",borderRadius:10,padding:"8px 16px",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>Enable</button>
+            }} style={{background:theme.c.brand,border:"none",borderRadius:10,padding:"8px 16px",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{t("notif.enable","Enable")}</button>
             <button onClick={function(){setNotifAsked(true);}} style={{background:"none",border:"none",color:theme.c.text3,fontSize:14,cursor:"pointer",padding:4}}>X</button>
           </div>
         </div>
@@ -771,14 +774,14 @@ function AppInner() {
                 var act=tab==item.id;
                 return (
                   <button key={item.id} style={{width:"100%",boxSizing:"border-box",background:act?"#F0FDF4":"none",border:"none",borderLeft:act?"3px solid "+G:"3px solid transparent",padding:"12px 16px",display:"flex",alignItems:"center",cursor:"pointer",fontFamily:"inherit",textAlign:"left"}} onClick={function(){setTab(item.id);setSidebar(false);}}>
-                    <span style={{fontSize:14,fontWeight:act?700:500,color:act?G:"#374151"}}>{item.label}</span>
+                    <span style={{fontSize:14,fontWeight:act?700:500,color:act?G:"#374151"}}>{t("side."+item.id, item.label)}</span>
                   </button>
                 );
               })}
             </div>
             <div style={{padding:"16px",borderTop:"1px solid #F0F0F0"}}>
               <div style={{fontSize:12,color:"#9CA3AF",marginBottom:12,lineHeight:1.6}}>! {DISCLAIMER}</div>
-              <button style={{width:"100%",boxSizing:"border-box",background:"#FEF2F2",border:"1px solid #FECACA",borderRadius:10,padding:"12px",color:theme.c.down,fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}} onClick={logout}>Logout</button>
+              <button style={{width:"100%",boxSizing:"border-box",background:"#FEF2F2",border:"1px solid #FECACA",borderRadius:10,padding:"12px",color:theme.c.down,fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}} onClick={logout}>{t("side.logout")}</button>
             </div>
           </div>
           <div style={{flex:1,background:"rgba(0,0,0,0.3)"}} onClick={function(){setSidebar(false);}}></div>
@@ -819,6 +822,7 @@ function AppInner() {
 // --- DESKTOP RIGHT SIDEBAR (320px) ---
 function GlobalHeader(props){
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
+  useLang();
   var BG=theme.c.bg,CARD2=theme.c.card2,BD=theme.c.border,BD2=theme.c.border2,T1=theme.c.text1,T2=theme.c.text2,T3=theme.c.text3,BLUE=theme.c.blue;
   var [query,setQuery] = useState("");
   var [open,setOpen] = useState(false);
@@ -842,7 +846,7 @@ function GlobalHeader(props){
           onChange={function(e){setQuery(e.target.value);}}
           onFocus={function(){setOpen(true);}}
           onBlur={function(){setTimeout(function(){setOpen(false);},150);}}
-          placeholder="Search NIFTY, BANKNIFTY, RELIANCE..."
+          placeholder={t("gh.search")}
           style={{width:"100%",boxSizing:"border-box",background:CARD2,border:"1px solid "+BD,borderRadius:11,padding:"8px 14px",color:T1,fontSize:13,fontFamily:"inherit"}}
         />
         {open && results.length>0 ? (
@@ -860,44 +864,44 @@ function GlobalHeader(props){
       </div>
       <div style={{display:"flex",alignItems:"center",gap:2}}>
         {[
-          {label:"Markets",id:"markets"},
-          {label:"Scanner",id:"scan"},
-          {label:"Options",id:"optionsintelpro"},
-          {label:"AI",id:"guardian"},
-          {label:"News",id:"news"}
+          {label:"Markets",id:"markets",k:"gh.n.markets"},
+          {label:"Scanner",id:"scan",k:"gh.n.scan"},
+          {label:"Options",id:"optionsintelpro",k:"gh.n.options"},
+          {label:"AI",id:"guardian",k:"gh.n.ai"},
+          {label:"News",id:"news",k:"side.news"}
         ].map(function(n){
           var act = props.tab==n.id;
-          return <button key={n.id} onClick={function(){props.setTab(n.id);}} style={{background:act?theme.c.blueSoft:"none",border:"none",borderRadius:8,padding:"7px 10px",cursor:"pointer",color:act?BLUE:T2,fontSize:13,fontWeight:act?800:600,fontFamily:"inherit"}}>{n.label}</button>;
+          return <button key={n.id} onClick={function(){props.setTab(n.id);}} style={{background:act?theme.c.blueSoft:"none",border:"none",borderRadius:8,padding:"7px 10px",cursor:"pointer",color:act?BLUE:T2,fontSize:13,fontWeight:act?800:600,fontFamily:"inherit"}}>{t(n.k,n.label)}</button>;
         })}
         <div style={{position:"relative"}}>
-          <button onClick={function(){setMoreOpen(function(p){return !p;});}} onBlur={function(){setTimeout(function(){setMoreOpen(false);},150);}} style={{background:"none",border:"none",borderRadius:8,padding:"7px 10px",cursor:"pointer",color:T2,fontSize:13,fontWeight:600,fontFamily:"inherit"}}>More &#9662;</button>
+          <button onClick={function(){setMoreOpen(function(p){return !p;});}} onBlur={function(){setTimeout(function(){setMoreOpen(false);},150);}} style={{background:"none",border:"none",borderRadius:8,padding:"7px 10px",cursor:"pointer",color:T2,fontSize:13,fontWeight:600,fontFamily:"inherit"}}>{t("side.more","More")} &#9662;</button>
           {moreOpen ? (
             <div style={{position:"absolute",top:"130%",left:0,minWidth:200,background:theme.c.card,border:"1px solid "+BD,borderRadius:10,overflow:"hidden",zIndex:30,boxShadow:"0 8px 24px rgba(0,0,0,0.4)",padding:"6px 0"}}>
               {[
-                {label:"Smart Price Action Zones",id:"pazones"},
-                {label:"Market Heatmap",id:"heatmap"},
-                {label:"FII / DII Intelligence Pro",id:"fiidiipro"},
-                {label:"Learn",id:"learn"},
-                {label:"My Watchlist",id:"watchlist"},
-                {label:"Portfolio Analytics",id:"portfolio"},
-                {label:"Trading Journal",id:"journal"},
-                {label:"Economic Calendar Pro",id:"econcalendar"},
-                {label:"Settings",id:"settings"}
+                {label:"Smart Price Action Zones",id:"pazones",k:"gh.m.pazones"},
+                {label:"Market Heatmap",id:"heatmap",k:"gh.m.heatmap"},
+                {label:"FII / DII Intelligence Pro",id:"fiidiipro",k:"gh.m.fiidiipro"},
+                {label:"Learn",id:"learn",k:"side.learn"},
+                {label:"My Watchlist",id:"watchlist",k:"gh.m.watchlist"},
+                {label:"Portfolio Analytics",id:"portfolio",k:"gh.m.portfolio"},
+                {label:"Trading Journal",id:"journal",k:"gh.m.journal"},
+                {label:"Economic Calendar Pro",id:"econcalendar",k:"gh.m.econcalendar"},
+                {label:"Settings",id:"settings",k:"gh.m.settings"}
               ].map(function(n){
-                return <button key={n.id} onMouseDown={function(){props.setTab(n.id);}} style={{width:"100%",boxSizing:"border-box",background:"none",border:"none",textAlign:"left",padding:"9px 14px",color:T2,fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>{n.label}</button>;
+                return <button key={n.id} onMouseDown={function(){props.setTab(n.id);}} style={{width:"100%",boxSizing:"border-box",background:"none",border:"none",textAlign:"left",padding:"9px 14px",color:T2,fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>{t(n.k,n.label)}</button>;
               })}
             </div>
           ) : null}
         </div>
       </div>
       <div style={{flex:1}}></div>
-      <button onClick={function(){props.setTab("home");}} title="Home" style={{background:props.tab=="home"?theme.c.blueSoft:"none",border:"1px solid "+(props.tab=="home"?BLUE+"4D":"transparent"),borderRadius:9,padding:"7px 10px",cursor:"pointer",color:props.tab=="home"?BLUE:T2,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:15}}>&#127968;</span>Home</button>
-      <button onClick={function(){props.setTab("alerts");}} title="Alerts" style={{background:"none",border:"none",cursor:"pointer",color:T2,fontSize:18}}>&#128276;</button>
+      <button onClick={function(){props.setTab("home");}} title={t("nav.home")} style={{background:props.tab=="home"?theme.c.blueSoft:"none",border:"1px solid "+(props.tab=="home"?BLUE+"4D":"transparent"),borderRadius:9,padding:"7px 10px",cursor:"pointer",color:props.tab=="home"?BLUE:T2,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:15}}>&#127968;</span>{t("side.home","Home")}</button>
+      <button onClick={function(){props.setTab("alerts");}} title={t("aria.alerts")} style={{background:"none",border:"none",cursor:"pointer",color:T2,fontSize:18}}>&#128276;</button>
       <div style={{position:"relative"}}>
         <button
           onClick={function(){setProfileOpen(function(p){return !p;});}}
           onBlur={function(){setTimeout(function(){setProfileOpen(false);},150);}}
-          title="Profile" style={{background:"none",border:"none",cursor:"pointer",color:T2,fontSize:18}}>&#128100;</button>
+          title={t("aria.profile")} style={{background:"none",border:"none",cursor:"pointer",color:T2,fontSize:18}}>&#128100;</button>
         {profileOpen ? (
           <div style={{position:"absolute",top:"130%",right:0,minWidth:200,background:theme.c.card,border:"1px solid "+BD,borderRadius:10,overflow:"hidden",zIndex:30,boxShadow:"0 8px 24px rgba(0,0,0,0.4)"}}>
             <div style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",borderBottom:"1px solid "+BD2}}>
@@ -907,8 +911,8 @@ function GlobalHeader(props){
                 <div style={{fontSize:11,color:T3}}>{props.user.phone}</div>
               </div>
             </div>
-            <button onMouseDown={function(){props.setTab("profile");}} style={{width:"100%",boxSizing:"border-box",background:"none",border:"none",textAlign:"left",padding:"10px 14px",color:T2,fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>View Profile</button>
-            <button onMouseDown={props.onLogout} style={{width:"100%",boxSizing:"border-box",background:"rgba(239,68,68,0.08)",border:"none",textAlign:"left",padding:"10px 14px",color:"#EF4444",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>Logout</button>
+            <button onMouseDown={function(){props.setTab("profile");}} style={{width:"100%",boxSizing:"border-box",background:"none",border:"none",textAlign:"left",padding:"10px 14px",color:T2,fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>{t("gh.view_profile")}</button>
+            <button onMouseDown={props.onLogout} style={{width:"100%",boxSizing:"border-box",background:"rgba(239,68,68,0.08)",border:"none",textAlign:"left",padding:"10px 14px",color:"#EF4444",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{t("side.logout")}</button>
           </div>
         ) : null}
       </div>
@@ -918,6 +922,7 @@ function GlobalHeader(props){
 
 function DesktopRightSidebar(props){
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
+  useLang();
 
   var BG=theme.c.bgAlt,CARD=theme.c.card,CARD2=theme.c.card2,BD=theme.c.border,BD2=theme.c.border2,T1=theme.c.text1,T2=theme.c.text2,T3=theme.c.text3,BLUE=theme.c.blue,UP=theme.c.up,DOWN=theme.c.down;
   var W=props.width||320;

@@ -1,110 +1,163 @@
-// BreakoutPro - i18n/translations.js
-// TECHNICAL LANGUAGE RULE: trading/financial terminology ALWAYS stays English
-// (Theta, Gamma, PCR, Max Pain, Options Intelligence, etc). Only explanations,
-// navigation words, and UI helper text translate to the selected language.
+// BreakoutPro - i18n/translations.jsx
+// The ONE localization module for the app (selector, store, t(), glossary).
+// Language packs live next to it in ./lang (en, te, hi, kn, ta) as plain
+// key -> string maps; this file holds no screen text itself.
+//
+// TECHNICAL LANGUAGE RULE: standard market terms (NIFTY 50, BANK NIFTY,
+// SENSEX, EMA, OI, CE, PE, Gamma, PCR, VWAP, RSI ...) always stay English.
+// Only the surrounding words, explanations and UI text translate, and the
+// glossary (term / termHelp) explains each term in the selected language.
+//
+// Behaviour:
+//  - The chosen language is saved in localStorage (bp_lang) and restored on
+//    every load. Changing it notifies every subscriber at once, so screens
+//    update with no page reload (App re-renders through useLang()).
+//  - t(key) falls back: selected language -> English -> optional fallback
+//    argument -> empty string. A raw key is NEVER returned or shown.
+//  - Numbers, prices, symbols, timestamps and calculations are not touched
+//    here; they keep their own en-IN formatting in every language.
 // Rules: no backtick, no triple-equals, ASCII only.
 
+import { useSyncExternalStore } from "react";
+import EN from "./lang/en";
+import TE from "./lang/te";
+import HI from "./lang/hi";
+import KN from "./lang/kn";
+import TA from "./lang/ta";
+
+// Only languages that actually have a translation pack are offered.
+// (ml, gu, mr, bn, pa, or, as were listed before with ZERO strings behind
+// them; they are intentionally not offered until real packs exist.)
+// Private beta: every language is open to every invited user. To put the
+// Indian languages behind Premium again, set this to true (the selector
+// already handles the lock + upgrade path).
+export var LANGUAGE_PREMIUM_GATE = false;
+var GATED = LANGUAGE_PREMIUM_GATE;
 export var LANGUAGES = [
-  {code:"en", native:"English",   name:"English",   free:true},
-  {code:"te", native:"\u0C24\u0C46\u0C32\u0C41\u0C17\u0C41", name:"Telugu",  free:false},
-  {code:"hi", native:"\u0939\u093F\u0928\u094D\u0926\u0940", name:"Hindi",   free:false},
-  {code:"kn", native:"\u0C95\u0CA8\u0CCD\u0CA8\u0CA1", name:"Kannada", free:false},
-  {code:"ta", native:"\u0BA4\u0BAE\u0BBF\u0BB4\u0BCD", name:"Tamil",    free:false},
-  {code:"ml", native:"\u0D2E\u0D32\u0D2F\u0D3E\u0D33\u0D02", name:"Malayalam",free:false},
-  {code:"gu", native:"\u0A97\u0AC1\u0A9C\u0AB0\u0ABE\u0AA4\u0AC0", name:"Gujarati",free:false},
-  {code:"mr", native:"\u092E\u0930\u093E\u0920\u0940", name:"Marathi",  free:false},
-  {code:"bn", native:"\u09AC\u09BE\u0982\u09B2\u09BE", name:"Bengali",  free:false},
-  {code:"pa", native:"\u0A2A\u0A70\u0A1C\u0A3E\u0A2C\u0A40", name:"Punjabi",  free:false},
-  {code:"or", native:"\u0B13\u0B21\u0B3C\u0B3F\u0B06", name:"Odia",     free:false},
-  {code:"as", native:"\u0985\u09B8\u09AE\u09C0\u09AF\u09BC\u09BE", name:"Assamese",free:false}
+  {code:"en", native:"English",   name:"English", free:true},
+  {code:"te", native:"\u0c24\u0c46\u0c32\u0c41\u0c17\u0c41", name:"Telugu",  free:!GATED},
+  {code:"hi", native:"\u0939\u093f\u0928\u094d\u0926\u0940", name:"Hindi",   free:!GATED},
+  {code:"kn", native:"\u0c95\u0ca8\u0ccd\u0ca8\u0ca1", name:"Kannada", free:!GATED},
+  {code:"ta", native:"\u0ba4\u0bae\u0bbf\u0bb4\u0bcd", name:"Tamil",   free:!GATED}
 ];
 
-export function getLang(){
+var PACKS = { en:EN.strings, te:TE.strings, hi:HI.strings, kn:KN.strings, ta:TA.strings };
+var GLOSS = { en:EN.terms,   te:TE.terms,   hi:HI.terms,   kn:KN.terms,   ta:TA.terms };
+var STORE_KEY = "bp_lang";
+
+function isSupported(code){
+  for(var i=0;i<LANGUAGES.length;i++){ if(LANGUAGES[i].code==code) return true; }
+  return false;
+}
+
+function readSaved(){
   try{
-    var stored = localStorage.getItem("bp_lang");
-    if(stored && LANGUAGES.some(function(l){ return l.code===stored; })) return stored;
+    var c = localStorage.getItem(STORE_KEY);
+    if(c && isSupported(c)) return c;
   }catch(e){}
   return "en";
 }
+
+var current = readSaved();
+var listeners = [];
+var missLog = {};
+
+function applyDocLang(){
+  try{ if(typeof document!="undefined") document.documentElement.setAttribute("lang", current); }catch(e){}
+}
+applyDocLang();
+
+export function getLang(){ return current; }
+
 export function setLang(code){
-  try{
-    if(LANGUAGES.some(function(l){ return l.code===code; })) localStorage.setItem("bp_lang", code);
-  }catch(e){}
+  if(!isSupported(code)) code = "en";
+  try{ localStorage.setItem(STORE_KEY, code); }catch(e){}
+  if(code==current) return;
+  current = code;
+  applyDocLang();
+  for(var i=0;i<listeners.length;i++){ try{ listeners[i](); }catch(e){} }
 }
 
-// TERMINOLOGY - always English in every language. Never translate these.
-// (Kept as a set so t() returns them unchanged regardless of language.)
-var TERMS = {
-  options_intel:"Options Intelligence",
-  market_intel:"Market Intelligence",
-  ai_option_analysis:"AI Option Analysis",
-  pattern_alerts:"Pattern Alerts",
-  market_brief:"AI Market Brief",
-  live_indices:"Live Indices",
-  option_chain:"Option Chain",
-  greeks:"Greeks"
-};
+export function subscribeLang(fn){
+  listeners.push(fn);
+  return function(){ listeners = listeners.filter(function(x){ return x!=fn; }); };
+}
 
-// UI / navigation / helper words and explanations - these translate.
-var STR = {
-  en:{
-    home:"Home", markets:"Markets", learn:"Learn", alerts:"Alerts", more:"More",
-    top_news:"Top News", learn_invest:"Learn & Invest", quick_tools:"Quick Tools",
-    view_all:"View All", view_full:"View Full", details:"Details",
-    watchlist:"Watchlist", settings:"Settings", language:"Language",
-    tap_insight:"Tap any metric for AI insight.",
-    not_advice:"Educational Market Intelligence Only. Not Investment Advice.",
-    meaning:"Meaning",
-    lbl_what:"WHAT IT MEANS", lbl_why:"WHY IT MATTERS", lbl_now:"CURRENT INTERPRETATION",
-    lbl_beginner:"BEGINNER", lbl_advanced:"ADVANCED", lbl_history:"HISTORICAL BEHAVIOR", lbl_risk:"RISK FACTORS",
-    market_mood:"Market Mood", market_stage:"Market Stage", current_stage:"Current Stage",
-    confidence:"Confidence", ai_score:"AI Score", mood_breakdown:"Market Mood Breakdown",
-    market_snapshot:"Market Snapshot", prev_current_session:"Previous / Current Session",
-    sector_rotation:"Sector Rotation", market_breadth:"Market Breadth", global_markets:"Global Markets",
-    three_day_evolution:"3-Day Evolution", risk_level:"Risk Level", ai_trade_bias:"AI Trade Bias",
-    what_to_watch:"What to Watch", support_lvl:"Support", resistance_lvl:"Resistance",
-    data_unavailable:"Data unavailable", market_closed:"Market closed", market_live:"Market live",
-    delayed_status:"Delayed", stale_status:"Stale"
-  },
-  te:{
-    home:"\u0C39\u0C4B\u0C2E\u0C4D", markets:"\u0C2E\u0C3E\u0C30\u0C4D\u0C15\u0C46\u0C1F\u0C4D\u0C32\u0C41", learn:"\u0C28\u0C47\u0C30\u0C4D\u0C1A\u0C41", alerts:"\u0C05\u0C32\u0C30\u0C4D\u0C1F\u0C4D\u0C32\u0C41", more:"\u0C2E\u0C30\u0C3F\u0C28\u0C4D\u0C28\u0C3F",
-    top_news:"\u0C1F\u0C3E\u0C2A\u0C4D \u0C35\u0C3E\u0C30\u0C4D\u0C24\u0C32\u0C41", learn_invest:"\u0C28\u0C47\u0C30\u0C4D\u0C1A\u0C41 & \u0C2A\u0C46\u0C1F\u0C4D\u0C1F\u0C41\u0C2C\u0C21\u0C3F", quick_tools:"\u0C15\u0C4D\u0C35\u0C3F\u0C15\u0C4D \u0C1F\u0C42\u0C32\u0C4D\u0C38\u0C4D",
-    view_all:"\u0C05\u0C28\u0C4D\u0C28\u0C40 \u0C1A\u0C42\u0C21\u0C41", view_full:"\u0C2A\u0C42\u0C30\u0C4D\u0C24\u0C3F\u0C17\u0C3E \u0C1A\u0C42\u0C21\u0C41", details:"\u0C35\u0C3F\u0C35\u0C30\u0C3E\u0C32\u0C41",
-    watchlist:"\u0C35\u0C3E\u0C1A\u0C4D\u200C\u0C32\u0C3F\u0C38\u0C4D\u0C1F\u0C4D", settings:"\u0C38\u0C46\u0C1F\u0C4D\u0C1F\u0C3F\u0C02\u0C17\u0C4D\u0C38\u0C4D", language:"\u0C2D\u0C3E\u0C37",
-    tap_insight:"AI \u0C35\u0C3F\u0C36\u0C4D\u0C32\u0C47\u0C37\u0C23 \u0C15\u0C4B\u0C38\u0C02 \u0C0F \u0C2E\u0C46\u0C1F\u0C4D\u0C30\u0C3F\u0C15\u0C4D \u0C2A\u0C48\u0C28\u0C48\u0C28\u0C3E \u0C28\u0C4A\u0C15\u0C4D\u0C15\u0C02\u0C21\u0C3F.",
-    not_advice:"\u0C15\u0C47\u0C35\u0C32\u0C02 \u0C35\u0C3F\u0C26\u0C4D\u0C2F\u0C3E \u0C2E\u0C3E\u0C30\u0C4D\u0C15\u0C46\u0C1F\u0C4D \u0C07\u0C02\u0C1F\u0C46\u0C32\u0C3F\u0C1C\u0C46\u0C28\u0C4D\u0C38\u0C4D. \u0C2A\u0C46\u0C1F\u0C4D\u0C1F\u0C41\u0C2C\u0C21\u0C3F \u0C38\u0C32\u0C39\u0C3E \u0C15\u0C3E\u0C26\u0C41.",
-    meaning:"\u0C05\u0C30\u0C4D\u0C25\u0C02",
-    lbl_what:"\u0C05\u0C30\u0C4D\u0C25\u0C02", lbl_why:"\u0C0E\u0C02\u0C26\u0C41\u0C15\u0C41 \u0C2E\u0C41\u0C16\u0C4D\u0C2F\u0C02", lbl_now:"\u0C2A\u0C4D\u0C30\u0C38\u0C4D\u0C24\u0C41\u0C24 \u0C05\u0C30\u0C4D\u0C25\u0C02",
-    lbl_beginner:"\u0C2A\u0C4D\u0C30\u0C3E\u0C30\u0C02\u0C2D\u0C3F\u0C15\u0C41\u0C32\u0C15\u0C41", lbl_advanced:"\u0C05\u0C21\u0C4D\u0C35\u0C3E\u0C28\u0C4D\u0C38\u0C4D\u0C21\u0C4D", lbl_history:"\u0C17\u0C24 \u0C2A\u0C4D\u0C30\u0C35\u0C30\u0C4D\u0C24\u0C28", lbl_risk:"\u0C30\u0C3F\u0C38\u0C4D\u0C15\u0C4D \u0C15\u0C3E\u0C30\u0C15\u0C3E\u0C32\u0C41",
-    current_stage:"ప్రస్తుత దశ",
-    confidence:"నమ్మకం", what_to_watch:"గమనించవలసినది",
-    data_unavailable:"డేటా అందుబాటులో లేదు"
-  },
-  hi:{
-    home:"\u0939\u094B\u092E", markets:"\u092C\u093E\u095B\u093E\u0930", learn:"\u0938\u0940\u0916\u0947\u0902", alerts:"\u0905\u0932\u0930\u094D\u091F", more:"\u0914\u0930",
-    top_news:"\u091F\u0949\u092A \u0916\u092C\u0930\u0947\u0902", learn_invest:"\u0938\u0940\u0916\u0947\u0902 \u0914\u0930 \u0928\u093F\u0935\u0947\u0936", quick_tools:"\u0915\u094D\u0935\u093F\u0915 \u091F\u0942\u0932\u094D\u0938",
-    view_all:"\u0938\u092D\u0940 \u0926\u0947\u0916\u0947\u0902", view_full:"\u092A\u0942\u0930\u093E \u0926\u0947\u0916\u0947\u0902", details:"\u0935\u093F\u0935\u0930\u0923",
-    watchlist:"\u0935\u0949\u091A\u0932\u093F\u0938\u094D\u091F", settings:"\u0938\u0947\u091F\u093F\u0902\u0917\u094D\u0938", language:"\u092D\u093E\u0937\u093E",
-    tap_insight:"AI \u091C\u093E\u0928\u0915\u093E\u0930\u0940 \u0915\u0947 \u0932\u093F\u090F \u0915\u093F\u0938\u0940 \u092D\u0940 \u092E\u0947\u091F\u094D\u0930\u093F\u0915 \u092A\u0930 \u091F\u0948\u092A \u0915\u0930\u0947\u0902\u0964",
-    not_advice:"\u0915\u0947\u0935\u0932 \u0936\u0948\u0915\u094D\u0937\u093F\u0915 \u092E\u093E\u0930\u094D\u0915\u0947\u091F \u091C\u093E\u0928\u0915\u093E\u0930\u0940\u0964 \u0928\u093F\u0935\u0947\u0936 \u0938\u0932\u093E\u0939 \u0928\u0939\u0940\u0902\u0964",
-    meaning:"\u0905\u0930\u094D\u0925",
-    lbl_what:"\u0905\u0930\u094D\u0925", lbl_why:"\u092F\u0939 \u0915\u094D\u092F\u094B\u0902 \u092E\u093E\u092F\u0928\u0947 \u0930\u0916\u0924\u093E \u0939\u0948", lbl_now:"\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0935\u094D\u092F\u093E\u0916\u094D\u092F\u093E",
-    lbl_beginner:"\u0936\u0941\u0930\u0941\u0906\u0924\u0940", lbl_advanced:"\u090F\u0921\u0935\u093E\u0902\u0938\u094D\u0921", lbl_history:"\u090C\u0924\u093F\u0939\u093E\u0938\u093F\u0915 \u0935\u094D\u092F\u0935\u0939\u093E\u0930", lbl_risk:"\u091C\u094B\u0916\u093F\u092E \u0915\u093E\u0930\u0915",
-    current_stage:"वर्तमान चरण",
-    confidence:"आत्मविश्वास", what_to_watch:"क्या देखें",
-    data_unavailable:"डेटा उपलब्ध नहीं है"
+// Components call this so they re-render the moment the language changes.
+export function useLang(){
+  return useSyncExternalStore(subscribeLang, getLang, getLang);
+}
+
+// Keep tabs/windows in sync: another tab changing bp_lang updates this one.
+try{
+  if(typeof window!="undefined"){
+    window.addEventListener("storage", function(ev){
+      if(ev.key==STORE_KEY && ev.newValue && isSupported(ev.newValue) && ev.newValue!=current){
+        current = ev.newValue;
+        applyDocLang();
+        for(var i=0;i<listeners.length;i++){ try{ listeners[i](); }catch(e){} }
+      }
+    });
   }
-};
+}catch(e){}
 
-// Translate a key. Terminology returns English always. Others use selected language,
-// falling back to English, then to the key.
-export function t(key){
-  if(TERMS[key]!=undefined) return TERMS[key];
-  var lang = getLang();
-  if(STR[lang] && STR[lang][key]!=undefined) return STR[lang][key];
-  if(STR.en[key]!=undefined) return STR.en[key];
-  return key;
+function fill(str, vars){
+  if(!vars || typeof vars!="object") return str;
+  return str.replace(/\{(\w+)\}/g, function(m, k){
+    return vars[k]!=undefined ? String(vars[k]) : m;
+  });
 }
+
+// Translate a key. Optional second argument:
+//   string  -> English fallback text used only if no pack has the key
+//   object  -> values for {placeholders} in the string
+// Never returns the raw key.
+export function t(key, extra){
+  var vars = (extra && typeof extra=="object") ? extra : null;
+  var fb = (typeof extra=="string") ? extra : "";
+  var pack = PACKS[current];
+  if(pack && pack[key]!=undefined && pack[key]!="") return fill(pack[key], vars);
+  if(current!="en"){ missLog[current+":"+key] = 1; }
+  if(PACKS.en[key]!=undefined) return fill(PACKS.en[key], vars);
+  missLog["en:"+key] = 1;
+  return fb ? fill(fb, vars) : "";
+}
+
+// Glossary: standard market terms stay English, meaning is localized.
+export function term(code){
+  var g = GLOSS[current] || {};
+  var en = GLOSS.en || {};
+  var row = g[code] || en[code];
+  return row ? { name:code, meaning:row } : { name:code, meaning:"" };
+}
+// Tooltip text, e.g. "EMA - <meaning in selected language>".
+export function termHelp(code){
+  var r = term(code);
+  return r.meaning ? (code + " - " + r.meaning) : code;
+}
+
+// Diagnostics: translated-key counts per language versus the English pack,
+// and the keys that were requested at runtime but missing.
+export function getCoverage(){
+  var enKeys = Object.keys(PACKS.en);
+  var enTerms = Object.keys(GLOSS.en);
+  var out = {};
+  LANGUAGES.forEach(function(l){
+    var p = PACKS[l.code], g = GLOSS[l.code];
+    var missing = enKeys.filter(function(k){ return p[k]==undefined || p[k]==""; });
+    var missingTerms = enTerms.filter(function(k){ return g[k]==undefined || g[k]==""; });
+    out[l.code] = {
+      total: enKeys.length,
+      translated: enKeys.length - missing.length,
+      missing: missing,
+      termsTotal: enTerms.length,
+      termsTranslated: enTerms.length - missingTerms.length,
+      missingTerms: missingTerms
+    };
+  });
+  return out;
+}
+export function getRuntimeMisses(){ return Object.keys(missLog); }
 
 // Shared access check for premium gating. Admin and premium unlock everything.
 export function hasAccess(){

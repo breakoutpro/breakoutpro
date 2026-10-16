@@ -229,7 +229,7 @@ export default function EquityHomeV2(props){
           </Card>
 
           {/* 4. AI MARKET MOOD */}
-          <Card title="AI Market Mood" icon="&#129504;" onDetails={function(){setTab("more");}}>
+          <Card title="Next Move Intelligence" icon="&#129504;" onDetails={function(){setTab("more");}}>
             {mm.status=="loading" && !mm.data ? (
               <div style={{fontSize:11,color:T2}}>Loading...</div>
             ) : !mm.mood || mm.mood.score==null ? (
@@ -485,7 +485,7 @@ export default function EquityHomeV2(props){
 
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(300px, 1fr))",gap:16,padding:"16px 16px 0",minWidth:0,boxSizing:"border-box"}}>
 
-          <SummaryCard title="AI Market Mood" icon="&#129504;" onDetails={function(){setTab("more");}}>
+          <SummaryCard title="Next Move Intelligence" icon="&#129504;" onDetails={function(){setTab("more");}}>
             {!mm.mood || mm.mood.score==null ? <div style={{fontSize:12,color:T2}}>Market mood unavailable</div> : (function(){
               var moodColor = mm.mood.label && mm.mood.label.indexOf("Bearish")>=0 ? DOWN : (mm.mood.label && mm.mood.label.indexOf("Bullish")>=0 ? UP : T2);
               return (

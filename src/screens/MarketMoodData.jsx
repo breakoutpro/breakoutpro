@@ -43,6 +43,14 @@ export function getFreshnessMeta(status){
   return FRESHNESS_META[status] || FRESHNESS_META.UNAVAILABLE;
 }
 
+// Provider/source time in IST (never the time the phone received the response).
+export function formatIstTime(ts){
+  if(ts==null) return "";
+  try{
+    return new Date(ts).toLocaleString("en-IN", { timeZone:"Asia/Kolkata", day:"numeric", month:"short", hour:"numeric", minute:"2-digit", hour12:true });
+  }catch(e){ return ""; }
+}
+
 // --- Number formatting (pure formatting, no invented values). ---
 export function formatIndexValue(v){
   if(v==null) return "--";
@@ -71,6 +79,7 @@ export function buildIndexRow(name, idxData){
     up: idxData.chgPct!=null ? idxData.chgPct>=0 : null,
     freshnessText:fresh.text,
     freshnessColor:fresh.color,
+    sourceTs: idxData.freshness.sourceTimestamp!=null ? idxData.freshness.sourceTimestamp : null, // provider time, not fetch time
     prevClose: idxData.prevClose!=null ? formatIndexValue(idxData.prevClose) : null,
     absChange: absChange!=null ? (absChange>=0?"+":"")+formatIndexValue(absChange) : null,
     dayLow: idxData.low!=null ? formatIndexValue(idxData.low) : null,

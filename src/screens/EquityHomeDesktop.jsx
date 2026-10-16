@@ -90,7 +90,7 @@ export default function EquityHomeDesktop(props){
               card, so it grows to fit the full information hierarchy. */}
           <div onClick={function(){setTab("marketmood");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BLUE+"55",boxShadow:"0 0 24px "+BLUE+"22",borderRadius:14,padding:tierCfg.cardPadding+6,boxSizing:"border-box",cursor:"pointer",maxHeight:400,overflowY:"auto"}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16}}>
-              <span style={{fontSize:tierCfg.widgetTitle+1,fontWeight:800,color:T1}}>&#129504; AI Market Mood</span>
+              <span style={{fontSize:tierCfg.widgetTitle+1,fontWeight:800,color:T1}}>&#129504; Next Move Intelligence</span>
               <ProvenanceBadge type="calculated"/>
             </div>
             {(function(){

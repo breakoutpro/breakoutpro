@@ -17,6 +17,7 @@
 // through the existing i18n system (t(key, vars)). Numbers in vars are
 // pre-formatted en-IN strings and are never translated.
 // Rules: no backtick, no triple-equals, ASCII only.
+import { holidayListCoversYear, isTradingHolidayIso } from "../utils/marketStatus.js";
 
 // ---- Tunable heuristic constants (documented in the feature report) --------
 export var RULES = {
@@ -45,7 +46,9 @@ export var RULES = {
   HOLIDAY_TOLERANCE: 2,    // weekdays a source may lag before it is STALE; 1-2 is reported as uncertain
   QUOTE_INTRADAY_SEC: 900, // in-session quote older than this is STALE
   CONTINUOUS_MAX_SEC: 21600, // 24h futures (Crude, Nat Gas): older than 6h is STALE
-  FUTURE_SKEW_MS: 300000   // timestamps more than 5 min ahead of now are invalid
+  FUTURE_SKEW_MS: 300000,  // timestamps more than 5 min ahead of now are invalid
+  PRICE_MISMATCH_PCT: 5,   // live quote vs latest daily close further apart than this = inconsistent data
+  REV_SWING_PCT: 2         // prior opposite trend must have moved price at least this percent (range wobble is not a trend)
 };
 
 // Weights (max points each input can add in either direction).
@@ -110,12 +113,26 @@ export function istParts(ms){
   return { day:Math.floor(s/86400000), min:Math.floor((s%86400000)/60000) };
 }
 function isWeekday(day){ var w = (day+4)%7; return w!=0 && w!=6; }
+// Trading day = weekday that is not a known NSE holiday. The app's own list
+// (utils/marketStatus.js) is used only for years it covers; for other years
+// holidays are unknown and the 1-2 session tolerance below still applies.
+function isTradingDay(day){
+  if(!isWeekday(day)) return false;
+  var iso = new Date(day*86400000).toISOString().slice(0,10);
+  if(holidayListCoversYear(parseInt(iso.slice(0,4), 10)) && isTradingHolidayIso(iso)) return false;
+  return true;
+}
 // Latest weekday whose 09:15 IST open has already passed (as an IST day index).
 export function expectedSessionDay(now){
   var p = istParts(now), e = p.day;
   if(p.min < RULES.OPEN_MIN) e--;
-  while(!isWeekday(e)) e--;
+  while(!isTradingDay(e)) e--;
   return e;
+}
+// True during regular NSE hours on a trading day (09:15-15:30 IST).
+export function isClockOpen(now){
+  var np = istParts(now);
+  return isTradingDay(np.day) && np.min >= RULES.OPEN_MIN && np.min < RULES.CLOSE_MIN;
 }
 // kind "session": NSE-style daily/quote data. kind "continuous": 24h futures.
 export function checkSourceTime(ts, now, kind, intraday){
@@ -126,12 +143,12 @@ export function checkSourceTime(ts, now, kind, intraday){
   }
   var obs = istParts(ts).day, exp = expectedSessionDay(now), np = istParts(now);
   if(obs >= exp){
-    var clockOpen = isWeekday(np.day) && np.min >= RULES.OPEN_MIN && np.min < RULES.CLOSE_MIN;
+    var clockOpen = isClockOpen(now);
     if(intraday && clockOpen && obs==np.day && (now - ts)/1000 > RULES.QUOTE_INTRADAY_SEC) return { state:"stale", lag:0 };
     return { state:"fresh", lag:0 };
   }
   var lag = 0;
-  for(var d=obs+1; d<=exp; d++){ if(isWeekday(d)) lag++; }
+  for(var d=obs+1; d<=exp; d++){ if(isTradingDay(d)) lag++; }
   if(lag > RULES.HOLIDAY_TOLERANCE) return { state:"stale", lag:lag };
   return { state:"uncertain", lag:lag };
 }
@@ -210,7 +227,24 @@ function analyseBars(candles, provisionalLast){
     if(prev.c < sup) brk.state = provisionalLast ? "developing" : "confirmed";
     else brk.state = "early";
   }
+  // reversal: a FRESH EMA cross after an established opposite EMA trend (held at
+  // least ESTABLISHED_SESSIONS sessions), with the last close already on the new
+  // side of the 21 EMA (heuristic, not validated)
+  var rev = { dir:0, priorSessions:0, priorSwingPct:0 };
+  if(crossed!=0){
+    var xi = n - 1 - crossAgo, pr = 0;
+    for(var pj=xi-1; pj>=RULES.EMA_SLOW-1; pj--){
+      var dj = diff(pj);
+      if(crossed>0 ? dj<0 : dj>0) pr++; else break;
+    }
+    rev.priorSessions = pr;
+    var si = xi - pr, refC = bars[si].c, ext = refC;
+    for(var sj=si; sj<n; sj++){ ext = crossed>0 ? Math.min(ext, bars[sj].c) : Math.max(ext, bars[sj].c); }
+    rev.priorSwingPct = Math.round((Math.abs(refC-ext)/refC)*10000)/100;
+    if(pr >= RULES.ESTABLISHED_SESSIONS && rev.priorSwingPct >= RULES.REV_SWING_PCT && ((crossed>0 && last.c>e21[n-1]) || (crossed<0 && last.c<e21[n-1]))) rev.dir = crossed;
+  }
   return {
+    reversal:rev, prevClose:prev.c,
     bars:n, close:last.c, ema9:e9[n-1], ema21:e21[n-1],
     bull:bullNow, bear:bearNow, sign:sign, held:held,
     crossed:crossed, crossAgo:crossAgo,
@@ -231,7 +265,7 @@ export function computeDirection(data, opts){
     net:0, coverage:0, session:(data && data.session) || null,
     supports:[], contradicts:[], bullEvidence:[], bearEvidence:[], notes:[],
     strengthen:[], weaken:[], inputs:[], reasons:[],
-    levels:null, basisClose:false, provisional:false, demo:!!opts.demo
+    levels:null, basisClose:false, provisional:false, demo:!!opts.demo, now:now
   };
 
   // Nothing real to analyse: demo mode, empty payload, or provider error.
@@ -325,6 +359,14 @@ export function computeDirection(data, opts){
   addInput(nh);
   addInput(bq); addInput(bh);
   techSignals("bn", "BANK NIFTY", bTech, bnDay);
+  // Authoritative price/levels for other modules (Next Move). Provider
+  // timestamps and validated status only; nothing is invented here.
+  function quoteView(q, qi){
+    if(!q || !isNum(q.ltp)) return null;
+    return { ltp:q.ltp, chgPct:(isNum(q.chgPct) ? q.chgPct : null), asOf:qi.asOf, status:qi.status, timeCheck:(qi.timeCheck || null), fetchedAt:qi.fetchedAt };
+  }
+  result.quote = { nifty:quoteView(idx.NIFTY, nq), bn:quoteView(idx.BANKNIFTY, bq) };
+  result.tech = { nifty:nTech, bn:bTech };
 
   // -- Sector participation (verified NSE sector indices only)
   var sec = data.sectors;
@@ -436,6 +478,11 @@ export function computeDirection(data, opts){
   // NIFTY 50 daily history is the technical backbone. If it is stale, has no
   // valid timestamp, or is missing/too short, no directional reading is given.
   if(!nTech){ reasons.push({ key: (nh.status=="STALE" ? "dir.why.stale_history" : "dir.why.no_history"), vars:{} }); }
+  // Consistency: the live quote and the latest daily candle describe the same
+  // index. If they are far apart, one of them is wrong or from another source.
+  if(nTech && usable(nq.status) && isNum(idx.NIFTY.ltp) && nTech.close>0 && (Math.abs(idx.NIFTY.ltp - nTech.close)/nTech.close)*100 > RULES.PRICE_MISMATCH_PCT){
+    reasons.push({ key:"dir.why.mismatch", vars:{ q:fmtNum(idx.NIFTY.ltp), c:fmtNum(nTech.close) } });
+  }
   if(result.coverage < RULES.MIN_COVERAGE){ reasons.push({ key:"dir.why.low_cov", vars:{ n:String(Math.round(result.coverage*100)) } }); }
   if(reasons.length){
     result.outlook = "insufficient";

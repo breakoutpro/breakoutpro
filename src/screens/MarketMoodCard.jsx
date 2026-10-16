@@ -67,7 +67,7 @@ export default function MarketMoodCard(props){
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",rowGap:8,marginBottom:12}}>
           <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
             <span style={{fontSize:14,flexShrink:0}} dangerouslySetInnerHTML={{__html:"&#129504;"}}/>
-            <span style={{fontSize:14,fontWeight:800,color:T1}}>AI Market Mood</span>
+            <span style={{fontSize:14,fontWeight:800,color:T1}}>Next Move Intelligence</span>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:4,background:CARD2,borderRadius:16,padding:"4px 12px",flexShrink:0}}>
             <span style={{width:6,height:6,borderRadius:"50%",background:badge.dot,display:"inline-block"}}></span>

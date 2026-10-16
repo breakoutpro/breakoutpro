@@ -1,4 +1,5 @@
-import { getFreshnessMeta } from "./MarketMoodData";
+import { getFreshnessMeta, formatIstTime } from "./MarketMoodData";
+import { t as tr } from "../i18n/translations";
 import { useTheme } from "../theme/ThemeProvider";
 import { useResponsive } from "../hooks/useResponsive";
 
@@ -86,6 +87,7 @@ export function IndexRow(props){
         <span style={{fontSize:12,fontWeight:800,color:MT.T1}}>{row.ltp}</span>
         <span style={{fontSize:12,fontWeight:700,color:chgColor}}>{row.chgPct}</span>
         <FreshnessPill status={row.freshnessText}/>
+        {row.sourceTs ? <span style={{fontSize:9,color:MT.T3}}>{tr("nm.idx.asof",{t:formatIstTime(row.sourceTs)})}</span> : null}
       </div>
     </div>
   );

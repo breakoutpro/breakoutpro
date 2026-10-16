@@ -1,16 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useResponsive } from "../hooks/useResponsive";
 import { useTheme } from "../theme/ThemeProvider";
 import { track } from "../state/analyticsRegistry";
 import { SkeletonCard, SkeletonList } from "../components/Skeleton";
 import {
   getSessionMeta, buildIndexRow, buildEvolution, buildVoiceSummary,
-  buildUnverifiedSection, rankSectors
+  buildUnverifiedSection, rankSectors, formatIstTime
 } from "./MarketMoodData";
 import {
   SectionHead, SectionHeadWithPill, UnavailableCard, IndexRow, GridWrap,
   StageTimeline, EvolutionCard, Sparkline, buildMT, SemicircleGauge
 } from "./MarketMoodParts";
+import EarlyDirectionPanel from "./EarlyDirectionPanel";
+import NextMoveCard from "./NextMoveCard";
+import { computeNextMove } from "./NextMoveEngine";
+import { useLang, t as tr } from "../i18n/translations";
+import { computeDirection, directionSpeech } from "./DirectionEngine";
 import { DEMO_MOOD, DEMO_AI, DEMO_DATA, DEMO_LEVELS, DEMO_EVOLUTION, DEMO_EVOLUTION_DATES, DEMO_RISK, DEMO_TRADE_BIAS, DEMO_BREADTH } from "./MarketMoodDemoData";
 
 // BreakoutPro - MarketMood.jsx
@@ -32,6 +37,7 @@ function speakText(t){
 }
 
 export default function MarketMood(props){
+  useLang(); // re-render on language change (existing i18n system)
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   var MT = buildMT(theme);
   var mm = props.mm || {};
@@ -73,6 +79,31 @@ export default function MarketMood(props){
 
   var [speaking, setSpeaking] = useState(false);
 
+  // Early Market Direction: pure rule-based reading of the SAME payload this
+  // page already holds (no extra request). A 15s tick re-evaluates data age so
+  // a LIVE label cannot linger when polling stops (offline / failed fetches).
+  var [dirTick, setDirTick] = useState(0);
+  useEffect(function(){
+    var id = setInterval(function(){ setDirTick(function(x){ return x+1; }); }, 15000);
+    return function(){ clearInterval(id); };
+  }, []);
+  var direction = useMemo(function(){
+    // Use the REAL payload whenever one exists, even if the page itself fell
+    // back to demo mood values (e.g. every index unavailable). Demo values
+    // are never fed to the direction engine.
+    return computeDirection(mm.data || null, {
+      now:Date.now(), lastUpdated:mm.lastUpdated, demo:(usingDemo && !mm.data),
+      offline:(mm.status=="offline" || mm.networkStatus=="OFFLINE")
+    });
+  }, [mm.data, usingDemo, mm.lastUpdated, mm.status, mm.networkStatus, dirTick]);
+  // Next Move Intelligence: scenarios derived from the SAME direction result
+  // (one calculation path, so levels and freshness can never disagree).
+  var nextMove = useMemo(function(){ return computeNextMove(direction); }, [direction]);
+  // Provider (source) time of the NIFTY quote. NOT the time this phone fetched it.
+  var niftyQ = mm.data && mm.data.indices && mm.data.indices.NIFTY;
+  var srcTs = niftyQ && niftyQ.freshness && niftyQ.freshness.sourceTimestamp ? niftyQ.freshness.sourceTimestamp : null;
+  var isLiveNow = !!(nextMove && nextMove.price && nextMove.price.kind=="live");
+
   // Fires exactly once per genuine open (component mount), not on
   // re-render - matches the ANALYTICS_EVENTS allow-list in
   // analyticsRegistry.js ("feature_open": ["feature"]), no new event type.
@@ -82,6 +113,7 @@ export default function MarketMood(props){
 
   function onVoice(){
     var t = buildVoiceSummary(mood, ai, session);
+    if(!usingDemo && direction){ t = t + " " + directionSpeech(direction); }
     setSpeaking(true);
     speakText(t);
     setTimeout(function(){ setSpeaking(false); }, 1000);
@@ -98,7 +130,7 @@ export default function MarketMood(props){
       <div style={{background:MT.CARD,borderBottom:"1px solid "+MT.BD,position:"sticky",top:0,zIndex:5}}>
         <div style={{display:"flex",alignItems:"center",gap:10,padding:wideLayout?"4px 10px":"6px 12px",maxWidth:1440,margin:"0 auto",boxSizing:"border-box"}}>
           <button onClick={props.onClose} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:30,height:30,color:MT.T1,fontSize:14,cursor:"pointer",flexShrink:0}}>&#8592;</button>
-          <div style={{fontSize:13,fontWeight:800,color:MT.T1}}>AI Market Mood</div>
+          <div style={{fontSize:13,fontWeight:800,color:MT.T1}}>{tr("nm.title")}</div>
           <button onClick={onVoice} style={{background:"transparent",border:"1px solid "+MT.BLUE,borderRadius:7,padding:"4px 10px",color:MT.BLUE,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit",display:"inline-flex",alignItems:"center",gap:5}}>
             <span style={{fontSize:12}} dangerouslySetInnerHTML={{__html:"&#128266;"}}/>
             {speaking ? "Playing..." : "Listen"}
@@ -126,6 +158,9 @@ export default function MarketMood(props){
             <span>&#9888;</span> DEMO DATA &#8212; NOT LIVE
           </div>
         ) : null}
+        {/* NEXT MOVE INTELLIGENCE - primary card; the mood score below is secondary context */}
+        <NextMoveCard nextMove={nextMove} wideLayout={wideLayout} gapV={gapV} padV={padV}/>
+
         {/* CURRENT MOOD - single clean primary status, per explicit instruction
             to remove duplication. Previously showed the mood 4 times (gauge
             visual + pills + title + AI Bias) - now shows it exactly once. */}
@@ -141,12 +176,15 @@ export default function MarketMood(props){
                   <span style={{fontSize:16,fontWeight:900,color:moodColor}}>{mood.label.toUpperCase()}</span>
                 </div>
                 <div style={{fontSize:11,color:MT.T2}}>{mood.stage} &nbsp;&#183;&nbsp; {mood.confidence} Confidence &nbsp;&#183;&nbsp; AI Score: {mood.score}/100</div>
-                {mm.lastUpdated ? <div style={{fontSize:9,color:MT.T3,marginTop:2}}>Updated {new Date(mm.lastUpdated).toLocaleTimeString("en-IN",{hour:"numeric",minute:"2-digit"})}</div> : null}
+                {!usingDemo ? <div style={{fontSize:9,color:MT.T3,marginTop:2}}>{srcTs ? tr("nm.src.time",{t:formatIstTime(srcTs)}) : tr("nm.src.na")}</div> : null}
               </div>
             </div>
           </div>
           <StageTimeline mood={mood} evolution={evolution}/>
         </div>
+
+        {/* EARLY MARKET DIRECTION - additive panel; everything else on this page is unchanged */}
+        <EarlyDirectionPanel direction={direction} wideLayout={wideLayout} gapV={gapV} padV={padV}/>
 
         {/* MARKET MOOD BREAKDOWN + WHY/WATCH/CHANGED/DRIVERS - single row on wide screens, Breakdown as one column beside the 4-card intelligence grid, matching the reference layout */}
         <div style={{display:wideLayout?"grid":"block",gridTemplateColumns:wideLayout?"1fr 3fr":undefined,gap:gapV,marginBottom:gapV,alignItems:"start"}}>
@@ -276,7 +314,7 @@ export default function MarketMood(props){
 
         {/* DATA STATUS - honest indicator of live vs unavailable, never fabricated */}
         <div style={{fontSize:11,color:MT.T3,marginBottom:gapV}}>
-          {status==="ok" && ai ? "Live data" : status==="ok" && !ai ? "Score available, analysis updating" : "Data unavailable right now."}
+          {status!=="ok" ? tr("nm.status.unavail") : (isLiveNow ? tr("nm.status.live") : (srcTs ? tr("nm.status.last",{t:formatIstTime(srcTs)}) : tr("nm.status.unavail")))}{status==="ok" && !ai ? " \u00b7 Score available, analysis updating" : ""}
         </div>
 
         {/* MARKET SNAPSHOT - one compact card, 4-column grid inside, same real index data as below */}
@@ -303,6 +341,7 @@ export default function MarketMood(props){
                       <div style={{fontSize:13,fontWeight:800,color:MT.T1}}>{row.ltp}</div>
                       <div style={{fontSize:10,fontWeight:700,color:row.up==null?MT.T2:(row.up?MT.SENT_GREEN:MT.SENT_RED)}}>{row.up==null?"":(row.up?"\u25b2 ":"\u25bc ")}{row.absChange ? row.absChange+" " : ""}({row.chgPct})</div>
                       {row.dayLow && row.dayHigh ? <div style={{fontSize:9,color:MT.T3,marginTop:1}}>Low: {row.dayLow} &nbsp; High: {row.dayHigh}</div> : null}
+                      {!usingDemo ? <div style={{fontSize:9,color:MT.T3,marginTop:1}}>{row.sourceTs ? tr("nm.idx.asof",{t:formatIstTime(row.sourceTs)}) : tr("nm.src.na")}</div> : null}
                       {!usingDemo && data && data.indexHistory && data.indexHistory[key] && data.indexHistory[key].points && data.indexHistory[key].points.length>=2 ? (
                         <div style={{marginTop:4}}><Sparkline points={data.indexHistory[key].points} inverse={key==="VIX"} height={28}/></div>
                       ) : null}
@@ -461,7 +500,7 @@ export default function MarketMood(props){
         {/* FOOTER DATA STATUS - compact, real status only */}
         <div style={{display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:8,fontSize:9,color:MT.T3,paddingTop:5,borderTop:"1px solid "+MT.BD}}>
           <span>All data is end-of-day unless otherwise stated &#8226; Market data providers not connected</span>
-          <span>AI Market Mood Score is deterministic and data-driven.</span>
+          <span>Market Mood Score is deterministic and data-driven.</span>
         </div>
 
           </>

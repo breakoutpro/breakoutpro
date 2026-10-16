@@ -94,4 +94,10 @@ export function getMarketStatus(){
   return {status:"closed",label:"Closed",note:"Opens 09:15 IST",color:"#EF4444",live:false,countdown:countdownText(mins,open+24*60,"Opens in")};
 }
 
+// Additive helpers for other modules (no behaviour change to getMarketStatus).
+// The holiday list above only covers 2026; for other years callers must treat
+// the calendar as unknown rather than assume "no holidays".
+export function holidayListCoversYear(y){ return y==2026; }
+export function isTradingHolidayIso(iso){ return TRADING_HOLIDAYS_2026.indexOf(iso)>=0; }
+
 export function isMarketLive(){ var s=getMarketStatus(); return s.live; }

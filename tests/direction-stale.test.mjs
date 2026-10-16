@@ -207,3 +207,25 @@ test("checkSourceTime unit cases", function(){
   assert.equal(checkSourceTime(NOW - 3600000, NOW, "continuous").state, "fresh");
   assert.equal(checkSourceTime(NOW - 7*3600000, NOW, "continuous").state, "stale");
 });
+
+test("known NSE holidays (app calendar, 2026) are not treated as missing sessions", function(){
+  // Fri 2026-10-02 (Gandhi Jayanti) is a listed holiday: Monday 08:30 expects Thursday
+  var now = ist(2026, 10, 5, 8, 30);
+  assert.equal(expectedSessionDay(now), istParts(ist(2026, 10, 1, 12, 0)).day);
+  var p = makePayload({ niftyKind:"up", niftyChg:0.6, bnChg:0.7, session:"CLOSED", status:"DELAYED", ts:ist(2026, 10, 1, 15, 29) });
+  setBars(p, ist(2026, 10, 1, 9, 15));
+  var r = computeDirection(p, { now:now, lastUpdated:now-5000 });
+  assert.equal(inp(r, "nifty_q").timeCheck, "fresh");
+  assert.equal(inp(r, "nifty_h").timeCheck, "fresh");
+  assert.equal(r.timeUncertain, false);
+  // Tue 2026-10-20 (Dussehra) holiday: Wednesday 08:00 expects Monday
+  var now2 = ist(2026, 10, 21, 8, 0);
+  assert.equal(expectedSessionDay(now2), istParts(ist(2026, 10, 19, 12, 0)).day);
+});
+
+test("outside the years the calendar covers, holidays stay unknown (uncertain, not stale)", function(){
+  var now = ist(2027, 1, 27, 8, 0);                    // Wednesday 08:00; Tue 26 Jan is not in the app list
+  var q = checkSourceTime(ist(2027, 1, 25, 15, 29), now, "session");
+  assert.equal(q.state, "uncertain");
+  assert.equal(q.lag, 1);
+});

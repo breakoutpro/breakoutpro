@@ -20,7 +20,9 @@ function allKeys(){
           + fs.readFileSync(new URL("../src/screens/MarketMood.jsx", import.meta.url), "utf8")
           + fs.readFileSync(new URL("../src/screens/MarketMoodParts.jsx", import.meta.url), "utf8")
           + fs.readFileSync(new URL("../src/screens/NextMoveHome.jsx", import.meta.url), "utf8")
-          + fs.readFileSync(new URL("../src/screens/NextMoveView.js", import.meta.url), "utf8");
+          + fs.readFileSync(new URL("../src/screens/NextMoveView.js", import.meta.url), "utf8")
+          + fs.readFileSync(new URL("../src/screens/NextMoveDetailView.js", import.meta.url), "utf8")
+          + fs.readFileSync(new URL("../src/screens/DetailedAnalysis.jsx", import.meta.url), "utf8");
   var keys = {};
   (src.match(/"nm\.[A-Za-z0-9_.]+"/g) || []).forEach(function(l){ var k = l.slice(1, -1); if(k.charAt(k.length-1)!="." ) keys[k] = 1; });
   ["upside","downside","range","reversal_up","reversal_dn","wait","unavailable"].forEach(function(a){ keys["nm.assess." + a] = 1; keys["nm.why." + a] = keys["nm.why." + a] || 0; });
@@ -29,6 +31,8 @@ function allKeys(){
   ["intraday","volume","options","news","breadth"].forEach(function(u){ keys["nm.unv." + u] = 1; });
   ["ok","behind","stale","na"].forEach(function(u){ keys["nm.trend." + u] = 1; });
   ["home.changed_q","home.drivers_q","home.ai_score","home.ai_conf_score"].forEach(function(k){ keys[k] = 1; });
+  // Detailed Analysis keys built at run time (prefix + id): every English nm.da.* key is required.
+  Object.keys(EN.strings).forEach(function(k){ if(k.indexOf("nm.da.")==0) keys[k] = 1; });
   Object.keys(keys).forEach(function(k){ if(keys[k]===0) delete keys[k]; });
   return Object.keys(keys);
 }

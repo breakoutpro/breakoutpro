@@ -18,13 +18,17 @@ function allKeys(){
   var src = fs.readFileSync(new URL("../src/screens/NextMoveEngine.js", import.meta.url), "utf8")
           + fs.readFileSync(new URL("../src/screens/NextMoveCard.jsx", import.meta.url), "utf8")
           + fs.readFileSync(new URL("../src/screens/MarketMood.jsx", import.meta.url), "utf8")
-          + fs.readFileSync(new URL("../src/screens/MarketMoodParts.jsx", import.meta.url), "utf8");
+          + fs.readFileSync(new URL("../src/screens/MarketMoodParts.jsx", import.meta.url), "utf8")
+          + fs.readFileSync(new URL("../src/screens/NextMoveHome.jsx", import.meta.url), "utf8")
+          + fs.readFileSync(new URL("../src/screens/NextMoveView.js", import.meta.url), "utf8");
   var keys = {};
   (src.match(/"nm\.[A-Za-z0-9_.]+"/g) || []).forEach(function(l){ var k = l.slice(1, -1); if(k.charAt(k.length-1)!="." ) keys[k] = 1; });
   ["upside","downside","range","reversal_up","reversal_dn","wait","unavailable"].forEach(function(a){ keys["nm.assess." + a] = 1; keys["nm.why." + a] = keys["nm.why." + a] || 0; });
   ["waiting","triggered","confirmed","invalidated","expired"].forEach(function(s){ keys["nm.st." + s] = 1; });
   ["OPEN","PRE_OPEN","POST_CLOSE","CLOSED","WEEKEND"].forEach(function(s){ keys["nm.sess." + s] = 1; });
   ["intraday","volume","options","news","breadth"].forEach(function(u){ keys["nm.unv." + u] = 1; });
+  ["ok","behind","stale","na"].forEach(function(u){ keys["nm.trend." + u] = 1; });
+  ["home.changed_q","home.drivers_q","home.ai_score","home.ai_conf_score"].forEach(function(k){ keys[k] = 1; });
   Object.keys(keys).forEach(function(k){ if(keys[k]===0) delete keys[k]; });
   return Object.keys(keys);
 }

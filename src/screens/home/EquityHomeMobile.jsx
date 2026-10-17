@@ -4,6 +4,7 @@ import { useHomeData } from "./hooks/useHomeData";
 import { JUSTIN } from "../JustInData";
 import MarketBadge from "./MarketBadge";
 import { t, termHelp, useLang } from "../../i18n/translations";
+import NextMoveHome from "../NextMoveHome";
 
 // BreakoutPro - EquityHomeMobile.jsx
 // The Mobile Home layout - UI only. All data comes from useHomeData(), the
@@ -96,13 +97,15 @@ export default function EquityHomeMobile(props){
           ) : (function(){
             var hasReal = mm.mood && mm.mood.score!=null;
             if(!hasReal){
-              return <div style={{fontSize:11,color:T2}}>{t("c.analysis_loading")}</div>;
+              return <NextMoveHome mm={mm} fs={11} ls={10} watchKey="home.watch_q"/>;
             }
             var mood = mm.mood;
             var ai = mm.ai;
             var moodColor = mood.label.indexOf("Bullish")>=0?SENT_GREEN:(mood.label.indexOf("Bearish")>=0?SENT_RED:SENT_YELLOW);
             return (
               <div style={{width:"100%",boxSizing:"border-box"}}>
+                <NextMoveHome mm={mm} fs={11} ls={10} watchKey="home.watch_q"/>
+                <div style={{borderTop:"1px solid "+BD,margin:"2px 0 6px"}}></div>
                 <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
                   <span style={{width:8,height:8,borderRadius:"50%",background:moodColor,flexShrink:0}}></span>
                   <span style={{fontSize:15,fontWeight:900,color:moodColor}}>{t("mood."+mood.label, mood.label).toUpperCase()}</span>
@@ -131,26 +134,6 @@ export default function EquityHomeMobile(props){
                     </div>
                   );
                 })()}
-                <div style={{marginBottom:8}}>
-                  <div style={{fontSize:10,color:T2,fontWeight:700,marginBottom:2}}>{t("home.key_signal")}</div>
-                  {ai && (ai.now || ai.whatChanged || (ai.keyDrivers && ai.keyDrivers.length)) ? (
-                    <div>
-                      {ai.now ? <div style={{fontSize:11,color:T1,lineHeight:1.4,marginBottom:4}}>{ai.now}</div> : null}
-                      {ai.whatChanged ? <div style={{fontSize:11,color:T2,lineHeight:1.4,marginBottom:4}}><b style={{color:T1}}>{t("home.what_changed")}</b>{ai.whatChanged}</div> : null}
-                      {ai.keyDrivers && ai.keyDrivers.length ? (
-                        <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
-                          {ai.keyDrivers.map(function(d,i){
-                            return <span key={i} style={{fontSize:10,color:T2,background:theme.c.card2,border:"1px solid "+BD,borderRadius:6,padding:"2px 7px"}}>{d}</span>;
-                          })}
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : <div style={{fontSize:11,color:T2}}>{t("c.data_unavailable")}</div>}
-                </div>
-                <div>
-                  <div style={{fontSize:10,color:T2,fontWeight:700,marginBottom:2}}>{t("home.watch_q")}</div>
-                  {ai && ai.watchNext ? <div style={{fontSize:11,color:T1,lineHeight:1.4}}>{ai.watchNext}</div> : <div style={{fontSize:11,color:T2}}>{t("c.data_unavailable")}</div>}
-                </div>
               </div>
             );
           })()}

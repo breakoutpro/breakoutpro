@@ -6,6 +6,7 @@ import { DEMO_MOOD, DEMO_AI } from "../MarketMoodDemoData";
 import MarketBadge from "./MarketBadge";
 import { SkeletonCard } from "../../components/Skeleton";
 import { t, termHelp, useLang } from "../../i18n/translations";
+import NextMoveHome from "../NextMoveHome";
 
 // BreakoutPro - EquityHomeTablet.jsx
 // Tablet Home layout - independent from Mobile and from Laptop/Desktop.
@@ -85,12 +86,15 @@ export default function EquityHomeTablet(props){
             <SkeletonCard height={90}/>
           ) : (function(){
             var usingDemo = !mm.mood || mm.mood.score==null;
-            var mood = usingDemo ? DEMO_MOOD : mm.mood;
-            var ai = usingDemo ? DEMO_AI : mm.ai;
+            if(usingDemo) return <NextMoveHome mm={mm} fs={11} ls={10} watchKey="home.watch_q"/>;
+            var mood = mm.mood;
+            var ai = mm.ai;
             var moodColor = mood.label.indexOf("Bullish")>=0?UP:(mood.label.indexOf("Bearish")>=0?DOWN:WARN);
             return (
               <div>
                 <div style={{display:"flex",gap:6,marginBottom:10}}>
+                <NextMoveHome mm={mm} fs={11} ls={10} watchKey="home.watch_q"/>
+                <div style={{borderTop:"1px solid "+BD,margin:"2px 0 6px"}}></div>
                   {[["BEARISH",DOWN],["SIDEWAYS",WARN],["BULLISH",UP]].map(function(seg){
                     var active = mood.label.toUpperCase().indexOf(seg[0])>=0 || (seg[0]==="SIDEWAYS" && mood.label.indexOf("Bull")<0 && mood.label.indexOf("Bear")<0);
                     return <div key={seg[0]} style={{fontSize:10,fontWeight:800,padding:"4px 9px",borderRadius:6,color:active?"#fff":seg[1],background:active?seg[1]:seg[1]+"14",border:"1px solid "+seg[1]}}>{t("mood.seg."+seg[0], seg[0])}</div>;
@@ -100,16 +104,6 @@ export default function EquityHomeTablet(props){
                 <div style={{fontSize:12,color:T2,marginBottom:2}}>{t("home.stage")} <span style={{color:T1,fontWeight:700}}>{t("stage."+mood.stage, mood.stage)}</span></div>
                 <div style={{fontSize:12,color:T2,marginBottom:8}}>{t("home.confidence")} <span style={{color:T1,fontWeight:700}}>{t("conf."+mood.confidence, mood.confidence)}</span></div>
                 <div style={{fontSize:10,color:T2,background:BG,border:"1px solid "+BD,borderRadius:6,padding:"3px 8px",display:"inline-block",marginBottom:10}}>{t("home.ai_conf_score",{n:mood.score})}</div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-                  <div>
-                    <div style={{fontSize:10,color:T2,fontWeight:700,marginBottom:3}}>{t("home.why")}</div>
-                    {ai && ai.now ? <div style={{fontSize:11,color:T1,lineHeight:1.4}}>{ai.now}</div> : <div style={{fontSize:11,color:T2}}>{t("c.data_unavailable")}</div>}
-                  </div>
-                  <div>
-                    <div style={{fontSize:10,color:T2,fontWeight:700,marginBottom:3}}>{t("home.watch_q")}</div>
-                    {ai && ai.watchNext ? <div style={{fontSize:11,color:T1,lineHeight:1.4}}>{ai.watchNext}</div> : <div style={{fontSize:11,color:T2}}>{t("c.data_unavailable")}</div>}
-                  </div>
-                </div>
               </div>
             );
           })()}

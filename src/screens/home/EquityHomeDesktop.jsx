@@ -6,6 +6,7 @@ import { getHomeTierConfig } from "../../utils/homeTierDensity";
 import ProvenanceBadge from "../../components/ProvenanceBadge";
 import { JUSTIN } from "../JustInData";
 import { t, termHelp, useLang } from "../../i18n/translations";
+import NextMoveHome from "../NextMoveHome";
 
 // BreakoutPro - EquityHomeDesktop.jsx
 // The Home dashboard: SIX core active-trader features (AI Market Mood,
@@ -91,13 +92,15 @@ export default function EquityHomeDesktop(props){
             {(function(){
               var hasReal = data.mm.mood && data.mm.mood.score!=null;
               if(!hasReal){
-                return <div style={{fontSize:tierCfg.secondaryText,color:T2}}>{t("c.analysis_loading")}</div>;
+                return <NextMoveHome mm={data.mm} fs={tierCfg.secondaryText} ls={9}/>;
               }
               var mood = data.mm.mood;
               var ai = data.mm.ai;
               var moodColor = mood.label.indexOf("Bullish")>=0?SENT_GREEN:(mood.label.indexOf("Bearish")>=0?SENT_RED:SENT_YELLOW);
               return (
                 <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0}}>
+                <NextMoveHome mm={data.mm} fs={tierCfg.secondaryText} ls={9}/>
+                <div style={{borderTop:"1px solid "+BD,margin:"2px 0 6px"}}></div>
                   <div style={{display:"flex",gap:5,marginBottom:6}}>
                     {[["BEARISH",SENT_RED],["SIDEWAYS",SENT_YELLOW],["BULLISH",SENT_GREEN]].map(function(seg){
                       var active = mood.label.toUpperCase().indexOf(seg[0])>=0 || (seg[0]==="SIDEWAYS" && mood.label.indexOf("Bull")<0 && mood.label.indexOf("Bear")<0);
@@ -126,14 +129,6 @@ export default function EquityHomeDesktop(props){
                     );
                   })()}
 
-                  <div style={{marginBottom:4}}>
-                    <div style={{fontSize:9,color:T2,fontWeight:800,marginBottom:2}}>{t("home.key_signal")}</div>
-                    <div style={{fontSize:tierCfg.secondaryText,color:ai&&ai.now?T1:T2,lineHeight:1.35}}>{ai && ai.now ? ai.now : t("home.analysis_progress")}</div>
-                  </div>
-                  <div style={{marginBottom:4}}>
-                    <div style={{fontSize:9,color:T2,fontWeight:800,marginBottom:2}}>{t("home.watch")}</div>
-                    <div style={{fontSize:tierCfg.secondaryText,color:ai&&ai.watchNext?T1:T2,lineHeight:1.3}}>{ai && ai.watchNext ? ai.watchNext : t("home.no_watch")}</div>
-                  </div>
                   <div style={{textAlign:"right",fontSize:tierCfg.label,color:BLUE,fontWeight:700,marginTop:"auto",paddingTop:4}}>{t("home.view_full_analysis")} &#8594;</div>
                 </div>
               );

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useResponsive } from "../hooks/useResponsive";
 import { useTheme } from "../theme/ThemeProvider";
 import { track } from "../state/analyticsRegistry";
@@ -13,9 +13,9 @@ import {
 } from "./MarketMoodParts";
 import EarlyDirectionPanel from "./EarlyDirectionPanel";
 import NextMoveCard from "./NextMoveCard";
-import { computeNextMove } from "./NextMoveEngine";
+import { useNextMove } from "../hooks/useNextMove";
 import { useLang, t as tr } from "../i18n/translations";
-import { computeDirection, directionSpeech } from "./DirectionEngine";
+import { directionSpeech } from "./DirectionEngine";
 import { DEMO_MOOD, DEMO_AI, DEMO_DATA, DEMO_LEVELS, DEMO_EVOLUTION, DEMO_EVOLUTION_DATES, DEMO_RISK, DEMO_TRADE_BIAS, DEMO_BREADTH } from "./MarketMoodDemoData";
 
 // BreakoutPro - MarketMood.jsx
@@ -79,30 +79,15 @@ export default function MarketMood(props){
 
   var [speaking, setSpeaking] = useState(false);
 
-  // Early Market Direction: pure rule-based reading of the SAME payload this
-  // page already holds (no extra request). A 15s tick re-evaluates data age so
-  // a LIVE label cannot linger when polling stops (offline / failed fetches).
-  var [dirTick, setDirTick] = useState(0);
-  useEffect(function(){
-    var id = setInterval(function(){ setDirTick(function(x){ return x+1; }); }, 15000);
-    return function(){ clearInterval(id); };
-  }, []);
-  var direction = useMemo(function(){
-    // Use the REAL payload whenever one exists, even if the page itself fell
-    // back to demo mood values (e.g. every index unavailable). Demo values
-    // are never fed to the direction engine.
-    return computeDirection(mm.data || null, {
-      now:Date.now(), lastUpdated:mm.lastUpdated, demo:(usingDemo && !mm.data),
-      offline:(mm.status=="offline" || mm.networkStatus=="OFFLINE")
-    });
-  }, [mm.data, usingDemo, mm.lastUpdated, mm.status, mm.networkStatus, dirTick]);
-  // Next Move Intelligence: scenarios derived from the SAME direction result
-  // (one calculation path, so levels and freshness can never disagree).
-  var nextMove = useMemo(function(){ return computeNextMove(direction); }, [direction]);
-  // Provider (source) time of the NIFTY quote. NOT the time this phone fetched it.
-  var niftyQ = mm.data && mm.data.indices && mm.data.indices.NIFTY;
-  var srcTs = niftyQ && niftyQ.freshness && niftyQ.freshness.sourceTimestamp ? niftyQ.freshness.sourceTimestamp : null;
+  // Early Market Direction and Next Move Intelligence: ONE shared path (the
+  // same hook the Home cards use) from the payload this page already holds.
+  // No extra request; freshness is re-checked against the clock every 15 s.
+  var nm = useNextMove(mm);
+  var direction = nm.direction;
+  var nextMove = nm.nextMove;
+  var srcTs = nm.srcTs;
   var isLiveNow = !!(nextMove && nextMove.price && nextMove.price.kind=="live");
+  var [showDir, setShowDir] = useState(false);
 
   // Fires exactly once per genuine open (component mount), not on
   // re-render - matches the ANALYTICS_EVENTS allow-list in
@@ -137,7 +122,7 @@ export default function MarketMood(props){
           </button>
           <div style={{fontSize:11,color:MT.T2,display:"flex",alignItems:"center",gap:4,marginLeft:"auto"}}>
             <span style={{width:6,height:6,borderRadius:"50%",background:sMeta.dot,display:"inline-block",flexShrink:0}}></span>
-            <span>{sMeta.label}</span>
+            <span>{tr("nm.sess." + session, sMeta.label)}</span>
           </div>
         </div>
       </div>
@@ -173,9 +158,10 @@ export default function MarketMood(props){
               <div style={{flex:"1 1 160px",minWidth:140}}>
                 <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
                   <span style={{width:9,height:9,borderRadius:"50%",background:moodColor,flexShrink:0}}></span>
-                  <span style={{fontSize:16,fontWeight:900,color:moodColor}}>{mood.label.toUpperCase()}</span>
+                  <span style={{fontSize:16,fontWeight:900,color:moodColor}}>{tr("mood." + mood.label, mood.label).toUpperCase()}</span>
                 </div>
-                <div style={{fontSize:11,color:MT.T2}}>{mood.stage} &nbsp;&#183;&nbsp; {mood.confidence} Confidence &nbsp;&#183;&nbsp; AI Score: {mood.score}/100</div>
+                <div style={{fontSize:11,color:MT.T2}}>{tr("stage." + mood.stage, mood.stage)} &nbsp;&#183;&nbsp; {tr("home.conf_suffix",{c:tr("conf." + mood.confidence, mood.confidence)})} &nbsp;&#183;&nbsp; {tr("home.ai_score",{n:mood.score})}</div>
+                {!usingDemo ? <div style={{fontSize:9,color:MT.T3,marginTop:3,lineHeight:1.4}}>{tr("nm.mood.note")}</div> : null}
                 {!usingDemo ? <div style={{fontSize:9,color:MT.T3,marginTop:2}}>{srcTs ? tr("nm.src.time",{t:formatIstTime(srcTs)}) : tr("nm.src.na")}</div> : null}
               </div>
             </div>
@@ -184,123 +170,48 @@ export default function MarketMood(props){
         </div>
 
         {/* EARLY MARKET DIRECTION - additive panel; everything else on this page is unchanged */}
-        <EarlyDirectionPanel direction={direction} wideLayout={wideLayout} gapV={gapV} padV={padV}/>
+        <button type="button" aria-expanded={showDir} onClick={function(){ setShowDir(!showDir); }} style={{display:"flex",alignItems:"center",gap:8,width:"100%",boxSizing:"border-box",background:MT.CARD,border:"1px solid "+MT.BD,borderRadius:8,padding:"8px 10px",marginBottom:gapV,color:MT.T1,fontSize:12,fontWeight:800,cursor:"pointer",fontFamily:"inherit",textAlign:"left"}}>
+          <span aria-hidden="true" style={{color:MT.T2,fontSize:10,flexShrink:0}}>{showDir ? "\u25be" : "\u25b8"}</span>
+          <span style={{overflowWrap:"anywhere",minWidth:0}}>{tr("dir.title")} {"\u00b7"} {tr("nm.ev.detail")}</span>
+        </button>
+        {showDir ? <EarlyDirectionPanel direction={direction} wideLayout={wideLayout} gapV={gapV} padV={padV}/> : null}
 
-        {/* MARKET MOOD BREAKDOWN + WHY/WATCH/CHANGED/DRIVERS - single row on wide screens, Breakdown as one column beside the 4-card intelligence grid, matching the reference layout */}
-        <div style={{display:wideLayout?"grid":"block",gridTemplateColumns:wideLayout?"1fr 3fr":undefined,gap:gapV,marginBottom:gapV,alignItems:"start"}}>
-          <div style={{marginBottom:wideLayout?0:8}}>
-            <SectionHead>MARKET MOOD BREAKDOWN</SectionHead>
-            <div style={{background:MT.CARD,border:"1px solid "+MT.BD,borderRadius:8,padding:padV}}>
-              {(function(){
-                var score = mood.score;
-                var zone = score<40?"bearish":(score<60?"sideways":"bullish");
-                var depth;
-                if(zone==="bearish") depth = 1 - Math.abs(score-19.5)/19.5;
-                else if(zone==="sideways") depth = 1 - Math.abs(score-50)/10;
-                else depth = 1 - Math.abs(score-80)/20;
-                var dominant = Math.round(55 + depth*30);
-                var remainder = 100 - dominant;
-                var others = ["bearish","sideways","bullish"].filter(function(z){ return z!==zone; });
-                var distScore = {bearish:score, sideways:Math.abs(score-50), bullish:100-score};
-                var w0 = 1/(distScore[others[0]]+5), w1 = 1/(distScore[others[1]]+5);
-                var pct = {}; pct[zone] = dominant;
-                pct[others[0]] = Math.round(remainder*w0/(w0+w1));
-                pct[others[1]] = remainder - pct[others[0]];
-                var rows = [["BEARISH",MT.SENT_RED,pct.bearish],["SIDEWAYS",MT.SENT_YELLOW,pct.sideways],["BULLISH",MT.SENT_GREEN,pct.bullish]];
-                return rows.map(function(r){
-                  return (
-                    <div key={r[0]} style={{display:"flex",alignItems:"center",gap:10,marginBottom:5}}>
-                      <div style={{width:70,fontSize:11,fontWeight:700,color:r[1]}}>{r[0]}</div>
-                      <div style={{flex:1,height:8,background:MT.BD,borderRadius:4,overflow:"hidden"}}>
-                        <div style={{height:"100%",width:r[2]+"%",background:r[1]}}/>
-                      </div>
-                      <div style={{width:36,fontSize:11,fontWeight:700,color:MT.T1,textAlign:"right"}}>{r[2]}%</div>
+        {/* MARKET INTELLIGENCE - grounded AI text. Shown only when real text
+            exists; there are no placeholder cards. (The old "Market Mood
+            Breakdown" bars were computed from the score, not measured, and are
+            removed.) */}
+        {(function(){
+          var cards = [];
+          if(ai && ai.now) cards.push({ id:"why", title:tr("home.why"), body:ai.now });
+          if(ai && ai.watchNext) cards.push({ id:"watch", title:tr("home.watch_q"), body:ai.watchNext });
+          if(ai && ai.whatChanged) cards.push({ id:"changed", title:tr("home.changed_q", "WHAT CHANGED?"), body:ai.whatChanged });
+          var drivers = ai && ai.keyDrivers && ai.keyDrivers.length ? ai.keyDrivers : null;
+          if(!cards.length && !drivers) return null;
+          return (
+            <div style={{display:wideLayout?"grid":"block",gridTemplateColumns:wideLayout?"repeat(auto-fit, minmax(220px, 1fr))":undefined,gap:gapV,marginBottom:gapV}}>
+              {cards.map(function(c){
+                return (
+                  <div key={c.id} style={{marginBottom:wideLayout?0:6}}>
+                    <SectionHead>{c.title}</SectionHead>
+                    <div style={{background:MT.CARD2,border:"1px solid "+MT.BD,borderRadius:12,padding:padV,boxSizing:"border-box"}}>
+                      <div style={{fontSize:11,color:MT.T1,lineHeight:1.35,overflowWrap:"anywhere"}}>{c.body}</div>
                     </div>
-                  );
-                });
-              })()}
-            </div>
-          </div>
-
-          {(function(){
-            var haveWhy = ai && ai.now;
-            var haveWatch = ai && ai.watchNext;
-            var haveChanged = ai && ai.whatChanged;
-            var haveDrivers = ai && ai.keyDrivers && ai.keyDrivers.length;
-            var anyReal = haveWhy || haveWatch || haveChanged || haveDrivers;
-
-            if(!anyReal){
-              // Keep unavailable intelligence compact on every device. Empty
-              // desktop cards waste valuable terminal space and make the page
-              // look unfinished.
-              return (
-                <div style={{background:MT.CARD2,border:"1px solid "+MT.BD,borderRadius:8,padding:padV,boxSizing:"border-box",display:"inline-block",maxWidth:wideLayout?420:"100%"}}>
-                  <div style={{fontSize:10,fontWeight:800,color:MT.T2,marginBottom:2}}>MARKET INTELLIGENCE</div>
-                  <div style={{fontSize:11,color:MT.T2}}>Analysis update in progress. Core market score remains available.</div>
+                  </div>
+                );
+              })}
+              {drivers ? (
+                <div>
+                  <SectionHead>{tr("home.drivers_q", "KEY DRIVERS")}</SectionHead>
+                  <div style={{background:MT.CARD2,border:"1px solid "+MT.BD,borderRadius:12,padding:padV,boxSizing:"border-box",display:"flex",flexWrap:"wrap",gap:6}}>
+                    {drivers.map(function(d,i){
+                      return <span key={i} style={{fontSize:12,color:MT.T2,background:MT.CARD,border:"1px solid "+MT.BD,borderRadius:6,padding:"4px 8px",overflowWrap:"anywhere"}}>{d}</span>;
+                    })}
+                  </div>
                 </div>
-              );
-            }
-
-            return (
-          <div style={{display:wideLayout?"grid":"block",gridTemplateColumns:wideLayout?"repeat(4, 1fr)":undefined,gap:gapV}}>
-          {wideLayout || haveWhy ? (
-          <div style={{marginBottom:wideLayout?0:8}}>
-            <SectionHead>&#10067; WHY THIS MOOD?</SectionHead>
-            <div style={{background:MT.CARD2,border:"1px solid "+MT.BD,borderRadius:12,padding:padV,boxSizing:"border-box"}}>
-              {!ai ? (
-                <div style={{fontSize:11,color:MT.T2}}>Analysis update in progress. Core market score remains available.</div>
-              ) : ai.now ? (
-                <div style={{fontSize:11,color:MT.T1,lineHeight:1.35}}>{ai.now}</div>
-              ) : (
-                <div style={{fontSize:11,color:MT.T2}}>No verified reasoning available right now.</div>
-              )}
+              ) : null}
             </div>
-          </div>
-          ) : null}
-          {wideLayout || haveWatch ? (
-          <div style={{marginBottom:wideLayout?0:8}}>
-            <SectionHead>&#128065; WHAT TO WATCH?</SectionHead>
-            <div style={{background:MT.CARD2,border:"1px solid "+MT.BD,borderRadius:12,padding:padV,boxSizing:"border-box"}}>
-              {ai && ai.watchNext ? (
-                <div style={{fontSize:11,color:MT.T1,lineHeight:1.35}}>{ai.watchNext}</div>
-              ) : (
-                <div style={{fontSize:11,color:MT.T2}}>No verified watch-level data available right now.</div>
-              )}
-            </div>
-          </div>
-          ) : null}
-          {wideLayout || haveChanged ? (
-          <div style={{marginBottom:wideLayout?0:8}}>
-            <SectionHead>&#128260; WHAT CHANGED?</SectionHead>
-            <div style={{background:MT.CARD2,border:"1px solid "+MT.BD,borderRadius:12,padding:padV,boxSizing:"border-box"}}>
-              {ai && ai.whatChanged ? (
-                <div style={{fontSize:11,color:MT.T1,lineHeight:1.35}}>{ai.whatChanged}</div>
-              ) : (
-                <div style={{fontSize:11,color:MT.T2}}>No verified change data available right now.</div>
-              )}
-            </div>
-          </div>
-          ) : null}
-          {wideLayout || haveDrivers ? (
-          <div>
-            <SectionHead>&#128200; KEY DRIVERS</SectionHead>
-            <div style={{background:MT.CARD2,border:"1px solid "+MT.BD,borderRadius:12,padding:padV,boxSizing:"border-box"}}>
-              {ai && ai.keyDrivers && ai.keyDrivers.length ? (
-                <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-                  {ai.keyDrivers.map(function(d,i){
-                    return <span key={i} style={{fontSize:12,color:MT.T2,background:MT.CARD,border:"1px solid "+MT.BD,borderRadius:6,padding:"4px 8px"}}>{d}</span>;
-                  })}
-                </div>
-              ) : (
-                <div style={{fontSize:11,color:MT.T2}}>No verified driver data available right now.</div>
-              )}
-            </div>
-          </div>
-          ) : null}
-          </div>
-            );
-          })()}
-        </div>
+          );
+        })()}
 
         {/* RISK NOTE - own section, real ai.riskNote only */}
         {ai && ai.riskNote ? (
@@ -314,7 +225,7 @@ export default function MarketMood(props){
 
         {/* DATA STATUS - honest indicator of live vs unavailable, never fabricated */}
         <div style={{fontSize:11,color:MT.T3,marginBottom:gapV}}>
-          {status!=="ok" ? tr("nm.status.unavail") : (isLiveNow ? tr("nm.status.live") : (srcTs ? tr("nm.status.last",{t:formatIstTime(srcTs)}) : tr("nm.status.unavail")))}{status==="ok" && !ai ? " \u00b7 Score available, analysis updating" : ""}
+          {status!=="ok" ? tr("nm.status.unavail") : (isLiveNow ? tr("nm.status.live") : (srcTs ? tr("nm.status.last",{t:formatIstTime(srcTs)}) : tr("nm.status.unavail")))}
         </div>
 
         {/* MARKET SNAPSHOT - one compact card, 4-column grid inside, same real index data as below */}

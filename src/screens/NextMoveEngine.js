@@ -66,6 +66,46 @@ function scenario(side, t, sessionOpen, behind){
   };
 }
 
+// Lines the scenario blocks already state with the same level; listing them
+// again under confirms / invalidates would repeat the same message.
+var REDUNDANT = { "dir.c.bull_close":1, "dir.c.bear_close":1, "dir.w.bull_inval":1, "dir.w.bear_inval":1 };
+var ESSENTIAL = ["nifty_q", "nifty_h"];
+
+// One message = one rule + its values. The same message is never listed twice,
+// whichever instrument list it came from. "seen" can be shared across lists.
+function msgKey(it){
+  var v = it && it.vars ? it.vars : {};
+  var names = Object.keys(v).sort();
+  var parts = [];
+  for(var i=0; i<names.length; i++){ parts.push(names[i] + "=" + String(v[names[i]])); }
+  return String(it && it.key) + "|" + parts.join(",");
+}
+export function uniqItems(list, seen, skip){
+  var out = [];
+  var arr = list || [];
+  for(var i=0; i<arr.length; i++){
+    var it = arr[i];
+    if(!it || !it.key) continue;
+    if(skip && skip[it.key]) continue;
+    var k = msgKey(it);
+    if(seen[k]) continue;
+    seen[k] = 1;
+    out.push(it);
+  }
+  return out;
+}
+
+function missingEssential(d){
+  var res = [];
+  var list = (d && d.inputs) || [];
+  for(var e=0; e<ESSENTIAL.length; e++){
+    var inp = inputById(d || {}, ESSENTIAL[e]);
+    if(!inp){ res.push({ id: ESSENTIAL[e], status: "UNAVAILABLE", reason: "unavailable" }); continue; }
+    if(!inp.used) res.push({ id: inp.id, status: inp.status, reason: inp.reason || (inp.status=="STALE" ? "stale" : "unavailable") });
+  }
+  return res;
+}
+
 function inputById(d, id){
   var list = d.inputs || [];
   for(var i=0; i<list.length; i++){ if(list[i].id==id) return list[i]; }
@@ -81,11 +121,11 @@ export function computeNextMove(d){
     scenarios: { bull: null, bear: null },
     evidence: { forTxt: [], against: [], context: [], caveats: [] },
     confirms: [], invalidates: [], reasons: [],
-    unverified: UNVERIFIED.slice(), excluded: [],
+    unverified: UNVERIFIED.slice(), excluded: [], missing: [],
     evidenceCompleteness: null, session: (d && d.session) || null,
     provisional: !!(d && d.provisional), basisClose: !!(d && d.basisClose)
   };
-  if(!d){ out.reasons.push({ key: "dir.why.no_data", vars: {} }); return out; }
+  if(!d){ out.reasons.push({ key: "dir.why.no_data", vars: {} }); out.missing = missingEssential(null); return out; }
   out.reasons = (d.reasons || []).slice();
   var tech = d.tech && d.tech.nifty;
   var q = d.quote && d.quote.nifty;
@@ -94,7 +134,8 @@ export function computeNextMove(d){
   // structure. Without them no assessment is produced from stale or missing data.
   if(d.demo || d.outlook=="insufficient" || !tech || !q){
     if(!out.reasons.length) out.reasons.push({ key: "dir.why.no_data", vars: {} });
-    out.freshness = q ? { quoteAsOf: q.asOf, quoteStatus: q.status, lastBarAsOf: nh ? nh.asOf : null, session: d.session || null } : null;
+    out.freshness = q ? { quoteAsOf: q.asOf, quoteStatus: q.status, lastBarAsOf: nh ? nh.asOf : null, lastBarStatus: nh ? nh.status : null, session: d.session || null } : null;
+    out.missing = d.demo ? missingEssential(null) : missingEssential(d);
     return out;
   }
 
@@ -111,7 +152,7 @@ export function computeNextMove(d){
   // The clock must agree too: a payload that claims OPEN outside NSE hours is not live.
   var isLive = q.status=="LIVE" && d.session=="OPEN" && q.timeCheck=="fresh" && (typeof d.now=="number" ? isClockOpen(d.now) : false);
   out.price = { ltp: q.ltp, chgPct: q.chgPct, asOf: q.asOf, kind: isLive ? "live" : "last_confirmed", status: q.status };
-  out.freshness = { quoteAsOf: q.asOf, quoteStatus: q.status, lastBarAsOf: nh ? nh.asOf : null, session: d.session || null, behind: behind };
+  out.freshness = { quoteAsOf: q.asOf, quoteStatus: q.status, lastBarAsOf: nh ? nh.asOf : null, lastBarStatus: nh ? nh.status : null, session: d.session || null, behind: behind };
 
   // ---- Assessment ----------------------------------------------------------
   var dirSign = d.outlook=="bullish" ? 1 : (d.outlook=="bearish" ? -1 : 0);
@@ -140,17 +181,18 @@ export function computeNextMove(d){
   out.why = { key: whyKey, vars: whyVars };
 
   // ---- Evidence, conditions (all reused from the direction result) --------
-  if(dirSign!=0){
-    out.evidence.forTxt = d.supports || [];
-    out.evidence.against = d.contradicts || [];
-  } else {
-    out.evidence.forTxt = d.bullEvidence || [];
-    out.evidence.against = d.bearEvidence || [];
-  }
-  out.evidence.context = d.context || [];
-  out.evidence.caveats = d.caveats || [];
-  out.confirms = d.strengthen || [];
-  out.invalidates = d.weaken || [];
+  // De-duplicated by rule + values. The direction result lists a neutral signal
+  // in both "contradicts" and "caveats", and the same message can come from
+  // more than one list, so a shared "seen" set keeps each message to one place.
+  var seen = {};
+  var forRaw = dirSign!=0 ? (d.supports || []) : (d.bullEvidence || []);
+  var againstRaw = dirSign!=0 ? (d.contradicts || []) : (d.bearEvidence || []);
+  out.evidence.forTxt = uniqItems(forRaw, seen);
+  out.evidence.against = uniqItems(againstRaw.concat(d.caveats || []), seen);
+  out.evidence.caveats = [];
+  out.evidence.context = uniqItems(d.context || [], {});
+  out.confirms = uniqItems(d.strengthen || [], {}, REDUNDANT);
+  out.invalidates = uniqItems(d.weaken || [], {}, REDUNDANT);
 
   // Inputs that were left out because they were stale, missing or timestamp-less
   var skip = { natgas:1, breadth:1, volume:1, fiidii:1, news:1 };

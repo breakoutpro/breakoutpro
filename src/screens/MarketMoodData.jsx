@@ -18,7 +18,7 @@ export var MT = {
 // --- Session (market hours) presentation. Session string comes from the
 // server (api/market-mood-data.js), which computes it honestly from IST time.
 var SESSION_META = {
-  OPEN:       { label:"Market Live",  sub:"NSE and BSE are open",         dot:MT.GREEN },
+  OPEN:       { label:"Market Open",  sub:"NSE and BSE trading session is open", dot:MT.GREEN },
   PRE_OPEN:   { label:"Pre-Open",     sub:"Pre-open session in progress", dot:MT.BLUE },
   POST_CLOSE: { label:"Post Close",   sub:"Session ended, settling",      dot:MT.T3 },
   CLOSED:     { label:"Market Closed",sub:"Outside trading hours",        dot:MT.T3 },

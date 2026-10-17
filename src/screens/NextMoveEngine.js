@@ -106,6 +106,72 @@ function missingEssential(d){
   return res;
 }
 
+
+// ---- Detailed Analysis feed -------------------------------------------------
+// Everything below is a re-shaping of the direction result. No EMA, level or
+// status is calculated again here: values are copied from d.tech (daily candles)
+// and d.inputs (validated provider timestamps and status).
+var DETAIL_INPUTS = ["nifty_q", "nifty_h", "bn_q", "bn_h", "vix", "sectors", "volume", "news", "breadth", "crude", "natgas", "fiidii"];
+
+function indicatorRow(id, techKey, inputId, d){
+  var tech = d.tech && d.tech[techKey];
+  var inp = inputById(d, inputId);
+  var row = { id: id, status: inp ? inp.status : "UNAVAILABLE", asOf: inp ? inp.asOf : null, reason: inp ? inp.reason : "unavailable",
+              close: null, ema9: null, ema21: null, forming: false, candleTs: null, interp: "na" };
+  if(tech && typeof tech.close=="number" && typeof tech.ema9=="number" && typeof tech.ema21=="number"){
+    row.close = tech.close; row.ema9 = tech.ema9; row.ema21 = tech.ema21;
+    row.forming = !!tech.provisional; row.candleTs = tech.lastBarTs || null;
+    // The wording follows the actual numbers, never a stored flag.
+    if(tech.ema9 > tech.ema21 && tech.close > tech.ema21) row.interp = "aligned_up";
+    else if(tech.ema9 < tech.ema21 && tech.close < tech.ema21) row.interp = "aligned_dn";
+    else row.interp = "mixed";
+  } else if(inp && inp.reason=="short_history"){ row.interp = "short"; }
+  else if(inp && inp.status=="STALE"){ row.interp = "stale"; }
+  return row;
+}
+
+// Breakout / breakdown observations on the NIFTY 50 daily chart, taken from the
+// same tech.brk and level fields the scenarios use.
+function structureEvents(tech, behind){
+  var ev = [];
+  if(!tech) return ev;
+  var forming = !!tech.provisional;
+  var lvlR = tech.resistance, lvlS = tech.support;
+  var b = tech.brk || { dir:0, state:"none" };
+  if(b.dir>0){
+    if(b.state=="confirmed") ev.push({ kind:"bo_confirmed", status:"confirmed", lvl:lvlR });
+    else ev.push({ kind:"bo_attempt", status:"developing", lvl:lvlR, note: b.state=="developing" ? "dev" : "early" });
+  } else if(b.dir<0){
+    if(b.state=="confirmed") ev.push({ kind:"bd_confirmed", status:"confirmed", lvl:lvlS });
+    else ev.push({ kind:"bd_attempt", status:"developing", lvl:lvlS, note: b.state=="developing" ? "dev" : "early" });
+  } else if(typeof tech.prevClose=="number"){
+    if(tech.prevClose > lvlR) ev.push({ kind:"failed_up", status: forming ? "developing" : "confirmed", lvl:lvlR });
+    else if(tech.prevClose < lvlS) ev.push({ kind:"failed_dn", status: forming ? "developing" : "confirmed", lvl:lvlS });
+  }
+  for(var i=0; i<ev.length; i++){
+    ev[i].ts = tech.lastBarTs || null;
+    if(behind) ev[i].status = "historical";   // data behind the session: an observation, not the current setup
+  }
+  return ev;
+}
+
+function buildDetail(d, behind){
+  var det = { inputs: [], indicators: [], events: [], timeUncertain: false, demo: false };
+  if(!d) return det;
+  det.demo = !!d.demo;
+  det.timeUncertain = !!d.timeUncertain;
+  if(d.demo) return det;
+  var list = d.inputs || [];
+  for(var i=0; i<list.length; i++){
+    var it = list[i];
+    if(DETAIL_INPUTS.indexOf(it.id) < 0) continue;
+    det.inputs.push({ id: it.id, status: it.status, asOf: it.asOf, used: !!it.used, reason: it.reason || "", uncertain: !!it.uncertain });
+  }
+  det.indicators = [ indicatorRow("nifty", "nifty", "nifty_h", d), indicatorRow("bn", "bn", "bn_h", d) ];
+  det.events = structureEvents(d.tech && d.tech.nifty, behind);
+  return det;
+}
+
 function inputById(d, id){
   var list = d.inputs || [];
   for(var i=0; i<list.length; i++){ if(list[i].id==id) return list[i]; }
@@ -119,9 +185,9 @@ export function computeNextMove(d){
     confidence: { validated: false },
     price: null, freshness: null,
     scenarios: { bull: null, bear: null },
-    evidence: { forTxt: [], against: [], context: [], caveats: [] },
+    evidence: { forTxt: [], against: [], context: [], caveats: [], mode: "neutral" },
     confirms: [], invalidates: [], reasons: [],
-    unverified: UNVERIFIED.slice(), excluded: [], missing: [],
+    unverified: UNVERIFIED.slice(), excluded: [], missing: [], detail: { inputs: [], indicators: [], events: [], timeUncertain: false, demo: false },
     evidenceCompleteness: null, session: (d && d.session) || null,
     provisional: !!(d && d.provisional), basisClose: !!(d && d.basisClose)
   };
@@ -136,11 +202,13 @@ export function computeNextMove(d){
     if(!out.reasons.length) out.reasons.push({ key: "dir.why.no_data", vars: {} });
     out.freshness = q ? { quoteAsOf: q.asOf, quoteStatus: q.status, lastBarAsOf: nh ? nh.asOf : null, lastBarStatus: nh ? nh.status : null, session: d.session || null } : null;
     out.missing = d.demo ? missingEssential(null) : missingEssential(d);
+    out.detail = buildDetail(d, false);
     return out;
   }
 
   var sessionOpen = !!d.provisional;
   var behind = !!(nh && nh.uncertain) || !!(inputById(d, "nifty_q") && inputById(d, "nifty_q").uncertain);
+  out.detail = buildDetail(d, behind);
   var bull = scenario("bull", tech, sessionOpen, behind);
   var bear = scenario("bear", tech, sessionOpen, behind);
   out.scenarios = { bull: bull, bear: bear };
@@ -187,6 +255,7 @@ export function computeNextMove(d){
   var seen = {};
   var forRaw = dirSign!=0 ? (d.supports || []) : (d.bullEvidence || []);
   var againstRaw = dirSign!=0 ? (d.contradicts || []) : (d.bearEvidence || []);
+  out.evidence.mode = dirSign!=0 ? "directional" : "neutral";
   out.evidence.forTxt = uniqItems(forRaw, seen);
   out.evidence.against = uniqItems(againstRaw.concat(d.caveats || []), seen);
   out.evidence.caveats = [];

@@ -9,9 +9,9 @@ import {
 } from "./MarketMoodData";
 import {
   SectionHead, SectionHeadWithPill, UnavailableCard, IndexRow, GridWrap,
-  StageTimeline, EvolutionCard, Sparkline, buildMT, SemicircleGauge
+  EvolutionCard, Sparkline, buildMT
 } from "./MarketMoodParts";
-import EarlyDirectionPanel from "./EarlyDirectionPanel";
+import DetailedAnalysis from "./DetailedAnalysis";
 import NextMoveCard from "./NextMoveCard";
 import { useNextMove } from "../hooks/useNextMove";
 import { useLang, t as tr } from "../i18n/translations";
@@ -87,7 +87,7 @@ export default function MarketMood(props){
   var nextMove = nm.nextMove;
   var srcTs = nm.srcTs;
   var isLiveNow = !!(nextMove && nextMove.price && nextMove.price.kind=="live");
-  var [showDir, setShowDir] = useState(false);
+  var vixQ = !usingDemo && mm.data && mm.data.indices ? mm.data.indices.VIX : null;
 
   // Fires exactly once per genuine open (component mount), not on
   // re-render - matches the ANALYTICS_EVENTS allow-list in
@@ -106,7 +106,6 @@ export default function MarketMood(props){
 
   var showLoading = status=="loading" && !mood;
   var showOffline = status=="offline";
-  var moodColor = mood && mood.label ? (mood.label.indexOf("Bullish")>=0?MT.SENT_GREEN:(mood.label.indexOf("Bearish")>=0?MT.SENT_RED:MT.SENT_YELLOW)) : MT.T2;
 
   return (
     <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:MT.BG,zIndex:350,overflowY:"auto"}}>
@@ -143,38 +142,11 @@ export default function MarketMood(props){
             <span>&#9888;</span> DEMO DATA &#8212; NOT LIVE
           </div>
         ) : null}
-        {/* NEXT MOVE INTELLIGENCE - primary card; the mood score below is secondary context */}
+        {/* NEXT MOVE INTELLIGENCE - the compact primary card. Everything else
+            (evidence, EMA values, market mood, timeline, data quality) sits in
+            ONE collapsed "Detailed Analysis" section directly below it. */}
         <NextMoveCard nextMove={nextMove} wideLayout={wideLayout} gapV={gapV} padV={padV}/>
-
-        {/* CURRENT MOOD - single clean primary status, per explicit instruction
-            to remove duplication. Previously showed the mood 4 times (gauge
-            visual + pills + title + AI Bias) - now shows it exactly once. */}
-        <div style={{display:wideLayout?"grid":"block",gridTemplateColumns:wideLayout?"1fr 1fr":undefined,gap:gapV,marginBottom:gapV,alignItems:"start"}}>
-          <div style={{background:MT.CARD,border:"1px solid "+MT.BD,borderRadius:8,padding:padV}}>
-            <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
-              <div style={{flex:"0 1 170px",minWidth:140}}>
-                <SemicircleGauge mood={mood}/>
-              </div>
-              <div style={{flex:"1 1 160px",minWidth:140}}>
-                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
-                  <span style={{width:9,height:9,borderRadius:"50%",background:moodColor,flexShrink:0}}></span>
-                  <span style={{fontSize:16,fontWeight:900,color:moodColor}}>{tr("mood." + mood.label, mood.label).toUpperCase()}</span>
-                </div>
-                <div style={{fontSize:11,color:MT.T2}}>{tr("stage." + mood.stage, mood.stage)} &nbsp;&#183;&nbsp; {tr("home.conf_suffix",{c:tr("conf." + mood.confidence, mood.confidence)})} &nbsp;&#183;&nbsp; {tr("home.ai_score",{n:mood.score})}</div>
-                {!usingDemo ? <div style={{fontSize:9,color:MT.T3,marginTop:3,lineHeight:1.4}}>{tr("nm.mood.note")}</div> : null}
-                {!usingDemo ? <div style={{fontSize:9,color:MT.T3,marginTop:2}}>{srcTs ? tr("nm.src.time",{t:formatIstTime(srcTs)}) : tr("nm.src.na")}</div> : null}
-              </div>
-            </div>
-          </div>
-          <StageTimeline mood={mood} evolution={evolution}/>
-        </div>
-
-        {/* EARLY MARKET DIRECTION - additive panel; everything else on this page is unchanged */}
-        <button type="button" aria-expanded={showDir} onClick={function(){ setShowDir(!showDir); }} style={{display:"flex",alignItems:"center",gap:8,width:"100%",boxSizing:"border-box",background:MT.CARD,border:"1px solid "+MT.BD,borderRadius:8,padding:"8px 10px",marginBottom:gapV,color:MT.T1,fontSize:12,fontWeight:800,cursor:"pointer",fontFamily:"inherit",textAlign:"left"}}>
-          <span aria-hidden="true" style={{color:MT.T2,fontSize:10,flexShrink:0}}>{showDir ? "\u25be" : "\u25b8"}</span>
-          <span style={{overflowWrap:"anywhere",minWidth:0}}>{tr("dir.title")} {"\u00b7"} {tr("nm.ev.detail")}</span>
-        </button>
-        {showDir ? <EarlyDirectionPanel direction={direction} wideLayout={wideLayout} gapV={gapV} padV={padV}/> : null}
+        <DetailedAnalysis nextMove={nextMove} mood={usingDemo ? null : mood} evolution={evolution} vixQuote={vixQ} usingDemo={usingDemo} wideLayout={wideLayout} gapV={gapV} padV={padV}/>
 
         {/* MARKET INTELLIGENCE - grounded AI text. Shown only when real text
             exists; there are no placeholder cards. (The old "Market Mood

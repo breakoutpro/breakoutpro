@@ -15,7 +15,7 @@ var T3 = "#8A9BB5";
 
 function shareNews(n, isAdmin) {
   if (!isAdmin) return;
-  var text = "MARKET NEWS\n\n" + n.title + "\n\nSource: " + n.source + "\n\nRead more at BreakoutPro: https://breakoutpro.in\n\n#MarketNews #NSE #BSE #IndianMarkets #StockMarket";
+  var text = "MARKET NEWS\n\n" + n.title + "\n\n" + (n.source ? "Source: " + n.source + "\n\n" : "") + "Read more at BreakoutPro: https://breakoutpro.in\n\n#MarketNews #NSE #BSE #IndianMarkets #StockMarket";
   if (navigator.share) {
     navigator.share({title: "BreakoutPro Market Alert", text: text, url: "https://breakoutpro.in"});
   } else {
@@ -33,6 +33,7 @@ export default function NewsScreen(props) {
   var allNews = props.news || [];
   var overnightNews = props.overnightNews || [];
   var isAdmin = props.isAdmin || false;
+  var newsStatus = props.newsStatus || "ok";
   var setTab = props.setTab;
   var [shareId, setShareId] = useState(null);
   var [filter, setFilter] = useState("all");
@@ -42,7 +43,7 @@ export default function NewsScreen(props) {
   var news = filter=="overnight" ? overnightNews : filter=="good" ? allNews.filter(function(n){return n.sentiment=="good";}) : filter=="bad" ? allNews.filter(function(n){return n.sentiment=="bad";}) : allNews;
 
   function doShare(n, platform) {
-    var text = "MARKET UPDATE\n\n" + n.title + "\n\nSource: " + (n.source||"ET Markets") + "\n\nFor live alerts: https://breakoutpro.in\n\n#MarketNews #NSE #StockMarket #IndianMarkets";
+    var text = "MARKET UPDATE\n\n" + n.title + "\n\n" + (n.source ? "Source: " + n.source + "\n\n" : "") + "For live alerts: https://breakoutpro.in\n\n#MarketNews #NSE #StockMarket #IndianMarkets";
     if (platform=="whatsapp") window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(text));
     else if (platform=="telegram") window.open("https://t.me/share/url?url=https://breakoutpro.in&text=" + encodeURIComponent(text));
     else if (platform=="twitter") window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(text.slice(0,240)));
@@ -88,8 +89,8 @@ export default function NewsScreen(props) {
         {news.length==0?(
           <div style={{textAlign:"center", padding:"40px 0"}}>
             <div style={{fontSize:32, marginBottom:12}}>&#128240;</div>
-            <div style={{fontSize:14, fontWeight:700, color:T1, marginBottom:4}}>{t("news.loading")}</div>
-            <div style={{fontSize:12, color:T2}}>{t("news.loading_sub")}</div>
+            <div style={{fontSize:14, fontWeight:700, color:T1, marginBottom:4}}>{allNews.length>0 ? t("news.none_filter") : newsStatus=="loading" ? t("news.loading") : t("news.unavail")}</div>
+            {allNews.length>0 ? null : <div style={{fontSize:12, color:T2}}>{newsStatus=="loading" ? t("news.loading_sub") : t("news.unavail_sub")}</div>}
           </div>
         ):null}
 
@@ -109,7 +110,7 @@ export default function NewsScreen(props) {
                     </div>
                     <div style={{fontSize:12, fontWeight:700, color:T1, lineHeight:1.5, marginBottom:8}}>{n.title}</div>
                     <div style={{display:"flex", gap:8, alignItems:"center"}}>
-                      <span style={{fontSize:12, color:BLUE, fontWeight:600, background:"rgba(59,130,246,0.1)", borderRadius:10, padding:"4px 8px"}}>{n.source||"ET Markets"}</span>
+                      {n.source?<span style={{fontSize:12, color:BLUE, fontWeight:600, background:"rgba(59,130,246,0.1)", borderRadius:10, padding:"4px 8px"}}>{n.source}</span>:null}
                       {n.pubDate?<span style={{fontSize:12, color:T2}}>{n.pubDate}</span>:null}
                     </div>
                   </div>

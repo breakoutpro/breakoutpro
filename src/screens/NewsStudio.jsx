@@ -273,7 +273,7 @@ export default function NewsStudio(props){
       </div>
       <div style={{padding:16}}>
         {news.length==0 ? (
-          <div style={{fontSize:12,color:T2,textAlign:"center",padding:32}}>Loading news...</div>
+          <div style={{fontSize:12,color:T2,textAlign:"center",padding:32}}>{t("news.empty")}</div>
         ) : news.map(function(a,i){
           return (
             <div key={i} onClick={function(){selectArticle(a);}} style={{background:CB,border:"1px solid "+BD,borderRadius:16,padding:12,marginBottom:8,cursor:"pointer"}}>

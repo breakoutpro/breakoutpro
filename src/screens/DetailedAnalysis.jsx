@@ -251,7 +251,9 @@ export default function DetailedAnalysis(props){
   var theme = useTheme();
   var MT = buildMT(theme);
   var stOpen = useState(false);       // collapsed by default on mobile and desktop
-  var open = stOpen[0], setOpen = stOpen[1];
+  var controlled = typeof props.open=="boolean";   // optional: a parent that can be remounted keeps the state
+  var open = controlled ? props.open : stOpen[0], setOpen = stOpen[1];
+  function toggle(){ if(props.onOpenChange) props.onOpenChange(!open); if(!controlled) setOpen(!open); }
   var m = props.nextMove;
   if(!m) return null;
   var wide = !!props.wideLayout;
@@ -259,7 +261,7 @@ export default function DetailedAnalysis(props){
   var panelId = "nm-da-panel", btnId = "nm-da-btn";
   return (
     <div data-testid="nm-detail" style={{background:MT.CARD,border:"1px solid "+MT.BD,borderRadius:8,marginBottom:props.gapV || 6,boxSizing:"border-box",minWidth:0}}>
-      <button id={btnId} type="button" aria-expanded={open} aria-controls={panelId} onClick={function(){ setOpen(!open); }}
+      <button id={btnId} type="button" aria-expanded={open} aria-controls={panelId} onClick={toggle}
         style={{display:"flex",alignItems:"center",gap:10,width:"100%",boxSizing:"border-box",background:"transparent",border:"none",padding:props.padV || 10,color:MT.T1,cursor:"pointer",fontFamily:"inherit",textAlign:"left"}}>
         <span style={{flex:"1 1 auto",minWidth:0}}>
           <span style={Object.assign({display:"block",fontSize:13,fontWeight:800,color:MT.T1}, WRAP)}>{t("nm.da.title")}</span>

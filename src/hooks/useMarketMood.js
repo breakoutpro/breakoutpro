@@ -20,6 +20,10 @@ import { canFire, buildPush } from "../state/notificationRegistry";
 
 var DATA_INTERVAL = 10 * 1000;
 var AI_INTERVAL = 120 * 1000;
+// There is no /api/market-mood-ai route yet, so no request is sent and mm.ai stays null.
+// The deterministic mood and the Next Move result do not depend on it. Set this to true
+// only after that route exists.
+var AI_ENDPOINT_AVAILABLE = false;
 var ALERT_COOLDOWN_MS = 15 * 60 * 1000; // minimum gap between market-mood alerts
 
 export function useMarketMood(){
@@ -115,6 +119,7 @@ export function useMarketMood(){
   }
 
   function fetchAi(m, d){
+    if(!AI_ENDPOINT_AVAILABLE) return;
     if(aiFetchingRef.current) return; // no overlapping AI calls
     aiFetchingRef.current = true;
     fetch("/api/market-mood-ai",{

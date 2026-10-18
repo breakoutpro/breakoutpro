@@ -1,59 +1,5 @@
-import { useState, useEffect } from "react";
-
-var POSITIVE_WORDS = ["surge","rally","gain","jump","rise","up","high","beat","strong","profit","growth","positive","bullish","buy","upgrade","record","outperform","soar","boost","recovery","cut rate","rate cut","approval","expansion","inflow"];
-var NEGATIVE_WORDS = ["fall","drop","crash","decline","loss","down","low","miss","weak","cut","negative","bearish","sell","downgrade","slump","plunge","concern","risk","fraud","probe","penalty","ban","tax hike","rate hike","outflow"];
-
-var STOCK_KEYWORDS = ["RELIANCE","TCS","HDFC","ICICI","INFY","SBI","TATA","WIPRO","AXIS","ADANI","ITC","NIFTY","SENSEX","BANKNIFTY","MARUTI","SUNPHARMA","BAJAJ","KOTAK","HCL","TITAN","ONGC","NTPC","POWERGRID","ULTRATECH","ASIANPAINT","NESTLE","HINDUNILVR"];
-
-function classifySentiment(title) {
-  if (!title || typeof title != "string") return "neutral";
-  var t = title.toLowerCase();
-  var posScore = 0, negScore = 0;
-  for (var i = 0; i < POSITIVE_WORDS.length; i++) {
-    if (t.indexOf(POSITIVE_WORDS[i]) != -1) posScore++;
-  }
-  for (var j = 0; j < NEGATIVE_WORDS.length; j++) {
-    if (t.indexOf(NEGATIVE_WORDS[j]) != -1) negScore++;
-  }
-  if (posScore > negScore) return "good";
-  if (negScore > posScore) return "bad";
-  return "neutral";
-}
-
-function extractStock(title) {
-  if (!title || typeof title != "string") return null;
-  var upper = title.toUpperCase();
-  for (var i = 0; i < STOCK_KEYWORDS.length; i++) {
-    if (upper.indexOf(STOCK_KEYWORDS[i]) != -1) return STOCK_KEYWORDS[i];
-  }
-  return null;
-}
-
-function parseItems(data) {
-  if (!Array.isArray(data?.items)) return [];
-  return data.items.slice(0, 20).filter(function(item){ return item && item.title; }).map(function(item) {
-    var pub = item.pubDate ? new Date(item.pubDate) : new Date();
-    var pubValid = pub instanceof Date && !isNaN(pub.getTime());
-    if (!pubValid) pub = new Date();
-    var diffMin = Math.floor((Date.now() - pub.getTime()) / 60000);
-    var timeStr = diffMin < 0 ? "Just now" : diffMin < 60 ? diffMin + "m ago" : diffMin < 1440 ? Math.floor(diffMin/60) + "h ago" : Math.floor(diffMin/1440) + "d ago";
-    var sentiment = classifySentiment(item.title);
-    var stock = extractStock(item.title);
-    return {
-      title: item.title,
-      link: item.link || "",
-      time: timeStr,
-      source: "ET Markets",
-      pubDate: timeStr,
-      pubDateRaw: item.pubDate || null,
-      cat: "Markets",
-      sentiment: sentiment,
-      stock: stock,
-      up: sentiment != "bad",
-      description: item.description || ""
-    };
-  });
-}
+import { useState, useEffect, useRef } from "react";
+import { parseItems } from "./newsParse";
 
 function isOvernight(pubDateRaw) {
   if (!pubDateRaw) return false;
@@ -69,48 +15,56 @@ function isOvernight(pubDateRaw) {
   return hoursAgo <= 18 && (pubHour >= 21 || pubHour < 9);
 }
 
+// A failed refresh keeps the last good headlines for at most this long; after
+// that the feed reports "unavailable" instead of showing old items as current.
+var KEEP_MS = 10 * 60 * 1000;
+
 export function useLiveNews() {
   var [news, setNews] = useState([]);
   var [loading, setLoading] = useState(true);
   var [lastFetch, setLastFetch] = useState(null);
   var [error, setError] = useState("");
+  var lastGoodRef = useRef(0);
 
-  async function fetchNews() {
+  function markUnavailable(msg) {
+    setError(msg);
+    if (Date.now() - lastGoodRef.current > KEEP_MS) setNews([]);
+    setLoading(false);
+  }
+
+  function fetchNews() {
     setLoading(true);
-    setError("");
-    try {
-      var r = await fetch("/api/news");
-      console.log("[useLiveNews] /api/news responded with status " + r.status);
-      if (!r.ok) throw new Error("API returned " + r.status);
-      var data = await r.json();
-      console.log("[useLiveNews] response shape - items array length: " + (Array.isArray(data?.items) ? data.items.length : "NOT AN ARRAY (data.items is " + typeof data?.items + ")"));
-      var parsed = parseItems(data);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        setNews(parsed);
-        setLastFetch(new Date());
-        console.log("[useLiveNews] loaded " + parsed.length + " real news items");
-      } else {
-        setError("No news items returned");
-        console.warn("[useLiveNews] fetch succeeded but 0 usable items after parsing - check that api/news.js is actually deployed and rss2json is returning data");
-      }
-    } catch (e) {
-      setError(e && e.message ? e.message : "Failed to load news");
-      console.error("[useLiveNews] fetch failed: " + (e && e.message ? e.message : e) + " - if this is a 404, api/news.js has not been deployed to this environment yet");
-      // No fake fallback - news state simply keeps whatever it last had
-      // (possibly still the initial empty array), never invented headlines.
-    } finally {
-      setLoading(false);
-    }
+    fetch("/api/news")
+      .then(function(r) {
+        if (!r.ok) throw new Error("API returned " + r.status);
+        return r.json();
+      })
+      .then(function(data) {
+        var parsed = parseItems(data);
+        if (parsed.length > 0) {
+          lastGoodRef.current = Date.now();
+          setNews(parsed);
+          setLastFetch(new Date());
+          setError("");
+          setLoading(false);
+        } else {
+          markUnavailable((data && data.reason) ? data.reason : "no_items");
+        }
+      })
+      .catch(function(e) {
+        markUnavailable(e && e.message ? e.message : "request_failed");
+      });
   }
 
   useEffect(function() {
     fetchNews();
-    var t = setInterval(fetchNews, 180000);
+    var t = setInterval(fetchNews, 120000);
     return function() { clearInterval(t); };
   }, []);
 
   var overnightNews = news.filter(function(n) { return isOvernight(n.pubDateRaw); });
+  // "loading" only until the first answer; "ok" with headlines; otherwise "unavailable".
+  var status = news.length > 0 ? "ok" : (loading && !error ? "loading" : "unavailable");
 
-  return { news: news, overnightNews: overnightNews, loading: loading, lastFetch: lastFetch, error: error, refresh: fetchNews };
+  return { news: news, overnightNews: overnightNews, loading: loading, lastFetch: lastFetch, error: error, status: status, refresh: fetchNews };
 }
-

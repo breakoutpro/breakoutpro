@@ -51,7 +51,7 @@ test("Detailed Analysis starts collapsed and is toggled by one accessible header
   assert.ok(/useState\(false\)/.test(SRC), "default state must be collapsed");
   assert.ok(SRC.indexOf("aria-expanded={open}") >= 0);
   assert.ok(SRC.indexOf("aria-controls={panelId}") >= 0);
-  assert.ok(SRC.indexOf("onClick={function(){ setOpen(!open); }}") >= 0);
+  assert.ok(SRC.indexOf("onClick={toggle}") >= 0 && SRC.indexOf("setOpen(!open)") >= 0);
   assert.ok(/<button[^>]*type="button"/.test(SRC));
   assert.ok(SRC.indexOf("{open && v ?") >= 0, "panel must render only when open");
   assert.ok(SRC.indexOf("localStorage") < 0 && SRC.indexOf("sessionStorage") < 0, "state stays local to the component");

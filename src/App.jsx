@@ -1,7 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { G, DISCLAIMER } from "./utils/helpers";
 import { STOCKS } from "./data/stocks";
-import { NEWS } from "./data/news";
 import { useLiveNews } from "./hooks/useLiveNews";
 import { useMarketMood } from "./hooks/useMarketMood";
 import { useResponsive } from "./hooks/useResponsive";
@@ -426,7 +425,7 @@ function MoreScreen(props) {
       {id:"profile",    label:"Profile",            sub:"Personal info, KYC, preferences"},
       {id:"morning",    label:"Morning Pulse",      sub:"AI overnight + market briefing"},
       {id:"marketclose",label:"Market Close Summary",sub:"Today's recap and tomorrow's watch"},
-      {id:"news",       label:"Market News",        sub:"Live news feed from ET Markets"},
+      {id:"news",       label:"Market News",        sub:"Headlines from the news provider"},
       {id:"ipo",        label:"IPO Center Pro",       sub:"Educational/Demo IPO Center - details, timeline, education"},
       {id:"settings",   label:"Settings",           sub:"Alerts, notifications, preferences"},
       {id:"referral",   label:"Refer & Earn",       sub:"Invite friends, unlock Premium"},
@@ -495,7 +494,8 @@ function AppInner() {
   var liveNewsData = useLiveNews();
   var mm = useMarketMood();
   // SAFETY PATCH: watchlistAlerts engine unmounted - see notes above.
-  var LIVE_NEWS = liveNewsData.news.length > 0 ? liveNewsData.news : NEWS;
+  // Only headlines the provider returned. No stored or example headlines are ever substituted.
+  var LIVE_NEWS = liveNewsData.news;
   function getSess(){
     try{var s=JSON.parse(localStorage.getItem("bp_sess")||"null");if(s&&s.name&&s.phone)return s;return null;}catch(e){return null;}
   }
@@ -669,7 +669,7 @@ function AppInner() {
         {tab=="watchlist" ? <WatchlistScreen setTab={setTab}/> : null}
         {tab=="patterns"  ? <ChartPatterns/> : null}
         {tab=="paper"     ? <PaperTrading isPrem={isPrem} setTab={setTab}/> : null}
-        {tab=="news"     ? <NewsScreen news={LIVE_NEWS} overnightNews={liveNewsData.overnightNews} isAdmin={isAdmin} setTab={setTab}/> : null}
+        {tab=="news"     ? <NewsScreen news={LIVE_NEWS} newsStatus={liveNewsData.status} overnightNews={liveNewsData.overnightNews} isAdmin={isAdmin} setTab={setTab}/> : null}
         {tab=="candle"   ? <CandleScreen setTab={setTab}/> : null}
         {tab=="chart"    ? <ChartEngine/> : null}
         {tab=="detector" ? <CandleDetector setTab={setTab}/> : null}
@@ -972,7 +972,7 @@ function DesktopRightSidebar(props){
       <Card title="Market News" action="All" onAction={function(){props.setTab("news");}}>
         {news.length?news.map(function(n,i){
           return <div key={i} style={{padding:"6px 0",borderBottom:i<news.length-1?"1px solid "+BD2:"none"}}><div style={{fontSize:11,color:T1,lineHeight:1.4,overflow:"hidden",textOverflow:"ellipsis",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{n.title||n.headline||"Market update"}</div></div>;
-        }):<div style={{fontSize:11,color:T3}}>Loading market news...</div>}
+        }):<div style={{fontSize:11,color:T3}}>{t("news.empty")}</div>}
       </Card>
     </div>
   );

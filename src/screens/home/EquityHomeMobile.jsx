@@ -4,7 +4,7 @@ import { useHomeData } from "./hooks/useHomeData";
 import { JUSTIN } from "../JustInData";
 import MarketBadge from "./MarketBadge";
 import { t, termHelp, useLang } from "../../i18n/translations";
-import NextMoveHome from "../NextMoveHome";
+import NextMoveHomeCard from "../NextMoveHomeCard";
 
 // BreakoutPro - EquityHomeMobile.jsx
 // The Mobile Home layout - UI only. All data comes from useHomeData(), the
@@ -91,52 +91,10 @@ export default function EquityHomeMobile(props){
       <div style={{width:"100%",boxSizing:"border-box",padding:"7px 9px 0"}}>
 
         {/* 4. AI MARKET MOOD */}
-        <Card title={t("home.mood_title")} icon="&#129504;" onDetails={function(){setTab("marketmood");}}>
+        <Card title={t("home.mood_title")} onDetails={function(){setTab("marketmood");}}>
           {mm.status=="loading" && !mm.data ? (
             <div style={{fontSize:11,color:T2}}>{t("c.loading")}</div>
-          ) : (function(){
-            var hasReal = mm.mood && mm.mood.score!=null;
-            if(!hasReal){
-              return <NextMoveHome mm={mm} fs={11} ls={10} watchKey="home.watch_q"/>;
-            }
-            var mood = mm.mood;
-            var ai = mm.ai;
-            var moodColor = mood.label.indexOf("Bullish")>=0?SENT_GREEN:(mood.label.indexOf("Bearish")>=0?SENT_RED:SENT_YELLOW);
-            return (
-              <div style={{width:"100%",boxSizing:"border-box"}}>
-                <NextMoveHome mm={mm} fs={11} ls={10} watchKey="home.watch_q"/>
-                <div style={{borderTop:"1px solid "+BD,margin:"2px 0 6px"}}></div>
-                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
-                  <span style={{width:8,height:8,borderRadius:"50%",background:moodColor,flexShrink:0}}></span>
-                  <span style={{fontSize:15,fontWeight:900,color:moodColor}}>{t("mood."+mood.label, mood.label).toUpperCase()}</span>
-                </div>
-                <div style={{fontSize:11,color:T2,marginBottom:8}}>{t("stage."+mood.stage, mood.stage)} &nbsp;&#183;&nbsp; {t("home.conf_suffix",{c:t("conf."+mood.confidence, mood.confidence)})} &nbsp;&#183;&nbsp; {t("home.ai_score",{n:mood.score})}</div>
-                {(function(){
-                  var idx = mm.data && mm.data.indices;
-                  var tiles = [["NIFTY 50","NIFTY"],["BANK NIFTY","BANKNIFTY"],["INDIA VIX","VIX"]];
-                  return (
-                    <div style={{display:"grid",gridTemplateColumns:"repeat(3, 1fr)",gap:6,marginBottom:8}}>
-                      {tiles.map(function(tl){
-                        var d = idx && idx[tl[1]];
-                        var up = d && d.chgPct!=null ? d.chgPct>=0 : null;
-                        return (
-                          <div key={tl[1]} style={{background:BG,border:"1px solid "+BD,borderRadius:6,padding:"4px 6px",minWidth:0}}>
-                            <div title={termHelp(tl[0])} style={{fontSize:8,color:T3,fontWeight:700}}>{tl[0]}</div>
-                            {d && d.ltp!=null ? (
-                              <div>
-                                <div style={{fontSize:11,fontWeight:800,color:T1}}>{typeof d.ltp==="number"?d.ltp.toLocaleString("en-IN"):d.ltp}</div>
-                                <div style={{fontSize:9,fontWeight:700,color:up==null?T2:(up?UP:DOWN)}}>{d.chgPct!=null?(d.chgPct>=0?"+":"")+d.chgPct+"%":"--"}</div>
-                              </div>
-                            ) : <div style={{fontSize:9,color:T3}}>{t("c.unavailable")}</div>}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })()}
-              </div>
-            );
-          })()}
+          ) : <NextMoveHomeCard mm={mm} fs={11} onOpen={function(){setTab("marketmood");}}/>}
         </Card>
 
         {/* Range Intelligence (real data) + Options Intelligence (DEMO,

@@ -6,7 +6,7 @@ import { getHomeTierConfig } from "../../utils/homeTierDensity";
 import ProvenanceBadge from "../../components/ProvenanceBadge";
 import { JUSTIN } from "../JustInData";
 import { t, termHelp, useLang } from "../../i18n/translations";
-import NextMoveHome from "../NextMoveHome";
+import NextMoveHomeCard from "../NextMoveHomeCard";
 
 // BreakoutPro - EquityHomeLaptop.jsx
 // The Home dashboard: SIX core active-trader features (AI Market Mood,
@@ -77,62 +77,15 @@ export default function EquityHomeLaptop(props){
             only, never a duplicate of the full page. */}
         <div style={{flex:1,minWidth:0,padding:"8px 12px",overflowY:"auto"}}>
 
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gridTemplateRows:"repeat(2, "+PRIMARY_CARD_HEIGHT+"px)",gap:8,alignItems:"stretch"}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gridTemplateRows:"minmax("+PRIMARY_CARD_HEIGHT+"px, auto) "+PRIMARY_CARD_HEIGHT+"px",gap:8,alignItems:"stretch"}}>
 
-          {/* AI MARKET MOOD - card 1 of 6. Uses the same BEARISH/SIDEWAYS/
-              BULLISH segment + small score-badge pattern as the full-screen
-              page (no large score circle) - kept consistent between Home
-              and the full page. Content-driven height throughout - no fixed
-              height anywhere on this card. */}
+          {/* NEXT MOVE INTELLIGENCE - card 1 of 6. Compact trader-first card (direction, price, key levels, data status) with one collapsed Detailed Analysis. Content-driven height: the first grid row grows to fit it. */}
           <div onClick={function(){setTab("marketmood");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:6,padding:"8px 12px",boxSizing:"border-box",cursor:"pointer",overflowY:"auto",display:"flex",flexDirection:"column",height:"100%"}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-              <span style={{fontSize:tierCfg.widgetTitle+1,fontWeight:800,color:T1}}>&#129504; {t("home.mood_title")}</span>
+              <span style={{fontSize:tierCfg.widgetTitle+1,fontWeight:800,color:T1}}>{t("home.mood_title")}</span>
               <ProvenanceBadge type="calculated"/>
             </div>
-            {(function(){
-              var hasReal = data.mm.mood && data.mm.mood.score!=null;
-              if(!hasReal){
-                return <NextMoveHome mm={data.mm} fs={tierCfg.secondaryText} ls={9}/>;
-              }
-              var mood = data.mm.mood;
-              var ai = data.mm.ai;
-              var moodColor = mood.label.indexOf("Bullish")>=0?SENT_GREEN:(mood.label.indexOf("Bearish")>=0?SENT_RED:SENT_YELLOW);
-              return (
-                <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0}}>
-                <NextMoveHome mm={data.mm} fs={tierCfg.secondaryText} ls={9}/>
-                <div style={{borderTop:"1px solid "+BD,margin:"2px 0 6px"}}></div>
-                  <div style={{display:"flex",gap:5,marginBottom:6}}>
-                    {[["BEARISH",SENT_RED],["SIDEWAYS",SENT_YELLOW],["BULLISH",SENT_GREEN]].map(function(seg){
-                      var active = mood.label.toUpperCase().indexOf(seg[0])>=0 || (seg[0]==="SIDEWAYS" && mood.label.indexOf("Bull")<0 && mood.label.indexOf("Bear")<0);
-                      return <div key={seg[0]} style={{fontSize:9,fontWeight:800,padding:"3px 7px",borderRadius:5,color:active?"#fff":seg[1],background:active?seg[1]:seg[1]+"14",border:"1px solid "+seg[1]}}>{t("mood.seg."+seg[0], seg[0])}</div>;
-                    })}
-                  </div>
-                  <div style={{fontSize:16,fontWeight:900,color:moodColor,marginBottom:3}}>{t("mood."+mood.label, mood.label).toUpperCase()}</div>
-                  <div style={{fontSize:tierCfg.secondaryText,color:T2,marginBottom:2}}>{t("home.stage")} <span style={{color:T1,fontWeight:700}}>{t("stage."+mood.stage, mood.stage)}</span></div>
-                  <div style={{fontSize:tierCfg.secondaryText,color:T2,marginBottom:5}}>{t("home.confidence")} <span style={{color:T1,fontWeight:700}}>{t("conf."+mood.confidence, mood.confidence)}</span></div>
-                  <div style={{fontSize:9,color:T3,background:BG,border:"1px solid "+BD,borderRadius:5,padding:"2px 7px",display:"inline-block",marginBottom:4}}>{t("home.ai_conf_score",{n:mood.score})}</div>
-
-                  {/* VIX - one compact inline line, not a dedicated wide
-                      panel. PCR/Max Pain/FII flow have no real provider
-                      anywhere in this codebase (confirmed: dhan.js's
-                      getOptionChain() is commented out; OptionsIntelData.jsx
-                      is explicitly "Mock now") - a single small honest note
-                      replaces what used to be a 55%-width empty panel. */}
-                  {(function(){
-                    var vix = data.mm && data.mm.data && data.mm.data.indices && data.mm.data.indices.VIX;
-                    var hasVix = vix && vix.ltp!=null;
-                    if(!hasVix) return null;
-                    var vixNum = Number(vix.ltp);
-                    var vixLabel = isNaN(vixNum) ? null : (vixNum<13?t("home.vol_low"):(vixNum<=18?t("home.vol_mod"):t("home.vol_high")));
-                    return (
-                      <div style={{fontSize:tierCfg.secondaryText,color:T2,marginBottom:5}}><span title={termHelp("VIX")}>VIX</span> <span style={{color:T1,fontWeight:700}}>{vix.ltp}</span> &#8226; {vixLabel}</div>
-                    );
-                  })()}
-
-                  <div style={{textAlign:"right",fontSize:tierCfg.label,color:BLUE,fontWeight:700,marginTop:"auto",paddingTop:4}}>{t("home.view_full_analysis")} &#8594;</div>
-                </div>
-              );
-            })()}
+            <NextMoveHomeCard mm={data.mm} fs={tierCfg.secondaryText} wide={true} onOpen={function(){setTab("marketmood");}}/>
           </div>
 
           {/* RANGE INTELLIGENCE - card 2 of 6. Real data, from api/market-mood-data.js's indices.NIFTY - the

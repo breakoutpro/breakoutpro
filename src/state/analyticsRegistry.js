@@ -46,10 +46,15 @@ function sanitize(event, payload){
   return out;
 }
 
+// Sending is OFF: there is no /api/analytics route. While off, nothing is buffered
+// and no request is made. Set to true only after a collector route exists.
+var ANALYTICS_SEND_ENABLED = false;
+
 var buffer = [];
 
 // Track an event (buffered, respects opt-out, PII-stripped).
 export function track(event, payload){
+  if(!ANALYTICS_SEND_ENABLED) return;
   if(optedOut()) return;
   if(!ANALYTICS_EVENTS[event]) return;
   buffer.push({ e:event, p:sanitize(event, payload), t:Date.now(), id:anonId() });
@@ -58,6 +63,7 @@ export function track(event, payload){
 
 // Batched send. Fails silently; analytics never breaks the app.
 export function flush(){
+  if(!ANALYTICS_SEND_ENABLED) return;
   if(optedOut() || !buffer.length) return;
   var batch = buffer.splice(0, buffer.length);
   try{

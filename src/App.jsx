@@ -540,7 +540,7 @@ function AppInner() {
     if (!document.getElementById("bp-global-css")) {
       var el = document.createElement("style");
       el.id = "bp-global-css";
-      el.textContent = "@keyframes slideDown{from{opacity:0;transform:translateY(-100%)}to{opacity:1;transform:translateY(0)}} @keyframes slideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}} @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}} @keyframes fadeIn{from{opacity:0}to{opacity:1}} @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}} body{background:#07111F!important;} * {-webkit-tap-highlight-color:transparent;} input,select,textarea{background:rgba(16,27,46,0.9)!important;color:#fff!important;border-color:#1E3A5F!important;} ::-webkit-scrollbar{width:2px;height:2px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:#1E3A5F;border-radius:10px}";
+      el.textContent = "@keyframes slideDown{from{opacity:0;transform:translateY(-100%)}to{opacity:1;transform:translateY(0)}} @keyframes slideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}} @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}} @keyframes fadeIn{from{opacity:0}to{opacity:1}} @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}} * {-webkit-tap-highlight-color:transparent;} input,select,textarea{background:var(--bp-input-bg,#0E131A)!important;color:var(--bp-text,#fff)!important;border-color:var(--bp-border,#27303D)!important;} input::placeholder,textarea::placeholder{color:var(--bp-text3,#8591A3)!important;} ::-webkit-scrollbar{width:2px;height:2px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:var(--bp-border,#27303D);border-radius:10px}";
       document.head.appendChild(el);
     }
     return function(){clearTimeout(splashTimer);};
@@ -750,7 +750,7 @@ function AppInner() {
               if (typeof Notification != "undefined") {
                 Notification.requestPermission();
               }
-            }} style={{background:theme.c.brand,border:"none",borderRadius:10,padding:"8px 16px",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{t("notif.enable","Enable")}</button>
+            }} style={{background:theme.c.brand,border:"none",borderRadius:10,padding:"8px 16px",color:theme.c.onBrand,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{t("notif.enable","Enable")}</button>
             <button onClick={function(){setNotifAsked(true);}} style={{background:"none",border:"none",color:theme.c.text3,fontSize:14,cursor:"pointer",padding:4}}>X</button>
           </div>
         </div>

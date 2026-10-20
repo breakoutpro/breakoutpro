@@ -1,9 +1,12 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { resolveTheme, loadThemeMode, saveThemeMode, deviceFor } from "./tokens";
+import { resolveTheme, loadThemeMode, saveThemeMode, deviceFor, applyThemeToDocument, normalizeMode } from "./tokens";
 
 // BreakoutPro - ThemeProvider.jsx
-// Provides theme palette + device breakpoint to the whole app.
-// Dark / Light / System with instant switch + persistence. Rules: no backtick, no triple-equals, ASCII.
+// Provides the theme palette + device breakpoint to the whole app.
+// Light Pro (default) / Dark Pro / AMOLED Dark / System, instant switch,
+// persisted under "bp_theme". The resolved theme id is also written to the
+// document (data-theme, color-scheme, page background). The shape of
+// theme.c is unchanged. Rules: no backtick, no triple-equals, ASCII.
 
 var ThemeContext = createContext(null);
 
@@ -29,17 +32,21 @@ export function ThemeProvider(props){
     return function(){ try{ mq.removeEventListener("change",onChange); }catch(e){ try{ mq.removeListener(onChange); }catch(e2){} } };
   },[mode]);
 
+  // keep the document attribute and page background in step with the palette
+  useEffect(function(){ applyThemeToDocument(palette); },[palette]);
+
   function setTheme(m){
-    setMode(m); saveThemeMode(m); setPalette(resolveTheme(m));
+    var n = normalizeMode(m);
+    setMode(n); saveThemeMode(n); setPalette(resolveTheme(n));
   }
 
-  var value = { mode:mode, setTheme:setTheme, c:palette, winW:winW, device:deviceFor(winW) };
+  var value = { mode:mode, setTheme:setTheme, c:palette, resolved:palette.id, isDark:palette.scheme=="dark", winW:winW, device:deviceFor(winW) };
   return <ThemeContext.Provider value={value}>{props.children}</ThemeContext.Provider>;
 }
 
-// Hook: const { c, device, mode, setTheme } = useTheme();
+// Hook: const { c, device, mode, resolved, isDark, setTheme } = useTheme();
 export function useTheme(){
   var ctx = useContext(ThemeContext);
-  if(!ctx) return { mode:"light", setTheme:function(){}, c:resolveTheme("light"), winW:430, device:"mobile" };
+  if(!ctx) return { mode:"light", setTheme:function(){}, c:resolveTheme("light"), resolved:"light", isDark:false, winW:430, device:"mobile" };
   return ctx;
 }

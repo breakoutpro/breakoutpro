@@ -1,42 +1,85 @@
 // BreakoutPro Design System - tokens.js
 // Single source of truth for colors, spacing, typography, radii, shadows, breakpoints.
-// Supports exactly two official themes: Dark and Light (plus System, which resolves
-// to one of the two based on OS preference). Rules: no backtick, no triple-equals, ASCII.
+// Three themes: Light Pro (default), Dark Pro and AMOLED Dark, plus System, which
+// resolves to Light Pro or Dark Pro from the OS preference. Rules: no backtick, no triple-equals, ASCII.
 
-// ---- DARK THEME (default, current app palette) ----
+// ---- THEMES: Light Pro (default), Dark Pro, AMOLED Dark ----------------------
+// Every palette has the SAME keys, so theme.c.* works unchanged in all existing
+// screens. Core keys (bg ... overlay) are the original token set. Semantic,
+// chart and accessibility keys below them are additions. Contrast of text, up,
+// down, neutral, warn and blue against bg/card/card2 is enforced by
+// tests/theme.test.mjs (WCAG AA 4.5:1 for text and signal colours).
 var DARK = {
+  id:"dark", scheme:"dark",
   // backgrounds
-  bg:"#050505", bgAlt:"#0A0D12",
-  card:"#111111", card2:"#0B0E13",
+  bg:"#0B0F14", bgAlt:"#0F141B",
+  card:"#131922", card2:"#0E131A",
   // borders
-  border:"#20242D", border2:"#141821",
+  border:"#27303D", border2:"#1B222D",
   // text
-  text1:"#FFFFFF", text2:"#A0A7B4", text3:"#5B6472",
+  text1:"#F1F5F9", text2:"#A9B4C4", text3:"#8591A3",
   // semantic (market data only)
-  up:"#006400", down:"#DC2626",
+  up:"#1FAE5B", down:"#F26B6B",
   // accents
-  blue:"#3B82F6", blueSoft:"rgba(59,130,246,0.12)",
-  gold:"#D4AF37", warn:"#F97316",
+  blue:"#4D8DF8", blueSoft:"rgba(77,141,248,0.14)",
+  gold:"#E0B84C", warn:"#F59E42",
   // brand
   brand:"#00C853", brandDark:"#00A040",
   // overlay
-  overlay:"rgba(0,0,0,0.7)"
+  overlay:"rgba(0,0,0,0.7)",
+  // semantic states
+  bull:"#1FAE5B", bear:"#F26B6B", neutral:"#E0B84C", warning:"#F59E42", info:"#5B9DF9",
+  bullSoft:"rgba(31,174,91,0.16)", bearSoft:"rgba(242,107,107,0.16)", neutralSoft:"rgba(224,184,76,0.16)",
+  warningSoft:"rgba(245,158,66,0.16)", infoSoft:"rgba(91,157,249,0.16)",
+  onAccent:"#FFFFFF", onBrand:"#04210F", accent:"#2563EB", danger:"#DC2626",
+  // chart
+  chartGrid:"#222B38", chartAxis:"#8591A3", chartLine:"#5B9DF9", chartArea:"rgba(91,157,249,0.14)",
+  chartUp:"#1FAE5B", chartDown:"#F26B6B"
 };
 
-// ---- LIGHT THEME (mapped, same semantic roles) ----
 var LIGHT = {
-  bg:"#FFFFFF", bgAlt:"#F8FAFC",
-  card:"#FFFFFF", card2:"#F8FAFC",
-  border:"#E5E7EB", border2:"#F1F5F9",
-  text1:"#111111", text2:"#3F3F46", text3:"#6B7280",
-  up:"#00632F", down:"#DC2626",
-  blue:"#2563EB", blueSoft:"rgba(37,99,235,0.1)",
-  gold:"#B7902B", warn:"#EA580C",
+  id:"light", scheme:"light",
+  bg:"#F3F5F8", bgAlt:"#EAEEF3",
+  card:"#FFFFFF", card2:"#F7F9FC",
+  border:"#D5DBE4", border2:"#E6EAF0",
+  text1:"#0F172A", text2:"#475569", text3:"#566275",
+  up:"#00632F", down:"#B91C1C",
+  blue:"#1D4ED8", blueSoft:"rgba(29,78,216,0.10)",
+  gold:"#755800", warn:"#9A4405",
   brand:"#00A040", brandDark:"#00803A",
-  overlay:"rgba(15,23,42,0.4)"
+  overlay:"rgba(15,23,42,0.4)",
+  bull:"#00632F", bear:"#B91C1C", neutral:"#755800", warning:"#9A4405", info:"#1D4ED8",
+  bullSoft:"rgba(0,99,47,0.10)", bearSoft:"rgba(185,28,28,0.10)", neutralSoft:"rgba(117,88,0,0.12)",
+  warningSoft:"rgba(154,68,5,0.12)", infoSoft:"rgba(29,78,216,0.10)",
+  onAccent:"#FFFFFF", onBrand:"#04210F", accent:"#1D4ED8", danger:"#B91C1C",
+  chartGrid:"#E1E6EE", chartAxis:"#566275", chartLine:"#1D4ED8", chartArea:"rgba(29,78,216,0.10)",
+  chartUp:"#00632F", chartDown:"#B91C1C"
 };
 
-export var THEMES = { dark:DARK, light:LIGHT };
+// Pure black page for OLED panels; cards stay a hair above black so they are
+// still separated by border and fill.
+var AMOLED = {
+  id:"amoled", scheme:"dark",
+  bg:"#000000", bgAlt:"#000000",
+  card:"#0A0A0A", card2:"#050505",
+  border:"#262B33", border2:"#16191E",
+  text1:"#FFFFFF", text2:"#B0B8C4", text3:"#8A93A1",
+  up:"#22B862", down:"#FF6B6B",
+  blue:"#4D8DF8", blueSoft:"rgba(77,141,248,0.16)",
+  gold:"#E0B84C", warn:"#F59E42",
+  brand:"#00C853", brandDark:"#00A040",
+  overlay:"rgba(0,0,0,0.8)",
+  bull:"#22B862", bear:"#FF6B6B", neutral:"#E0B84C", warning:"#F59E42", info:"#5B9DF9",
+  bullSoft:"rgba(34,184,98,0.18)", bearSoft:"rgba(255,107,107,0.18)", neutralSoft:"rgba(224,184,76,0.18)",
+  warningSoft:"rgba(245,158,66,0.18)", infoSoft:"rgba(91,157,249,0.18)",
+  onAccent:"#FFFFFF", onBrand:"#04210F", accent:"#2563EB", danger:"#DC2626",
+  chartGrid:"#1C2026", chartAxis:"#8A93A1", chartLine:"#5B9DF9", chartArea:"rgba(91,157,249,0.16)",
+  chartUp:"#22B862", chartDown:"#FF6B6B"
+};
+
+export var THEMES = { light:LIGHT, dark:DARK, amoled:AMOLED };
+export var THEME_IDS = ["light", "dark", "amoled"];
+export var THEME_MODES = ["light", "dark", "amoled", "system"];
 
 // ---- SPACING (4px base scale) ----
 export var space = { xs:4, sm:8, md:12, lg:16, xl:20, x2:24, x3:32, x4:40, x5:56 };
@@ -51,6 +94,10 @@ export var font = {
   size:{ xs:8, sm:9, base:11, md:12.5, lg:14, xl:16, x2:19, x3:24, x4:30 },
   // Named semantic scale, per the professional-trading-platform hierarchy -
   // use these for new work; the scale above stays for existing screens.
+  // Trader-first scale for the Home card and Market Mood: direction word, big
+  // numbers, labels, captions. Numbers use tabular figures so columns align.
+  pro:{ direction:24, numLg:20, numMd:16, body:12, label:11, caption:10 },
+  tabular:"tabular-nums",
   hierarchy:{ pageTitle:32, sectionTitle:20, cardTitle:16, label:13, numberSm:18, numberLg:24 },
   weight:{ regular:400, medium:600, semibold:700, bold:800, black:900 }
 };
@@ -73,21 +120,56 @@ export function deviceFor(w){
   return "ultra";
 }
 
-// ---- THEME PERSISTENCE + SYSTEM DETECTION ----
-// Reuses the existing "bp_theme" key already present in this file - no
-// new/duplicate localStorage key introduced.
+// ---- THEME PERSISTENCE, MIGRATION AND SYSTEM DETECTION ------------------------
+// One storage key, "bp_theme" (already used before). Saved values from earlier
+// versions are normalised here: the legacy "amoled" now selects AMOLED Dark;
+// other spellings map to the nearest theme; anything unknown becomes Light Pro
+// (the default for existing users).
+var LEGACY = {
+  "amoled":"amoled", "amoled dark":"amoled", "amoled-dark":"amoled", "amoled_dark":"amoled", "black":"amoled", "pure-black":"amoled",
+  "dark":"dark", "dark pro":"dark", "dark-pro":"dark", "dark_pro":"dark", "midnight":"dark",
+  "light":"light", "light pro":"light", "light-pro":"light", "light_pro":"light", "white":"light",
+  "system":"system", "auto":"system"
+};
+export function normalizeMode(m){
+  if(m==null) return "light";
+  var k = String(m).trim().toLowerCase();
+  return LEGACY[k] || "light";
+}
 export function loadThemeMode(){
-  try{ return localStorage.getItem("bp_theme")||"light"; }catch(e){ return "light"; }
+  var raw = null;
+  try{ raw = localStorage.getItem("bp_theme"); }catch(e){ return "light"; }
+  var m = normalizeMode(raw);
+  if(raw!=null && raw!==m){ try{ localStorage.setItem("bp_theme", m); }catch(e){} }   // migrate in place
+  return m;
 }
-export function saveThemeMode(m){ try{ localStorage.setItem("bp_theme",m); }catch(e){} }
+export function saveThemeMode(m){ try{ localStorage.setItem("bp_theme", normalizeMode(m)); }catch(e){} }
 export function systemPrefersDark(){
-  try{ return window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches; }catch(e){ return false; }
+  try{ return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches); }catch(e){ return false; }
 }
-// Resolve a mode (dark/light/system) to an actual palette. Any legacy saved
-// preference (e.g. a previously-selected "amoled") safely falls back to LIGHT.
+// The concrete theme id (light / dark / amoled) for a mode.
+export function resolveThemeId(mode){
+  var m = normalizeMode(mode==null ? loadThemeMode() : mode);
+  if(m=="system") return systemPrefersDark() ? "dark" : "light";
+  return m;
+}
 export function resolveTheme(mode){
-  var m=mode||loadThemeMode();
-  if(m=="system") m=systemPrefersDark()?"dark":"light";
-  return THEMES[m] || LIGHT;
+  return THEMES[resolveThemeId(mode)] || LIGHT;
 }
-
+// Set the document theme attribute, color-scheme and page background so the
+// area outside React (overscroll, scrollbars, browser chrome) matches.
+export function applyThemeToDocument(palette){
+  if(typeof document=="undefined" || !palette) return;
+  try{
+    var root = document.documentElement;
+    root.setAttribute("data-theme", palette.id);
+    root.style.colorScheme = palette.scheme;
+    root.style.setProperty("--bp-input-bg", palette.card2);
+    root.style.setProperty("--bp-text", palette.text1);
+    root.style.setProperty("--bp-text3", palette.text3);
+    root.style.setProperty("--bp-border", palette.border);
+    if(document.body) document.body.style.setProperty("background", palette.bg, "important");
+    var meta = document.querySelector("meta[name=theme-color]");
+    if(meta) meta.setAttribute("content", palette.bg);
+  }catch(e){}
+}

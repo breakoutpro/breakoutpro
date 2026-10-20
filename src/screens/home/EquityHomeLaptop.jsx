@@ -4,7 +4,6 @@ import { useResponsive } from "../../hooks/useResponsive";
 import { useHomeData } from "./hooks/useHomeData";
 import { getHomeTierConfig } from "../../utils/homeTierDensity";
 import ProvenanceBadge from "../../components/ProvenanceBadge";
-import { JUSTIN } from "../JustInData";
 import { t, termHelp, useLang } from "../../i18n/translations";
 import NextMoveHomeCard from "../NextMoveHomeCard";
 
@@ -33,22 +32,11 @@ export default function EquityHomeLaptop(props){
   // Dedicated sentiment colors (Bearish/Sideways/Bullish) - separate from
   // theme.c.up/down/warn, which are used elsewhere for price ticks and
   // general warnings, not sentiment specifically.
-  var SENT_GREEN="#087443", SENT_RED="#C62828", SENT_YELLOW="#EAB308";
+  var SENT_GREEN=theme.c.bull, SENT_RED=theme.c.bear, SENT_YELLOW=theme.c.neutral;
   var T1=theme.c.text1, T2=theme.c.text2, T3=theme.c.text3;
   var setTab = props.setTab || function(){};
   var data = useHomeData();
   var mm = data.mm;
-
-  // PRIMARY_CARD_HEIGHT - the ONE number that controls the 3x2 core-feature
-  // grid's row height. Both rows use this same value, so all six primary
-  // cards (AI Market Mood, Range Intelligence, Options Intelligence,
-  // Market News, Live Breakouts, Market Alerts) are always identical in
-  // height regardless of how much content each one has. Content that does
-  // not fit scrolls inside its own card (overflowY:auto on each card)
-  // rather than growing the row - this is what keeps Row 1 and Row 2 the
-  // same height instead of one feature stretching its row taller than the
-  // other. Tune this one value if a tier needs a different compact height.
-  var PRIMARY_CARD_HEIGHT = 230;
 
   // LIVE BREAKOUTS - reuses the existing real /api/scanner-data endpoint
   // (confirmed real: fetches actual daily candles per symbol, classifies
@@ -70,17 +58,16 @@ export default function EquityHomeLaptop(props){
       {/* MAIN AREA - center workspace */}
       <div style={{flex:1,display:"flex",minHeight:0,width:"100%"}}>
 
-        {/* CENTER WORKSPACE - the 3x2 core-feature grid (AI Market Mood,
-            Range Intelligence, Options Intelligence, Market News, Live
-            Breakouts, Market Alerts). Each card's detailed analysis lives
+        {/* CENTER WORKSPACE - Next Move Intelligence (left, primary) with Range
+            Intelligence, Live Breakouts and Market Alerts stacked on the right. Each card's detailed analysis lives
             on its own dedicated page - Home shows a real-data summary
             only, never a duplicate of the full page. */}
         <div style={{flex:1,minWidth:0,padding:"8px 12px",overflowY:"auto"}}>
 
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gridTemplateRows:"minmax("+PRIMARY_CARD_HEIGHT+"px, auto) "+PRIMARY_CARD_HEIGHT+"px",gap:8,alignItems:"stretch"}}>
+          <div style={{display:"grid",gridTemplateColumns:"minmax(0, 1.2fr) minmax(0, 1fr)",gridAutoRows:"auto",gap:8,alignItems:"start"}}>
 
-          {/* NEXT MOVE INTELLIGENCE - card 1 of 6. Compact trader-first card (direction, price, key levels, data status) with one collapsed Detailed Analysis. Content-driven height: the first grid row grows to fit it. */}
-          <div onClick={function(){setTab("marketmood");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:6,padding:"8px 12px",boxSizing:"border-box",cursor:"pointer",overflowY:"auto",display:"flex",flexDirection:"column",height:"100%"}}>
+          {/* NEXT MOVE INTELLIGENCE - Compact trader-first card (direction, price, key levels, data status) with one collapsed Detailed Analysis. Content-driven height: the first grid row grows to fit it. */}
+          <div onClick={function(){setTab("marketmood");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:6,padding:"8px 12px",boxSizing:"border-box",cursor:"pointer",overflowY:"auto",display:"flex",flexDirection:"column",alignSelf:"start"}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
               <span style={{fontSize:tierCfg.widgetTitle+1,fontWeight:800,color:T1}}>{t("home.mood_title")}</span>
               <ProvenanceBadge type="calculated"/>
@@ -88,7 +75,9 @@ export default function EquityHomeLaptop(props){
             <NextMoveHomeCard mm={data.mm} fs={tierCfg.secondaryText} wide={true} onOpen={function(){setTab("marketmood");}}/>
           </div>
 
-          {/* RANGE INTELLIGENCE - card 2 of 6. Real data, from api/market-mood-data.js's indices.NIFTY - the
+          <div style={{display:"flex",flexDirection:"column",gap:8,minWidth:0}}>
+
+          {/* RANGE INTELLIGENCE - Real data, from api/market-mood-data.js's indices.NIFTY - the
               most recent daily candle IS today's session, so high/low are
               genuinely today's real range. */}
           {(function(){
@@ -126,59 +115,20 @@ export default function EquityHomeLaptop(props){
               );
             }
             return (
-              <div onClick={function(){setTab("rangeintel");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:6,padding:"8px 12px",boxSizing:"border-box",cursor:"pointer",overflowY:"auto",display:"flex",flexDirection:"column",height:"100%"}}>
+              <div onClick={function(){setTab("rangeintel");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:6,padding:"8px 12px",boxSizing:"border-box",cursor:"pointer",overflowY:"auto",display:"flex",flexDirection:"column"}}>
                 {rangeContent}
               </div>
             );
           })()}
 
-          {/* OPTIONS INTELLIGENCE - card 3 of 6. No verified live options-
-              chain provider exists anywhere in this codebase (confirmed via
-              full repository audit: dhan.js's real getOptionChain() is
-              commented out pending a paid subscription, OptionsIntelData.jsx's
-              own header states "Mock now"). Per instruction, example/demo
-              PCR/Max Pain/Call Wall/Put Wall numbers must not be shown at
-              all - even DEMO-labeled - so this card now shows the same
-              compact honest not-connected state as Market Alerts rather
-              than any numeric placeholder. */}
-          <div style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:6,padding:"8px 12px",boxSizing:"border-box",overflowY:"auto",display:"flex",flexDirection:"column",height:"100%"}}>
-            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-              <span style={{fontSize:tierCfg.widgetTitle,fontWeight:800,color:T1}}>{t("home.options_title")}</span>
-              <ProvenanceBadge type="unavailable"/>
-            </div>
-            <div style={{fontSize:tierCfg.label,color:T3}}>{t("home.options_none")}</div>
-          </div>
-
-          {/* MARKET NEWS - card 4 of 6, compact, max 2 headlines (narrower
-              1/3-width card than before), real JustIn data only */}
-          <div onClick={function(){setTab("news");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:6,padding:"8px 12px",boxSizing:"border-box",cursor:"pointer",overflowY:"auto",display:"flex",flexDirection:"column",height:"100%"}}>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-              <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontSize:tierCfg.widgetTitle,fontWeight:800,color:T1}}>{t("home.market_news")}</span>
-                <ProvenanceBadge type="calculated"/>
-              </div>
-              <span style={{fontSize:tierCfg.label,color:BLUE,fontWeight:700}}>{t("c.view_all_arrow")} &#8594;</span>
-            </div>
-            {JUSTIN.length===0 ? (
-              <div style={{fontSize:tierCfg.secondaryText,color:T3}}>{t("home.news_none")}</div>
-            ) : JUSTIN.slice(0,2).map(function(n){
-              return (
-                <div key={n.id} style={{padding:"5px 0",borderBottom:"1px solid "+BD2}}>
-                  <div style={{fontSize:tierCfg.secondaryText,fontWeight:700,color:T1,marginBottom:2}}>{n.headline}</div>
-                  <div style={{fontSize:tierCfg.label,color:T3}}>{n.time} &#183; {n.source}</div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* LIVE BREAKOUTS - card 5 of 6. Same real /api/scanner-data
+          {/* LIVE BREAKOUTS - Same real /api/scanner-data
               source that BreakoutScanner.jsx uses (real daily-candle
               classification, no Math.random, no invented values) -
               previously a horizontal strip below the grid, now its own
               core card so it gets equal Home-page prominence. Not
               duplicated into Market Alerts - each feature owns its own
               information. */}
-          <div style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:6,padding:"8px 12px",boxSizing:"border-box",overflowY:"auto",display:"flex",flexDirection:"column",height:"100%"}}>
+          <div style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:6,padding:"8px 12px",boxSizing:"border-box",overflowY:"auto",display:"flex",flexDirection:"column"}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
               <span style={{fontSize:tierCfg.widgetTitle,fontWeight:800,color:T1}}>{t("home.live_breakouts")}</span>
               <ProvenanceBadge type={scannerResults && scannerResults.length ? "calculated" : "unavailable"}/>
@@ -198,18 +148,20 @@ export default function EquityHomeLaptop(props){
             )}
           </div>
 
-          {/* MARKET ALERTS - card 6 of 6. No verified alert-generation
+          {/* MARKET ALERTS - No verified alert-generation
               source exists anywhere in this codebase - shown as a compact,
               honest unavailable state, never a fabricated alert count,
               timestamp, symbol or reason. Previously lived in a secondary
               5-up row below the grid; moved into the core 3x2 grid so it
               gets equal Home-page prominence with the other five features. */}
-          <div style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:6,padding:"8px 12px",boxSizing:"border-box",overflowY:"auto",display:"flex",flexDirection:"column",height:"100%"}}>
+          <div style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:6,padding:"8px 12px",boxSizing:"border-box",overflowY:"auto",display:"flex",flexDirection:"column"}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
               <span style={{fontSize:tierCfg.widgetTitle,fontWeight:800,color:T1}}>{t("home.market_alerts")}</span>
               <ProvenanceBadge type="unavailable"/>
             </div>
             <div style={{fontSize:tierCfg.label,color:T3}}>{t("home.alerts_none")}</div>
+          </div>
+
           </div>
 
           </div>

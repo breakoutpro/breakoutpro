@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "../../theme/ThemeProvider";
 import { useHomeData } from "./hooks/useHomeData";
-import { JUSTIN } from "../JustInData";
 import MarketBadge from "./MarketBadge";
 import { t, termHelp, useLang } from "../../i18n/translations";
 import NextMoveHomeCard from "../NextMoveHomeCard";
@@ -19,7 +18,7 @@ export default function EquityHomeMobile(props){
   var BG=theme.c.bg, CARD=theme.c.card, BD=theme.c.border;
   var BLUE=theme.c.blue, PROBLUE=theme.c.blue;
   var UP=theme.c.up, DOWN=theme.c.down, WARN=theme.c.warn;
-  var SENT_GREEN="#087443", SENT_RED="#C62828", SENT_YELLOW="#EAB308";
+  var SENT_GREEN=theme.c.bull, SENT_RED=theme.c.bear, SENT_YELLOW=theme.c.neutral;
   var T1=theme.c.text1, T2=theme.c.text2, T3=theme.c.text3;
   var setTab = props.setTab || function(){};
   var data = useHomeData();
@@ -97,12 +96,9 @@ export default function EquityHomeMobile(props){
           ) : <NextMoveHomeCard mm={mm} fs={11} onOpen={function(){setTab("marketmood");}}/>}
         </Card>
 
-        {/* Range Intelligence (real data) + Options Intelligence (DEMO,
-            clearly labeled), grouped visually in one card but keeping both
-            canonical feature names visible - per explicit correction,
-            "Market Structure" must not be used as a feature name anywhere.
-            Internally stacked (not side-by-side) since Mobile is
-            single-column. */}
+        {/* Range Intelligence (real data only). The demo Options block that used
+            to sit in this card was removed: it showed example values, not a
+            verified options chain. */}
         {(function(){
           var nifty = mm.data && mm.data.indices && mm.data.indices.NIFTY;
           var hasRange = nifty && nifty.ltp!=null && nifty.high!=null && nifty.low!=null && nifty.high>nifty.low;
@@ -132,18 +128,8 @@ export default function EquityHomeMobile(props){
             );
           }
           return (
-            <Card title={t("home.range_title")} icon="&#128640;" onDetails={function(){setTab("rangeintel");}}>
+            <Card title={t("home.range_title")} onDetails={function(){setTab("rangeintel");}}>
               {rangeBlock}
-              <div style={{borderTop:"1px solid "+BD,paddingTop:8}}>
-                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
-                  <span style={{fontSize:11,fontWeight:800,color:T1}}>{t("home.options_title")}</span>
-                  <span style={{fontSize:8,fontWeight:800,color:WARN,background:WARN+"18",border:"1px solid "+WARN+"55",borderRadius:4,padding:"1px 5px"}}>{t("home.demo")}</span>
-                </div>
-                <div style={{fontSize:10,color:T3,marginBottom:1}}><span title={termHelp("PCR")}>PCR</span> <span style={{color:T1,fontWeight:700}}>1.02</span> &middot; <span title={termHelp("Max Pain")}>Max Pain</span> <span style={{color:T1,fontWeight:700}}>24,600</span></div>
-                <div style={{fontSize:10,color:T3,marginBottom:1}}>Call Wall <span style={{color:T1,fontWeight:700}}>24,800</span> &middot; Put Wall <span style={{color:T1,fontWeight:700}}>24,400</span></div>
-                <div style={{fontSize:10,color:T3,marginBottom:1}}><span title={termHelp("OI")}>{t("home.oi_insight")}</span> <span style={{color:T1,fontWeight:700}}>{t("home.oi_insight_text")}</span></div>
-                <div style={{fontSize:9,color:T3}}>{t("home.options_example")}</div>
-              </div>
             </Card>
           );
         })()}
@@ -151,21 +137,8 @@ export default function EquityHomeMobile(props){
         {/* MARKET ALERTS - no verified alert-generation source exists
             anywhere in this codebase, matching Desktop/Laptop's honest
             unavailable state. */}
-        <Card title={t("home.market_alerts")} icon="&#128276;">
+        <Card title={t("home.market_alerts")}>
           <div style={{fontSize:11,color:T2}}>{t("home.alerts_none")}</div>
-        </Card>
-
-        <Card title={t("home.market_news")} icon="&#128240;" onDetails={function(){setTab("news");}}>
-          {JUSTIN.length===0 ? (
-            <div style={{fontSize:11,color:T2}}>{t("home.news_none")}</div>
-          ) : JUSTIN.slice(0,3).map(function(n){
-            return (
-              <div key={n.id} style={{padding:"5px 0",borderBottom:"1px solid "+BD}}>
-                <div style={{fontSize:11,fontWeight:700,color:T1,marginBottom:2}}>{n.headline}</div>
-                <div style={{fontSize:10,color:T2}}>{n.time} &#183; {n.source}</div>
-              </div>
-            );
-          })}
         </Card>
 
         {/* MARKET BREADTH / FII-DII / LATEST ALERTS - no real provider
@@ -173,16 +146,12 @@ export default function EquityHomeMobile(props){
             honestly unavailable with structure intact (same pattern as
             Desktop). GLOBAL MARKETS and KEY LEVELS use real data already
             confirmed on Desktop, previously missing from Mobile. */}
-        <Card title={t("home.breadth_title")} icon="&#128202;">
+        <Card title={t("home.breadth_title")}>
           <div style={{fontSize:11,color:T2}}>{t("home.breadth_none")}</div>
         </Card>
 
-        <Card title={t("home.fiidii_title")} icon="&#128176;">
+        <Card title={t("home.fiidii_title")}>
           <div style={{fontSize:11,color:T2}}>{t("home.fiidii_none")}</div>
-        </Card>
-
-        <Card title={t("home.latest_alerts")} icon="&#128276;">
-          <div style={{fontSize:11,color:T2}}>{t("home.alerts_none")}</div>
         </Card>
 
         {(function(){
@@ -190,13 +159,13 @@ export default function EquityHomeMobile(props){
           var hasGlobal = global && global.status!=="UNAVAILABLE" && global.items && global.items.length;
           if(!hasGlobal){
             return (
-              <Card title={t("home.global_title")} icon="&#127760;">
+              <Card title={t("home.global_title")}>
                 <div style={{fontSize:11,color:T2}}>{t("home.global_none")}</div>
               </Card>
             );
           }
           return (
-            <Card title={t("home.global_title")} icon="&#127760;">
+            <Card title={t("home.global_title")}>
               {global.items.slice(0,4).map(function(g,i){
                 return (
                   <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderTop:i>0?"1px solid "+BD:"none"}}>
@@ -218,7 +187,7 @@ export default function EquityHomeMobile(props){
           var s1 = Math.round(((2*pivot) - nifty.high)*100)/100;
           var pivotR = Math.round(pivot*100)/100;
           return (
-            <Card title={t("home.key_levels")} icon="&#127919;">
+            <Card title={t("home.key_levels")}>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
                 <div><div style={{fontSize:9,color:T3}}>{t("home.strong_res")}</div><div style={{fontSize:12,fontWeight:800,color:DOWN}}>{r1.toLocaleString("en-IN")}</div></div>
                 <div><div style={{fontSize:9,color:T3}}>{t("home.pivot")}</div><div style={{fontSize:12,fontWeight:800,color:T1}}>{pivotR.toLocaleString("en-IN")}</div></div>

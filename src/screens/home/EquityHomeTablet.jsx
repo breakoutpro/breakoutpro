@@ -1,7 +1,6 @@
 import { useTheme } from "../../theme/ThemeProvider";
 import { useHomeData } from "./hooks/useHomeData";
 import { formatMarketPrice } from "../../utils/formatMarketPrice";
-import { JUSTIN } from "../JustInData";
 import { DEMO_MOOD, DEMO_AI } from "../MarketMoodDemoData";
 import MarketBadge from "./MarketBadge";
 import { SkeletonCard } from "../../components/Skeleton";
@@ -62,7 +61,14 @@ export default function EquityHomeTablet(props){
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(300px, 1fr))",gap:16,padding:"16px 16px 0",minWidth:0,boxSizing:"border-box"}}>
 
 
-        <SummaryCard title={t("home.snapshot")} icon="&#128202;">
+
+        <SummaryCard title={t("home.mood_title")} onDetails={function(){setTab("marketmood");}}>
+          {mm.status=="loading" && !mm.data ? (
+            <SkeletonCard height={90}/>
+          ) : <NextMoveHomeCard mm={mm} fs={12} wide={true} onOpen={function(){setTab("marketmood");}}/>}
+        </SummaryCard>
+
+        <SummaryCard title={t("home.snapshot")}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,width:"100%",boxSizing:"border-box"}}>
             {data.spineRows.map(function(r){
               var color = r.dir=="up"?UP:(r.dir=="down"?DOWN:T2);
@@ -81,18 +87,12 @@ export default function EquityHomeTablet(props){
           </div>
         </SummaryCard>
 
-        <SummaryCard title={t("home.mood_title")} onDetails={function(){setTab("marketmood");}}>
-          {mm.status=="loading" && !mm.data ? (
-            <SkeletonCard height={90}/>
-          ) : <NextMoveHomeCard mm={mm} fs={12} wide={true} onOpen={function(){setTab("marketmood");}}/>}
-        </SummaryCard>
-
         {(function(){
           var nifty = mm.data && mm.data.indices && mm.data.indices.NIFTY;
           var hasRange = nifty && nifty.ltp!=null && nifty.high!=null && nifty.low!=null && nifty.high>nifty.low;
           if(!hasRange){
             return (
-              <SummaryCard title={t("home.range_title")} icon="&#128640;" onDetails={function(){setTab("rangeintel");}}>
+              <SummaryCard title={t("home.range_title")} onDetails={function(){setTab("rangeintel");}}>
                 <div style={{fontSize:12,color:T2}}>{t("home.range_none")}</div>
               </SummaryCard>
             );
@@ -104,7 +104,7 @@ export default function EquityHomeTablet(props){
           var state = posPct>=80?"Breakout Watch":(posPct<=20?"Breakdown Watch":"Balanced");
           var stateColor = state==="Breakout Watch"?UP:(state==="Breakdown Watch"?DOWN:T1);
           return (
-            <SummaryCard title={t("home.range_title")} icon="&#128640;" onDetails={function(){setTab("rangeintel");}}>
+            <SummaryCard title={t("home.range_title")} onDetails={function(){setTab("rangeintel");}}>
               <div style={{fontSize:12,color:T2,marginBottom:6}}>NIFTY 50 &middot; <span title={termHelp("CMP")}>CMP:</span> <b style={{color:T1}}>{nifty.ltp.toLocaleString("en-IN")}</b></div>
               <div style={{position:"relative",height:16,marginBottom:6}}>
                 <div style={{position:"absolute",top:7,left:0,right:0,height:2,background:BD}}></div>
@@ -118,34 +118,6 @@ export default function EquityHomeTablet(props){
             </SummaryCard>
           );
         })()}
-
-        <SummaryCard title={t("home.options_title")} icon="&#128202;" onDetails={function(){ if(props.setShowOptions) props.setShowOptions(true); else setTab("optionsintelpro"); }}>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,textAlign:"center",marginBottom:8}}>
-            <div><div style={{fontSize:10,color:T2}}>{t("home.underlying")}</div><div style={{fontSize:12,color:T2}}>--</div></div>
-            <div><div title={termHelp("Expiry")} style={{fontSize:10,color:T2}}>Expiry</div><div style={{fontSize:12,color:T2}}>--</div></div>
-            <div><div title={termHelp("ATM")} style={{fontSize:10,color:T2}}>ATM</div><div style={{fontSize:12,color:T2}}>--</div></div>
-            <div><div title={termHelp("PCR")} style={{fontSize:10,color:T2}}>PCR</div><div style={{fontSize:12,color:T2}}>--</div></div>
-            <div><div title={termHelp("Max Pain")} style={{fontSize:10,color:T2}}>Max Pain</div><div style={{fontSize:12,color:T2}}>--</div></div>
-            <div><div title={termHelp("Gamma Flip")} style={{fontSize:10,color:T2}}>Gamma Flip</div><div style={{fontSize:12,color:T2}}>--</div></div>
-            <div><div title={termHelp("Call OI")} style={{fontSize:10,color:T2}}>Call OI</div><div style={{fontSize:12,color:T2}}>--</div></div>
-            <div><div title={termHelp("Put OI")} style={{fontSize:10,color:T2}}>Put OI</div><div style={{fontSize:12,color:T2}}>--</div></div>
-            <div><div title={termHelp("IV")} style={{fontSize:10,color:T2}}>IV / Greeks</div><div style={{fontSize:12,color:T2}}>--</div></div>
-          </div>
-          <div style={{fontSize:12,color:T2}}>{t("home.options_connect")}</div>
-        </SummaryCard>
-
-        <SummaryCard title={t("home.market_news")} icon="&#128240;" onDetails={function(){setTab("news");}}>
-          {JUSTIN.length===0 ? (
-            <div style={{fontSize:12,color:T2}}>{t("home.news_none")}</div>
-          ) : JUSTIN.slice(0,3).map(function(n){
-            return (
-              <div key={n.id} style={{padding:"6px 0",borderBottom:"1px solid "+BD}}>
-                <div style={{fontSize:12,fontWeight:700,color:T1,marginBottom:2}}>{n.headline}</div>
-                <div style={{fontSize:11,color:T2}}>{n.time} &middot; {n.source}</div>
-              </div>
-            );
-          })}
-        </SummaryCard>
 
       </div>
       <div style={{height:24}}></div>

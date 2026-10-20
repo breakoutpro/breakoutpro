@@ -23,7 +23,7 @@ export default function MarketBadge(){
   else if(mins>=15*60+30&&mins<16*60){ st={label:"Post-Market",col:BLUE,dot:BLUE}; }
   else { st={label:"Closed",col:DOWN,dot:DOWN}; }
   return (
-    <span style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.05)",border:"1px solid "+BD,borderRadius:20,padding:"3px 7px",whiteSpace:"nowrap"}}>
+    <span style={{display:"inline-flex",alignItems:"center",gap:4,background:theme.c.card2,border:"1px solid "+BD,borderRadius:20,padding:"3px 7px",whiteSpace:"nowrap"}}>
       <span style={{width:5,height:5,borderRadius:"50%",background:st.dot,animation:st.label=="Open"?"pulse-dot 1.4s infinite":"none",flexShrink:0}}></span>
       <span style={{fontSize:10,fontWeight:800,color:st.col}}>{t(st.label=="Open"?"mkt.badge_open":(st.label=="Pre-Market"?"mkt.badge_pre":(st.label=="Post-Market"?"mkt.badge_post":"mkt.closed")), st.label)}</span>
     </span>

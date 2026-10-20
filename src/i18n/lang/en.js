@@ -80,8 +80,8 @@ var strings = {
   "c.edu_footer":"Educational market intelligence only. Not investment advice. Not a recommendation to buy or sell.",
   "set.title":"Settings",
   "set.appearance":"APPEARANCE",
-  "set.light":"Light",
-  "set.dark":"Dark",
+  "set.light":"Light Pro",
+  "set.dark":"Dark Pro",
   "set.system":"System Default",
   "set.pro_member":"PRO Member",
   "set.free_plan":"Free Plan",
@@ -1156,7 +1156,11 @@ var strings = {
   "nm.ev.detail":"Detailed evidence",
   "home.changed_q":"WHAT CHANGED?",
   "home.drivers_q":"KEY DRIVERS",
-  "nm.more":"+{n} more (see detailed evidence)"
+  "nm.more":"+{n} more (see detailed evidence)",
+  "set.amoled":"AMOLED Dark",
+  "set.theme_aria":"App theme",
+  "set.theme_on":"selected",
+  "set.theme_hint":"Saved on this device"
 };
 var terms = {
   "NIFTY 50":"Index of the 50 largest NSE companies",

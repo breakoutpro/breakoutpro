@@ -14,17 +14,19 @@ function Toggle(props){
   var BLUE = theme.c.blue;
 
   return (
-    <div onClick={props.onChange} style={{width:44,height:24,borderRadius:12,background:props.value?BLUE:"rgba(255,255,255,0.1)",border:"1px solid "+(props.value?BLUE:BD),cursor:"pointer",position:"relative",flexShrink:0}}>
-      <div style={{width:18,height:18,borderRadius:"50%",background:"#fff",position:"absolute",top:2,left:props.value?22:2,boxShadow:"0 1px 4px rgba(0,0,0,0.3)"}}></div>
+    <div onClick={props.onChange} style={{width:44,height:24,borderRadius:12,background:props.value?BLUE:theme.c.border,border:"1px solid "+(props.value?BLUE:BD),cursor:"pointer",position:"relative",flexShrink:0}}>
+      <div style={{width:18,height:18,borderRadius:"50%",background:theme.c.onAccent,position:"absolute",top:2,left:props.value?22:2,boxShadow:"0 1px 4px rgba(0,0,0,0.3)"}}></div>
     </div>
   );
 }
 
 function Row(props){
+  var theme = useTheme();
+  var BD = theme.c.border, T1 = theme.c.text1, T2 = theme.c.text2;
   return (
     <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderBottom:"1px solid "+BD}}>
       <div style={{width:36,height:36,borderRadius:10,background:props.bg,border:"1px solid "+props.bd,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-        <span style={{fontSize:16}} dangerouslySetInnerHTML={{__html:props.icon}}/>
+        <span style={{fontSize:16,color:theme.c.text1}} dangerouslySetInnerHTML={{__html:props.icon}}/>
       </div>
       <div style={{flex:1}}>
         <div style={{fontSize:12,fontWeight:600,color:T1}}>{props.label}</div>
@@ -46,10 +48,11 @@ var TYPES=[
 
 export default function SettingsAlerts(props){
   useLang();
+  var theme = useTheme();
   var st=props.st||{};
   var toggle=props.toggle||function(){};
   return (
-    <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,margin:"0 14px",overflow:"hidden"}}>
+    <div style={{background:theme.c.card,border:"1px solid "+theme.c.border,borderRadius:16,margin:"0 14px",overflow:"hidden"}}>
       {TYPES.map(function(ty){
         return <Row key={ty.key} icon={ty.icon} label={t("set.t."+ty.k, ty.label)} sub={t("set.t."+ty.k+"_sub", ty.sub)} bg={ty.bg} bd={ty.bd} value={st[ty.key]} onChange={function(){toggle(ty.key);}}/>;
       })}

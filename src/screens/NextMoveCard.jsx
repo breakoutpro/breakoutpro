@@ -105,7 +105,7 @@ export default function NextMoveCard(props){
   var grid2 = { display:"grid", gridTemplateColumns: wide ? "repeat(auto-fit, minmax(260px, 1fr))" : "minmax(0, 1fr)", gap:6, marginTop:6 };
   var p = m.price, f = m.freshness;
   var quoteStatus = f && f.quoteStatus ? f.quoteStatus : "UNAVAILABLE";
-  var qmeta = getFreshnessMeta(p && p.kind=="live" ? "LIVE" : quoteStatus);
+  var qmeta = getFreshnessMeta(p && p.kind=="live" ? "LIVE" : quoteStatus, theme.c);
   var tQuote = f ? fmtTime(f.quoteAsOf) : null;
   var tBar = f ? fmtDay(f.lastBarAsOf) : null;
   var tm = trendMeta(f, MT);

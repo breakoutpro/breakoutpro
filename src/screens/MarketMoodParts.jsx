@@ -11,9 +11,10 @@ import { useResponsive } from "../hooks/useResponsive";
 // Rules: no backtick, no triple-equals, ASCII only.
 
 // Builds the same MT shape MarketMoodData.jsx used to hardcode, but sourced
-// live from the active theme so this page actually switches with Light/Dark.
+// live from the active theme (Light Pro / Dark Pro / AMOLED) so this page follows the selection.
 export function buildMT(theme) {
   return {
+    C: theme.c,
     BG: theme.c.bg, CARD: theme.c.card, CARD2: theme.c.card2, BD: theme.c.border,
     T1: theme.c.text1, T2: theme.c.text2, T3: theme.c.text3, BLUE: theme.c.blue,
     GREEN: theme.c.up, DGREEN: theme.c.up, RED: theme.c.down, DRED: theme.c.down,
@@ -22,7 +23,10 @@ export function buildMT(theme) {
     // theme.c.up/down/warn since those tokens are used elsewhere for price
     // ticks and general warnings, not sentiment specifically. Not touching
     // the global tokens or their names, per the explicit constraint.
-    SENT_GREEN: "#087443", SENT_RED: "#C62828", SENT_YELLOW: "#EAB308"
+    SENT_GREEN: theme.c.bull, SENT_RED: theme.c.bear, SENT_YELLOW: theme.c.neutral,
+    // semantic states, chart and accent text
+    INFO: theme.c.info, UP: theme.c.up, DOWN: theme.c.down, ON_ACCENT: theme.c.onAccent,
+    SOFT_BG: theme.c.blueSoft, CHART_GRID: theme.c.chartGrid, CHART_AXIS: theme.c.chartAxis, CHART_LINE: theme.c.chartLine
   };
 }
 
@@ -41,7 +45,7 @@ export function SectionHead(props){
 // Small freshness pill (LIVE / DELAYED / STALE / OFFLINE / UNAVAILABLE).
 export function FreshnessPill(props){
   var theme = useTheme(); var MT = buildMT(theme);
-  var meta = getFreshnessMeta(props.status);
+  var meta = getFreshnessMeta(props.status, theme.c);
   return (
     <span style={{fontSize:12,fontWeight:800,color:meta.color,background:meta.color+"18",border:"1px solid "+meta.color+"40",borderRadius:5,padding:"4px 8px",letterSpacing:0.3}}>
       {meta.text}

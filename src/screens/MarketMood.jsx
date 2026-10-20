@@ -63,14 +63,14 @@ export default function MarketMood(props){
   var gapV = wideLayout ? 4 : 8;
   var padV = wideLayout ? "4px 6px" : 10;
 
-  var sMeta = getSessionMeta(session);
+  var sMeta = getSessionMeta(session, theme.c);
   var evolution = buildEvolution(data || {});
 
   var idx = (data && data.indices) || {};
-  var niftyRow = buildIndexRow("NIFTY 50", idx.NIFTY);
-  var sensexRow = buildIndexRow("SENSEX", idx.SENSEX);
-  var bankRow = buildIndexRow("BANK NIFTY", idx.BANKNIFTY);
-  var vixRow = buildIndexRow("INDIA VIX", idx.VIX);
+  var niftyRow = buildIndexRow("NIFTY 50", idx.NIFTY, theme.c);
+  var sensexRow = buildIndexRow("SENSEX", idx.SENSEX, theme.c);
+  var bankRow = buildIndexRow("BANK NIFTY", idx.BANKNIFTY, theme.c);
+  var vixRow = buildIndexRow("INDIA VIX", idx.VIX, theme.c);
 
   // Sector Rotation / Global Markets: real, server-populated groups.
   var sectorSection = buildUnverifiedSection(data && data.sectors);
@@ -113,7 +113,7 @@ export default function MarketMood(props){
       {/* HEADER - single compact line, no hero area */}
       <div style={{background:MT.CARD,borderBottom:"1px solid "+MT.BD,position:"sticky",top:0,zIndex:5}}>
         <div style={{display:"flex",alignItems:"center",gap:10,padding:wideLayout?"4px 10px":"6px 12px",maxWidth:1440,margin:"0 auto",boxSizing:"border-box"}}>
-          <button onClick={props.onClose} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:30,height:30,color:MT.T1,fontSize:14,cursor:"pointer",flexShrink:0}}>&#8592;</button>
+          <button onClick={props.onClose} style={{background:theme.c.blueSoft,border:"none",borderRadius:8,width:30,height:30,color:MT.T1,fontSize:14,cursor:"pointer",flexShrink:0}}>&#8592;</button>
           <div style={{fontSize:13,fontWeight:800,color:MT.T1}}>{tr("nm.title")}</div>
           <button onClick={onVoice} style={{background:"transparent",border:"1px solid "+MT.BLUE,borderRadius:7,padding:"4px 10px",color:MT.BLUE,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit",display:"inline-flex",alignItems:"center",gap:5}}>
             <span style={{fontSize:12}} dangerouslySetInnerHTML={{__html:"&#128266;"}}/>

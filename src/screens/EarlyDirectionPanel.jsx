@@ -69,7 +69,7 @@ function Chip(props){
 function InputRow(props){
   var MT = props.MT, inp = props.inp;
   var st = inp.status;
-  var meta = getFreshnessMeta(st);
+  var meta = getFreshnessMeta(st, MT.C);
   var color = meta.color;
   var when = fmtTime(inp.asOf);
   var reasonText = inp.reason ? t("dir.r." + inp.reason) : "";

@@ -20,7 +20,8 @@ var WRAP = { overflowWrap:"anywhere", wordBreak:"break-word", minWidth:0 };
 var DASH = "\u2014";
 
 function Chip(props){
-  var m = getFreshnessMeta(props.status);
+  var theme = useTheme();
+  var m = getFreshnessMeta(props.status, theme.c);
   return <span style={{fontSize:9,fontWeight:800,color:m.color,background:m.color+"18",border:"1px solid "+m.color+"40",borderRadius:5,padding:"1px 5px",flexShrink:0,whiteSpace:"nowrap"}}>{m.text}</span>;
 }
 

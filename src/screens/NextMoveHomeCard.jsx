@@ -44,7 +44,7 @@ export default function NextMoveHomeCard(props){
   var wide = !!props.wide;
   var tone = v.dir=="bull" ? UPC : (v.dir=="bear" ? DNC : (v.dir=="side" ? MT.SENT_YELLOW : (v.dir=="unavail" ? MT.WARN : MT.T2)));
   var glyph = v.dir=="bull" ? "\u25b2" : (v.dir=="bear" ? "\u25bc" : (v.dir=="side" ? "\u25c6" : "\u25cb"));
-  var fm = getFreshnessMeta(v.quote.chip);
+  var fm = getFreshnessMeta(v.quote.chip, theme.c);
   var usingDemo = hook.usingDemo;
   var evolution = buildEvolution(mm.data || {});
   var vixQ = !usingDemo && mm.data && mm.data.indices ? mm.data.indices.VIX : null;
@@ -73,7 +73,7 @@ export default function NextMoveHomeCard(props){
           {/* 2. CURRENT PRICE AND % CHANGE */}
           {v.price ? (
             <div data-testid="nm-home-price" style={{marginTop:8,display:"flex",alignItems:"baseline",flexWrap:"wrap",gap:"2px 8px"}}>
-              <span style={{fontSize:20,fontWeight:900,color:MT.T1,lineHeight:1.2}}>{v.price.ltp}</span>
+              <span style={{fontSize:20,fontWeight:900,color:MT.T1,lineHeight:1.2,fontVariantNumeric:"tabular-nums"}}>{v.price.ltp}</span>
               {v.price.pct ? <span style={{fontSize:fs+1,fontWeight:800,color:priceColor}}>{v.price.pct}</span> : null}
               <span style={Object.assign({fontSize:10,color:MT.T3,lineHeight:1.3}, WRAP)}>{v.price.kindText}{v.price.asOf ? " \u00b7 " + t("nm.asof", { t:v.price.asOf }) : ""}</span>
             </div>
@@ -87,7 +87,7 @@ export default function NextMoveHomeCard(props){
                 return (
                   <div key={lv.id} style={{background:MT.CARD2,border:"1px solid "+MT.BD,borderLeft:"3px solid "+c,borderRadius:8,padding:"6px 8px",minWidth:0,boxSizing:"border-box"}}>
                     <div style={Object.assign({fontSize:10,fontWeight:700,color:MT.T2,lineHeight:1.3}, WRAP)}>{lv.label}</div>
-                    <div style={{fontSize:wide ? 20 : 18,fontWeight:900,color:c,lineHeight:1.2,marginTop:1}}>{lv.value}</div>
+                    <div style={{fontSize:wide ? 20 : 18,fontWeight:900,color:c,lineHeight:1.2,marginTop:1,fontVariantNumeric:"tabular-nums"}}>{lv.value}</div>
                   </div>
                 );
               })}

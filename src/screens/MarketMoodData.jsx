@@ -24,8 +24,13 @@ var SESSION_META = {
   CLOSED:     { label:"Market Closed",sub:"Outside trading hours",        dot:MT.T3 },
   WEEKEND:    { label:"Weekend",      sub:"Markets closed",               dot:MT.T3 }
 };
-export function getSessionMeta(session){
-  return SESSION_META[session] || { label:"Unknown", sub:"Session status unavailable", dot:MT.T3 };
+// Optional second argument: the active theme palette (theme.c). With it the dot
+// colour follows the selected theme; without it the static fallback is used.
+var SESSION_DOT = { OPEN:"up", PRE_OPEN:"info", POST_CLOSE:"text3", CLOSED:"text3", WEEKEND:"text3" };
+export function getSessionMeta(session, c){
+  var m = SESSION_META[session] || { label:"Unknown", sub:"Session status unavailable", dot:MT.T3 };
+  if(c){ m = { label:m.label, sub:m.sub, dot: c[SESSION_DOT[session] || "text3"] }; }
+  return m;
 }
 
 // --- Freshness / data-honesty labels. Every real value must carry one of
@@ -39,8 +44,15 @@ var FRESHNESS_META = {
   OFFLINE:     { text:"OFFLINE",     color:MT.T3 },
   UNAVAILABLE: { text:"UNAVAILABLE", color:MT.T3 }
 };
-export function getFreshnessMeta(status){
-  return FRESHNESS_META[status] || FRESHNESS_META.UNAVAILABLE;
+// Theme role per status (semantic tokens), used when the active palette is passed.
+var FRESHNESS_ROLE = { LIVE:"up", DELAYED:"info", STALE:"warning", PARTIAL:"info", DEMO:"warning", OFFLINE:"text3", UNAVAILABLE:"text3" };
+export function getFreshnessMeta(status, c){
+  var m = FRESHNESS_META[status] || FRESHNESS_META.UNAVAILABLE;
+  if(c){
+    var key = FRESHNESS_META[status] ? status : "UNAVAILABLE";
+    return { text:m.text, color:c[FRESHNESS_ROLE[key]] };
+  }
+  return m;
 }
 
 // Provider/source time in IST (never the time the phone received the response).
@@ -65,11 +77,11 @@ export function formatPct(v){
 
 // --- Build one real index row from data.indices[key]. Returns null shape
 // (available:false) if the server marked it unavailable - never fabricated.
-export function buildIndexRow(name, idxData){
+export function buildIndexRow(name, idxData, c){
   if(!idxData || idxData.ltp==null || !idxData.freshness){
     return { available:false, name:name };
   }
-  var fresh = getFreshnessMeta(idxData.freshness.status);
+  var fresh = getFreshnessMeta(idxData.freshness.status, c);
   var absChange = (idxData.ltp!=null && idxData.prevClose!=null) ? Math.round((idxData.ltp-idxData.prevClose)*100)/100 : null;
   return {
     available:true,

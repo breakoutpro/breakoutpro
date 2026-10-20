@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test tests/*.test.mjs",
+    "test:dhan": "node --test tests/dhan-historical.test.mjs"
   },
   "dependencies": {
     "react": "^18.2.0",

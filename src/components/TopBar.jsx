@@ -16,7 +16,7 @@ export default function TopBar(props){
   BLUE=theme.c.blue; 
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks
   // above so this bar actually switches with the selected theme.
-  var BG = theme.c.bg, BD = theme.c.border, BLUE=theme.c.blue, T1 = theme.c.text1;
+  var BG = theme.c.bg, BD = theme.c.border, BLUE=theme.c.blue, T1 = theme.c.text1, T2 = theme.c.text2, T3 = theme.c.text3;
   var onMenu=props.onMenu||function(){};
   var setTab=props.setTab||function(){};
 
@@ -29,7 +29,7 @@ export default function TopBar(props){
   var mktIsLive = mkt.status=="open" || mkt.status=="muhurat";
   var mktIsNeutral = mkt.status=="weekend" || mkt.status=="preopen" || mkt.status=="muhurat_upcoming" || mkt.status=="holiday" || mkt.status=="postclose";
   var mktColor = mktIsLive ? theme.c.up : (mktIsNeutral ? theme.c.text3 : theme.c.down);
-  var mktBg = mktIsLive ? "rgba(0,143,57,0.1)" : (mktIsNeutral ? theme.c.card2 : "rgba(220,38,38,0.1)");
+  var mktBg = mktIsLive ? theme.c.bullSoft : (mktIsNeutral ? theme.c.card2 : theme.c.bearSoft);
 
   return (
     <div style={{background:BG,borderBottom:"1px solid "+BD,padding:"12px 16px"}}>

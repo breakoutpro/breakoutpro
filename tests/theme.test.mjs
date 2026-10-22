@@ -293,7 +293,7 @@ test("Settings and the alert widget use theme tokens instead of fixed dark-only 
   assert.ok(!/rgba\(255,255,255/.test(st), "Settings has white-tint fills");
   var vw = read("src/screens/VoiceAlertWidget.jsx");
   assert.ok(!/rgba\(255,255,255/.test(vw) && !/rgba\(34,197,94/.test(vw), "VoiceAlertWidget has fixed tints");
-  assert.ok(read("src/App.jsx").indexOf("color:theme.c.onBrand") >= 0, "notification prompt button text");
+  assert.ok(read("src/App.jsx").indexOf("Enable Alert Notifications") < 0, "Home notification banner was removed");
 });
 
 test("theme files follow the repository rules (no backtick, no triple-equals)", function(){

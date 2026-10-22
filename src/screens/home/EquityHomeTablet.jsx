@@ -27,7 +27,7 @@ export default function EquityHomeTablet(props){
 
   function SummaryCard(p){
     return (
-      <div onClick={p.onDetails||undefined} style={{background:CARD,border:"1px solid "+(p.hero?BLUE:BD),borderRadius:16,padding:p.hero?18:16,boxSizing:"border-box",minWidth:0,overflow:"hidden",height:"100%",minHeight:p.minHeight||undefined,display:"flex",flexDirection:"column",cursor:p.onDetails?"pointer":"default"}}>
+      <div onClick={p.onDetails||undefined} style={{background:CARD,border:"1px solid "+(p.hero?BLUE:BD),borderRadius:16,padding:p.hero?18:16,boxSizing:"border-box",minWidth:0,overflow:"hidden",height:"100%",minHeight:p.minHeight||undefined,gridColumn:p.span?"1 / -1":undefined,display:"flex",flexDirection:"column",cursor:p.onDetails?"pointer":"default"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
             {p.icon ? <span style={{fontSize:16}} dangerouslySetInnerHTML={{__html:p.icon}}/> : null}
@@ -40,7 +40,7 @@ export default function EquityHomeTablet(props){
   }
 
   return (
-    <div style={{background:BG,minHeight:"100vh",fontFamily:"'Inter',Arial,sans-serif",paddingBottom:40,color:T1,overflowX:"hidden"}}>
+    <div style={{background:BG,minHeight:"100vh",fontFamily:"'Inter',Arial,sans-serif",paddingBottom:16,color:T1,overflowX:"hidden"}}>
       <div style={{background:BG,borderBottom:"1px solid "+BD,padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
           <div style={{fontSize:22,fontWeight:900,letterSpacing:-0.5}}>
@@ -92,7 +92,7 @@ export default function EquityHomeTablet(props){
           var hasRange = nifty && nifty.ltp!=null && nifty.high!=null && nifty.low!=null && nifty.high>nifty.low;
           if(!hasRange){
             return (
-              <SummaryCard title={t("home.range_title")} onDetails={function(){setTab("rangeintel");}}>
+              <SummaryCard span={true} title={t("home.range_title")} onDetails={function(){setTab("rangeintel");}}>
                 <div style={{fontSize:12,color:T2}}>{t("home.range_none")}</div>
               </SummaryCard>
             );
@@ -104,7 +104,7 @@ export default function EquityHomeTablet(props){
           var state = posPct>=80?"Breakout Watch":(posPct<=20?"Breakdown Watch":"Balanced");
           var stateColor = state==="Breakout Watch"?UP:(state==="Breakdown Watch"?DOWN:T1);
           return (
-            <SummaryCard title={t("home.range_title")} onDetails={function(){setTab("rangeintel");}}>
+            <SummaryCard span={true} title={t("home.range_title")} onDetails={function(){setTab("rangeintel");}}>
               <div style={{fontSize:12,color:T2,marginBottom:6}}>NIFTY 50 &middot; <span title={termHelp("CMP")}>CMP:</span> <b style={{color:T1}}>{nifty.ltp.toLocaleString("en-IN")}</b></div>
               <div style={{position:"relative",height:16,marginBottom:6}}>
                 <div style={{position:"absolute",top:7,left:0,right:0,height:2,background:BD}}></div>
@@ -120,7 +120,7 @@ export default function EquityHomeTablet(props){
         })()}
 
       </div>
-      <div style={{height:24}}></div>
+      <div style={{height:8}}></div>
       <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}"}</style>
     </div>
   );

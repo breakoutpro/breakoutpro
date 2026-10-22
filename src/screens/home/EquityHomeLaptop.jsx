@@ -53,7 +53,7 @@ export default function EquityHomeLaptop(props){
   }, []);
 
   return (
-    <div style={{background:BG,minHeight:"100vh",fontFamily:"'Inter',Arial,sans-serif",color:T1,overflowX:"hidden",display:"flex",flexDirection:"column"}}>
+    <div style={{background:BG,width:"100%",boxSizing:"border-box",fontFamily:"'Inter',Arial,sans-serif",color:T1,overflowX:"hidden",display:"flex",flexDirection:"column"}}>
 
       {/* MAIN AREA - center workspace */}
       <div style={{flex:1,display:"flex",minHeight:0,width:"100%"}}>
@@ -62,20 +62,20 @@ export default function EquityHomeLaptop(props){
             Intelligence, Live Breakouts and Market Alerts stacked on the right. Each card's detailed analysis lives
             on its own dedicated page - Home shows a real-data summary
             only, never a duplicate of the full page. */}
-        <div style={{flex:1,minWidth:0,padding:"8px 12px",overflowY:"auto"}}>
+        <div style={{flex:1,minWidth:0,width:"100%",maxWidth:1280,margin:"0 auto",padding:"16px 20px 8px",boxSizing:"border-box"}}>
 
-          <div style={{display:"grid",gridTemplateColumns:"minmax(0, 1.2fr) minmax(0, 1fr)",gridAutoRows:"auto",gap:8,alignItems:"start"}}>
+          <div style={{display:"grid",gridTemplateColumns:"minmax(0, 1.25fr) minmax(0, 1fr)",gridAutoRows:"auto",gap:16,alignItems:"start"}}>
 
           {/* NEXT MOVE INTELLIGENCE - Compact trader-first card (direction, price, key levels, data status) with one collapsed Detailed Analysis. Content-driven height: the first grid row grows to fit it. */}
-          <div onClick={function(){setTab("marketmood");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:6,padding:"8px 12px",boxSizing:"border-box",cursor:"pointer",overflowY:"auto",display:"flex",flexDirection:"column",alignSelf:"start"}}>
-            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+          <div onClick={function(){setTab("marketmood");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:12,padding:"14px 16px",boxSizing:"border-box",cursor:"pointer",overflowY:"auto",display:"flex",flexDirection:"column",alignSelf:"start"}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
               <span style={{fontSize:tierCfg.widgetTitle+1,fontWeight:800,color:T1}}>{t("home.mood_title")}</span>
               <ProvenanceBadge type="calculated"/>
             </div>
             <NextMoveHomeCard mm={data.mm} fs={tierCfg.secondaryText} wide={true} onOpen={function(){setTab("marketmood");}}/>
           </div>
 
-          <div style={{display:"flex",flexDirection:"column",gap:8,minWidth:0}}>
+          <div style={{display:"flex",flexDirection:"column",gap:16,minWidth:0}}>
 
           {/* RANGE INTELLIGENCE - Real data, from api/market-mood-data.js's indices.NIFTY - the
               most recent daily candle IS today's session, so high/low are
@@ -115,7 +115,7 @@ export default function EquityHomeLaptop(props){
               );
             }
             return (
-              <div onClick={function(){setTab("rangeintel");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:6,padding:"8px 12px",boxSizing:"border-box",cursor:"pointer",overflowY:"auto",display:"flex",flexDirection:"column"}}>
+              <div onClick={function(){setTab("rangeintel");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:12,padding:"14px 16px",boxSizing:"border-box",cursor:"pointer",overflowY:"auto",display:"flex",flexDirection:"column"}}>
                 {rangeContent}
               </div>
             );
@@ -128,7 +128,7 @@ export default function EquityHomeLaptop(props){
               core card so it gets equal Home-page prominence. Not
               duplicated into Market Alerts - each feature owns its own
               information. */}
-          <div style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:6,padding:"8px 12px",boxSizing:"border-box",overflowY:"auto",display:"flex",flexDirection:"column"}}>
+          <div style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:12,padding:"14px 16px",boxSizing:"border-box",overflowY:"auto",display:"flex",flexDirection:"column"}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
               <span style={{fontSize:tierCfg.widgetTitle,fontWeight:800,color:T1}}>{t("home.live_breakouts")}</span>
               <ProvenanceBadge type={scannerResults && scannerResults.length ? "calculated" : "unavailable"}/>
@@ -137,7 +137,7 @@ export default function EquityHomeLaptop(props){
               var tagLabel = r.tags.indexOf("breakout")>=0?"Breakout":(r.tags.indexOf("breakdown")>=0?"Breakdown":"Vol Spike");
               var tagColor = r.tags.indexOf("breakout")>=0?UP:(r.tags.indexOf("breakdown")>=0?DOWN:WARN);
               return (
-                <div key={r.sym} onClick={function(){setTab("breakoutscan");}} style={{display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer",padding:"4px 0",borderBottom:"1px solid "+BD2}}>
+                <div key={r.sym} onClick={function(){setTab("breakoutscan");}} style={{display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer",padding:"8px 0",borderBottom:"1px solid "+BD2}}>
                   <span style={{fontSize:tierCfg.secondaryText,fontWeight:800,color:T1}}>{r.sym}</span>
                   <span style={{fontSize:tierCfg.label,fontWeight:700,color:tagColor}}>{t("home.tag."+tagLabel, tagLabel)}</span>
                   {r.chgPct!=null ? <span style={{fontSize:tierCfg.label,color:r.chgPct>=0?UP:DOWN}}>{r.chgPct>=0?"+":""}{r.chgPct}%</span> : null}
@@ -154,7 +154,7 @@ export default function EquityHomeLaptop(props){
               timestamp, symbol or reason. Previously lived in a secondary
               5-up row below the grid; moved into the core 3x2 grid so it
               gets equal Home-page prominence with the other five features. */}
-          <div style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:6,padding:"8px 12px",boxSizing:"border-box",overflowY:"auto",display:"flex",flexDirection:"column"}}>
+          <div style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:12,padding:"14px 16px",boxSizing:"border-box",overflowY:"auto",display:"flex",flexDirection:"column"}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
               <span style={{fontSize:tierCfg.widgetTitle,fontWeight:800,color:T1}}>{t("home.market_alerts")}</span>
               <ProvenanceBadge type="unavailable"/>
@@ -167,10 +167,10 @@ export default function EquityHomeLaptop(props){
           </div>
 
           {/* QUICK ACTIONS - connects to existing real routes only */}
-          <div style={{padding:"8px 12px",display:"flex",gap:8}}>
+          <div style={{padding:"16px 0 8px",display:"flex",gap:12}}>
             {[[t("home.qa.scan"),"breakoutscan"],[t("home.qa.learn"),"learn"],[t("home.qa.alert"),"alerts"]].map(function(a){
               return (
-                <button key={a[1]} onClick={function(){setTab(a[1]);}} style={{flex:1,background:"transparent",border:"1px solid "+BD,borderRadius:6,padding:"6px 10px",cursor:"pointer",fontSize:tierCfg.label,fontWeight:700,color:T1}}>{a[0]}</button>
+                <button key={a[1]} onClick={function(){setTab(a[1]);}} style={{flex:1,background:"transparent",border:"1px solid "+BD,borderRadius:8,padding:"10px 12px",cursor:"pointer",fontSize:tierCfg.label,fontWeight:700,color:T1}}>{a[0]}</button>
               );
             })}
           </div>
@@ -180,7 +180,7 @@ export default function EquityHomeLaptop(props){
       </div>
 
       {/* FOOTER DISCLAIMER */}
-      <div style={{padding:"5px 20px",borderTop:"1px solid "+BD}}>
+      <div style={{padding:"12px 20px",borderTop:"1px solid "+BD,marginTop:8}}>
         <div style={{fontSize:10,color:WARN,textAlign:"center"}}>{t("c.edu_footer")}</div>
       </div>
     </div>

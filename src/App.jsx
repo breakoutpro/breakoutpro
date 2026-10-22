@@ -729,7 +729,7 @@ function AppInner() {
 
   // The mobile app column (unchanged on mobile).
   var appColumn = (
-    <div style={{position:"relative",width:"100%",maxWidth:centerMaxW,margin:"0 auto",height:isDesktop?"100%":"100vh",fontFamily:"Inter,Arial,sans-serif",background:theme.c.bg,filter:brightness!=100?"brightness("+(brightness/100)+")":"none",display:"flex",flexDirection:"column"}}>
+    <div style={{position:"relative",width:"100%",maxWidth:centerMaxW,margin:"0 auto",height:isDesktop?"100%":"100vh",boxSizing:"border-box",paddingBottom:(!isDesktop && tab=="home")?"calc(61px + env(safe-area-inset-bottom))":0,fontFamily:"Inter,Arial,sans-serif",background:theme.c.bg,filter:brightness!=100?"brightness("+(brightness/100)+")":"none",display:"flex",flexDirection:"column"}}>
       <div style={{flex:1,minHeight:0,overflowY:"auto",overflowX:"hidden"}}>
         {!isDesktop && tab!="home"&&tab!="alerts"&&tab!="scan"&&tab!="guardian"&&tab!="optsell"&&tab!="optsellhub"&&tab!="signals"&&tab!="settings"&&tab!="search"&&tab!="rangeintel" ? <TopBar isPrem={isPrem} trialDays={trialDays} setTab={setTab} onMenu={function(){setSidebar(true);}} onSub={function(){setTab("sub");}}/> : null}
         {/* SAFETY PATCH: PatternAlertBanner removed with its fake data source. */}

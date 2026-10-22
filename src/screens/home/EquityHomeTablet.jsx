@@ -65,7 +65,7 @@ export default function EquityHomeTablet(props){
         <SummaryCard title={t("home.mood_title")} onDetails={function(){setTab("marketmood");}}>
           {mm.status=="loading" && !mm.data ? (
             <SkeletonCard height={90}/>
-          ) : <NextMoveHomeCard mm={mm} fs={12} wide={true} onOpen={function(){setTab("marketmood");}}/>}
+          ) : <NextMoveHomeCard mm={mm} fs={12} wide={true}/>}
         </SummaryCard>
 
         <SummaryCard title={t("home.snapshot")}>

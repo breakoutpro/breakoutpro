@@ -93,7 +93,7 @@ export default function EquityHomeMobile(props){
         <Card title={t("home.mood_title")} onDetails={function(){setTab("marketmood");}}>
           {mm.status=="loading" && !mm.data ? (
             <div style={{fontSize:11,color:T2}}>{t("c.loading")}</div>
-          ) : <NextMoveHomeCard mm={mm} fs={11} onOpen={function(){setTab("marketmood");}}/>}
+          ) : <NextMoveHomeCard mm={mm} fs={11}/>}
         </Card>
 
         {/* Range Intelligence (real data only). The demo Options block that used

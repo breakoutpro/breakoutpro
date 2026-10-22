@@ -72,7 +72,7 @@ export default function EquityHomeDesktop(props){
               <span style={{fontSize:tierCfg.widgetTitle+1,fontWeight:800,color:T1}}>{t("home.mood_title")}</span>
               <ProvenanceBadge type="calculated"/>
             </div>
-            <NextMoveHomeCard mm={data.mm} fs={tierCfg.secondaryText} wide={true} onOpen={function(){setTab("marketmood");}}/>
+            <NextMoveHomeCard mm={data.mm} fs={tierCfg.secondaryText} wide={true}/>
           </div>
 
           <div style={{display:"flex",flexDirection:"column",gap:16,minWidth:0}}>
@@ -128,7 +128,7 @@ export default function EquityHomeDesktop(props){
               core card so it gets equal Home-page prominence. Not
               duplicated into Market Alerts - each feature owns its own
               information. */}
-          <div style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:12,padding:"14px 16px",boxSizing:"border-box",overflowY:"auto",display:"flex",flexDirection:"column"}}>
+          <div onClick={function(){setTab("breakoutscan");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:12,padding:"14px 16px",boxSizing:"border-box",cursor:"pointer",overflowY:"auto",display:"flex",flexDirection:"column"}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
               <span style={{fontSize:tierCfg.widgetTitle,fontWeight:800,color:T1}}>{t("home.live_breakouts")}</span>
               <ProvenanceBadge type={scannerResults && scannerResults.length ? "calculated" : "unavailable"}/>
@@ -137,7 +137,7 @@ export default function EquityHomeDesktop(props){
               var tagLabel = r.tags.indexOf("breakout")>=0?"Breakout":(r.tags.indexOf("breakdown")>=0?"Breakdown":"Vol Spike");
               var tagColor = r.tags.indexOf("breakout")>=0?UP:(r.tags.indexOf("breakdown")>=0?DOWN:WARN);
               return (
-                <div key={r.sym} onClick={function(){setTab("breakoutscan");}} style={{display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer",padding:"8px 0",borderBottom:"1px solid "+BD2}}>
+                <div key={r.sym} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid "+BD2}}>
                   <span style={{fontSize:tierCfg.secondaryText,fontWeight:800,color:T1}}>{r.sym}</span>
                   <span style={{fontSize:tierCfg.label,fontWeight:700,color:tagColor}}>{t("home.tag."+tagLabel, tagLabel)}</span>
                   {r.chgPct!=null ? <span style={{fontSize:tierCfg.label,color:r.chgPct>=0?UP:DOWN}}>{r.chgPct>=0?"+":""}{r.chgPct}%</span> : null}

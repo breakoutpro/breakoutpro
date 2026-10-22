@@ -53,7 +53,7 @@ export default function NextMoveHomeCard(props){
   var fs = props.fs || 12;
 
   return (
-    <div data-testid="nm-home-card" onClick={function(e){ e.stopPropagation(); }} style={{minWidth:0,width:"100%",boxSizing:"border-box"}}>
+    <div data-testid="nm-home-card" style={{minWidth:0,width:"100%",boxSizing:"border-box"}}>
       {/* 1. DIRECTION + SETUP HEADLINE + DATA STATUS */}
       <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0,flex:"1 1 150px"}}>
@@ -107,12 +107,9 @@ export default function NextMoveHomeCard(props){
       <div style={Object.assign({fontSize:10,color:MT.WARN,marginTop:6,lineHeight:1.4,fontWeight:700}, WRAP)}>{v.disclaimer}</div>
 
       {/* 5. EVERYTHING ELSE: one collapsed section */}
-      <div style={{marginTop:8}}>
+      <div style={{marginTop:8}} onClick={function(e){ e.stopPropagation(); }}>
         <DetailedAnalysis nextMove={nm} mood={usingDemo ? null : mm.mood} evolution={evolution} vixQuote={vixQ} usingDemo={usingDemo} open={daOpen} onOpenChange={function(o){ DA_OPEN = o; setDaOpen(o); }} wideLayout={wide} gapV={4} padV={9}/>
       </div>
-      {props.onOpen ? (
-        <button type="button" onClick={props.onOpen} style={{background:"transparent",border:"none",padding:"4px 0 0",margin:0,color:MT.BLUE,fontWeight:700,fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>{t("home.view_full_analysis")} {"\u2192"}</button>
-      ) : null}
     </div>
   );
 }

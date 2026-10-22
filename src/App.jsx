@@ -177,7 +177,7 @@ function AuthScreen(props) {
 
   var inp={width:"100%",background:"rgba(255,255,255,0.06)",border:"1.5px solid rgba(255,255,255,0.14)",borderRadius:12,padding:"13px 14px 13px 42px",color:"#F3F4F6",fontSize:14,fontFamily:"inherit",outline:"none",boxSizing:"border-box"};
   var iconWrap={position:"relative",marginBottom:14};
-  var fieldIcon={position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",width:16,height:16,opacity:0.55,pointerEvents:"none"};
+  var fieldIcon={position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",width:16,height:16,opacity:0.8,pointerEvents:"none",color:"var(--bp-text3,#64748B)"};
 
   return (
     <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",background:"radial-gradient(circle at 30% 20%, #16202e 0%, #0a0f17 48%, #05080c 100%)"}}>
@@ -216,30 +216,30 @@ function AuthScreen(props) {
 
             {mode=="register"?
               <div style={iconWrap}>
-                <svg style={fieldIcon} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <svg style={fieldIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 <input style={inp} placeholder="Full Name" value={name} onChange={function(e){setName(e.target.value);}}/>
               </div>
             :null}
             {mode=="register"?
               <div style={iconWrap}>
-                <svg style={fieldIcon} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M12 15a4 4 0 0 0 4-4V7a4 4 0 0 0-8 0v4a4 4 0 0 0 4 4z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v3"/></svg>
+                <svg style={fieldIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 15a4 4 0 0 0 4-4V7a4 4 0 0 0-8 0v4a4 4 0 0 0 4 4z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v3"/></svg>
                 <input style={inp} placeholder="Invite Code (private beta)" value={invite} onChange={function(e){setInvite(e.target.value);}}/>
               </div>
             :null}
 
             <div style={iconWrap}>
-              <svg style={fieldIcon} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.97.36 1.93.68 2.85a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.23-1.25a2 2 0 0 1 2.11-.45c.92.32 1.88.55 2.85.68A2 2 0 0 1 22 16.92z"/></svg>
+              <svg style={fieldIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.97.36 1.93.68 2.85a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.23-1.25a2 2 0 0 1 2.11-.45c.92.32 1.88.55 2.85.68A2 2 0 0 1 22 16.92z"/></svg>
               <input style={inp} placeholder="Phone (10 digits)" type="tel" maxLength={10} value={phone} onChange={onPhoneChange}/>
             </div>
 
             <div style={iconWrap}>
-              <svg style={fieldIcon} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <svg style={fieldIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
               <input style={Object.assign({},inp,{paddingRight:42})} placeholder="Password (min 6 chars)" type={showPass?"text":"password"} value={pass} onChange={function(e){setPass(e.target.value);}}/>
-              <button type="button" onClick={function(){setShowPass(!showPass);}} aria-label="Toggle password visibility" style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",padding:0,cursor:"pointer",opacity:0.6,display:"flex"}}>
+              <button type="button" onClick={function(){setShowPass(!showPass);}} aria-label={showPass?"Hide password":"Show password"} aria-pressed={showPass} style={{position:"absolute",right:2,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",padding:12,minWidth:44,minHeight:44,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--bp-text2,#475569)"}}>
                 {showPass?
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.6 18.6 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.6 18.6 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
                 :
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 }
               </button>
             </div>
@@ -501,7 +501,7 @@ function AppInner() {
   }
   var saved = getSess();
   var [splash,setSplash] = useState(true);
-  var [showTutorial,setShowTutorial] = useState(function(){ try{ return shouldShowTutorial(); }catch(e){ return false; } });
+  var [showTutorial,setShowTutorial] = useState(false); // first-run welcome modal removed
   var [user,setUser] = useState(saved);
   var [tab,setTab] = useState("home");
   var [notifAsked,setNotifAsked] = useState(false);
@@ -580,6 +580,15 @@ function AppInner() {
     setTab(newTab);
   }
 
+  // Back from a detail screen: use browser history when this screen was pushed
+  // by goTo (so the browser Back button and the in-app Back stay in step),
+  // otherwise fall back to Home.
+  function goBack(){
+    var st = null;
+    try{ st = window.history.state; }catch(e){}
+    if(st && st.tab && tab!="home"){ window.history.back(); } else { setTab("home"); }
+  }
+
   function login(u){
     if(!u.trialStart)u.trialStart=Date.now();
     setUser(u);setIsPrem(u.isPrem||u.isAdmin||false);
@@ -615,7 +624,7 @@ function AppInner() {
 
   var hp={nifty:nifty,sensex:sensex,bankNifty:bankNifty,midcap:midcap,
     stocks:STOCKS,news:LIVE_NEWS,briefing:briefing,briefingLoading:briefingLoading,
-    onBriefing:loadBriefing,user:user,setTab:setTab,glTab:glTab,setGlTab:setGlTab};
+    onBriefing:loadBriefing,user:user,setTab:goTo,glTab:glTab,setGlTab:setGlTab};
 
   var KNOWN_TABS = ["home","markets","scan","scanner","learn","ai","briefing","alerts","settings","share","morning","commodity","watchlist","patterns","paper","news","candle","chart","detector","analysis","scalper","more","quiz","global","heatmap","fiidii","journal","challenges","sub","oi","tools","breakdown","volspike","gap","rsiscan","macdscan","supertrend","orb","mf","portfolio","voice","backtest","strategy","profile","referral","datahub","marketclose","search","stockprofile","ipo","signals","optsell","optsellhub","guardian","expiryalerts","alerthistory","studio","newsstudio","academy","aimentor","optionsintelpro","stockresearchpro","marketreplay","econcalendar","fiidiipro","marketheatmap","dividendtracker","globalmarketspro","alertcenterpro","rangeintel","marketmood","chartscanner"];
 
@@ -685,10 +694,10 @@ function AppInner() {
         {tab=="sub"        ? <SubScreen isPrem={isPrem} trialDays={trialDays} onUpgrade={upgrade}/> : null}
         {tab=="oi"       ? <OIChain/> : null}
         {tab=="pazones"  ? <PriceActionZones onBack={function(){setTab("more");}} setTab={setTab}/> : null}
-        {tab=="rangeintel" ? <RangeIntelligence setTab={setTab} mm={mm}/> : null}
+        {tab=="rangeintel" ? <RangeIntelligence setTab={function(t2){ if(t2=="home") goBack(); else goTo(t2); }} mm={mm}/> : null}
         {tab=="chartscanner" ? <ChartPatternScanner mm={mm} onBack={function(){setTab("more");}}/> : null}
-        {tab=="marketmood" ? <MarketMood mm={mm} onClose={function(){setTab("home");}}/> : null}
-        {tab=="breakoutscan" ? <BreakoutScanner onBack={function(){setTab("home");}}/> : null}
+        {tab=="marketmood" ? <MarketMood mm={mm} onClose={goBack}/> : null}
+        {tab=="breakoutscan" ? <BreakoutScanner onBack={goBack}/> : null}
         {tab=="tools"    ? <ToolsScreen/> : null}
         {KNOWN_TABS.indexOf(tab)==-1 ? <MoreScreen setTab={setTab}/> : null}
       </Suspense>
@@ -737,24 +746,6 @@ function AppInner() {
         {renderScreen()}
       </div>
       {/* BUILD FIX: ExpiryAlertPopup render removed with its import above. */}
-      {!notifAsked && typeof Notification != "undefined" && Notification.permission == "default" ? (
-        <div style={{flexShrink:0,padding:"8px 14px 0"}}>
-          <div style={{background:theme.c.card,border:"1px solid "+theme.c.border,borderRadius:14,padding:"12px 16px",display:"flex",alignItems:"center",gap:12,boxShadow:"0 -4px 20px rgba(0,0,0,0.15)"}}>
-            <div style={{fontSize:22}}>&#128276;</div>
-            <div style={{flex:1}}>
-              <div style={{fontSize:12,fontWeight:700,color:theme.c.text1,marginBottom:4}}>{t("notif.title","Enable Alert Notifications")}</div>
-              <div style={{fontSize:12,color:theme.c.text2}}>{t("notif.body","Get breakout & pattern alerts on your phone")}</div>
-            </div>
-            <button onClick={function(){
-              setNotifAsked(true);
-              if (typeof Notification != "undefined") {
-                Notification.requestPermission();
-              }
-            }} style={{background:theme.c.brand,border:"none",borderRadius:10,padding:"8px 16px",color:theme.c.onBrand,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{t("notif.enable","Enable")}</button>
-            <button onClick={function(){setNotifAsked(true);}} style={{background:"none",border:"none",color:theme.c.text3,fontSize:14,cursor:"pointer",padding:4}}>X</button>
-          </div>
-        </div>
-      ) : null}
       <DisclaimerTicker/>
       {!isDesktop ? <TabBar tab={tab} setTab={goTo}/> : null}
       {sidebar?(

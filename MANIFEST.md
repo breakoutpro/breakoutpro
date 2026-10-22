@@ -1,12 +1,8 @@
-# Home responsive layout - change manifest
-Files (repo-relative paths):
-- src/screens/home/EquityHomeLaptop.jsx  - centered max-width 1280 container, 16px gaps, 12px card radius, 14x16 padding, roomier rows/buttons, removed forced min-height:100vh
-- src/screens/home/EquityHomeDesktop.jsx - same changes as Laptop
-- src/screens/home/EquityHomeTablet.jsx  - Range card spans full width; bottom padding 40->16, spacer 24->8
-- src/screens/home/EquityHomeMobile.jsx  - bottom padding 84->16 (was compensating for the tab bar)
-- src/App.jsx - one style change: on non-desktop Home only, app column gets border-box + bottom padding equal to the tab bar so the notification banner and disclaimer ticker are no longer hidden behind it
-
-No change to data, calculations, alerts, translations, themes or Next Move.
-
-Checks that ran: npm test 433/433 pass; layout harness (fixture data) at 360,390,414,768,1024,1280,1366,1440,1920 x light/dark/amoled x 2 scenarios = 54 cases, 0 overflow/clipping/obscured issues; Next Move Home harness at 390,768,1366,1440 (en,te) 16 cases, 0 issues.
-Not run: vite build (package registry unreachable here; esbuild bundle of src/main.jsx succeeds).
+# Four UI fixes - manifest
+- src/App.jsx: password eye icon now visible (it was white-on-white after the theme work), 44px tap target, aria-label/aria-pressed, applies to the single password field used by Login and Register; welcome modal no longer opens (showTutorial starts false); "Enable Alert Notifications" banner removed; new goBack() (browser-history aware); Home navigation now uses goTo so browser Back works; Market Mood, Scanner and Range Intelligence Back buttons use goBack.
+- src/screens/NextMoveHomeCard.jsx: "View Full Analysis" link removed; card taps now reach the card (Detailed Analysis section keeps its own taps).
+- src/screens/home/EquityHome{Mobile,Tablet,Laptop,Desktop}.jsx: dropped the now-unused onOpen prop; Laptop/Desktop Live Breakouts card opens the scanner as a whole (rows no longer double-fire).
+- tests/theme.test.mjs: one assertion changed (it required the removed banner's button; now asserts the banner is gone).
+- tests/home-ui-fixes.test.mjs: new source-level tests for the four changes.
+Not changed: auth logic, APIs, calculations, alerts logic, themes, translations.
+Results: npm test 438/438 pass. Browser checks (fixture data) at 390 and 1366 px: 42/42 pass. Layout harness at 390/1366 (2 themes x 2 scenarios): 0 issues. vite build NOT run (registry unreachable, vite not installed).

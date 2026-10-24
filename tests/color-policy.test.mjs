@@ -51,5 +51,5 @@ test("session and data-status indicators are not red/green", function(){
   var mb = read("src/screens/home/MarketBadge.jsx"); assert.ok(mb.indexOf("DOWN") < 0 && mb.indexOf("theme.c.up") < 0);
 });
 test("wide screens keep a readable content width", function(){
-  assert.ok(read("src/App.jsx").indexOf('maxWidth:(tab=="home"||isTvClass)?"none":1360') >= 0);
+  assert.ok(read("src/App.jsx").indexOf('maxWidth:(tab=="home"||isTvClass)?"none":1440') >= 0);
 });

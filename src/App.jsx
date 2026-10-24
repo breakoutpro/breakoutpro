@@ -38,6 +38,7 @@ var OIChain = lazy(function(){ return import("./screens/OIChain"); });
 var PriceActionZones = lazy(function(){ return import("./screens/PriceActionZones"); });
 var RangeIntelligence = lazy(function(){ return import("./screens/home/RangeIntelligence"); });
 var ChartPatternScanner = lazy(function(){ return import("./screens/ChartPatternScanner"); });
+var BreakoutTimeframe = lazy(function(){ return import("./screens/BreakoutTimeframe"); });
 var MarketMood = lazy(function(){ return import("./screens/MarketMood"); });
 var BreakoutScanner = lazy(function(){ return import("./screens/BreakoutScanner"); });
 var AlertsScreen = lazy(function(){ return import("./screens/Alerts"); });
@@ -438,6 +439,7 @@ function MoreScreen(props) {
       {id:"pazones", label:"Smart Price Action Zones", sub:"Historical support/resistance zones - educational analysis"},
       {id:"rangeintel", label:"Range Intelligence", sub:"Multi-timeframe range structure - educational analysis"},
       {id:"chartscanner", label:"Chart Pattern Scanner", sub:"Candle patterns on verified daily candles - Current and History"},
+      {id:"breakouttf", label:"Breakout Time Frame Confirmation", sub:"Breakout vs higher time frames on verified candles - educational"},
       {id:"stockresearchpro", label:"AI Stock Research Pro", sub:"Real technical analysis, honest data-availability"},
       {id:"marketreplay", label:"Market Replay Simulator", sub:"Replay real historical candles, mark your decisions"},
       {id:"econcalendar", label:"Economic Calendar Pro", sub:"Educational/Demo Calendar - RBI, Fed, CPI, earnings & more"},
@@ -547,7 +549,7 @@ function AppInner() {
   },[]);
 
   // Browser back button support
-  var MORE_SCREENS = ["global","heatmap","fiidii","journal","challenges","sub","tools","candle","chart","detector","analysis","scalper","quiz","briefing","oi","alerts","settings","patterns","paper","share","morning","watchlist","chartscanner"];
+  var MORE_SCREENS = ["global","heatmap","fiidii","journal","challenges","sub","tools","candle","chart","detector","analysis","scalper","quiz","briefing","oi","alerts","settings","patterns","paper","share","morning","watchlist","chartscanner","breakouttf"];
   useEffect(function(){
     function onBack(e){
       e.preventDefault();
@@ -626,7 +628,7 @@ function AppInner() {
     stocks:STOCKS,news:LIVE_NEWS,briefing:briefing,briefingLoading:briefingLoading,
     onBriefing:loadBriefing,user:user,setTab:goTo,glTab:glTab,setGlTab:setGlTab};
 
-  var KNOWN_TABS = ["home","markets","scan","scanner","learn","ai","briefing","alerts","settings","share","morning","commodity","watchlist","patterns","paper","news","candle","chart","detector","analysis","scalper","more","quiz","global","heatmap","fiidii","journal","challenges","sub","oi","tools","breakdown","volspike","gap","rsiscan","macdscan","supertrend","orb","mf","portfolio","voice","backtest","strategy","profile","referral","datahub","marketclose","search","stockprofile","ipo","signals","optsell","optsellhub","guardian","expiryalerts","alerthistory","studio","newsstudio","academy","aimentor","optionsintelpro","stockresearchpro","marketreplay","econcalendar","fiidiipro","marketheatmap","dividendtracker","globalmarketspro","alertcenterpro","rangeintel","marketmood","chartscanner"];
+  var KNOWN_TABS = ["home","markets","scan","scanner","learn","ai","briefing","alerts","settings","share","morning","commodity","watchlist","patterns","paper","news","candle","chart","detector","analysis","scalper","more","quiz","global","heatmap","fiidii","journal","challenges","sub","oi","tools","breakdown","volspike","gap","rsiscan","macdscan","supertrend","orb","mf","portfolio","voice","backtest","strategy","profile","referral","datahub","marketclose","search","stockprofile","ipo","signals","optsell","optsellhub","guardian","expiryalerts","alerthistory","studio","newsstudio","academy","aimentor","optionsintelpro","stockresearchpro","marketreplay","econcalendar","fiidiipro","marketheatmap","dividendtracker","globalmarketspro","alertcenterpro","rangeintel","marketmood","chartscanner","breakouttf"];
 
   function renderScreen(){
     return (
@@ -696,6 +698,7 @@ function AppInner() {
         {tab=="pazones"  ? <PriceActionZones onBack={function(){setTab("more");}} setTab={setTab}/> : null}
         {tab=="rangeintel" ? <RangeIntelligence setTab={function(t2){ if(t2=="home") goBack(); else goTo(t2); }} mm={mm}/> : null}
         {tab=="chartscanner" ? <ChartPatternScanner mm={mm} onBack={function(){setTab("more");}}/> : null}
+        {tab=="breakouttf" ? <BreakoutTimeframe onBack={goBack}/> : null}
         {tab=="marketmood" ? <MarketMood mm={mm} onClose={goBack}/> : null}
         {tab=="breakoutscan" ? <BreakoutScanner onBack={goBack}/> : null}
         {tab=="tools"    ? <ToolsScreen/> : null}

@@ -34,6 +34,7 @@ import AIScreen     from "./screens/AI";
 import LearnScreen  from "./screens/Learn";
 import NewsScreen   from "./screens/News";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { useDensity } from "./theme/density";
 var OIChain = lazy(function(){ return import("./screens/OIChain"); });
 var PriceActionZones = lazy(function(){ return import("./screens/PriceActionZones"); });
 var RangeIntelligence = lazy(function(){ return import("./screens/home/RangeIntelligence"); });
@@ -373,6 +374,7 @@ function FiiScreen() {
 function MoreScreen(props) {
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   useLang();
+  var D = useDensity();
 
   var BG = theme.c.bg;
   var CARD = theme.c.card;
@@ -454,27 +456,27 @@ function MoreScreen(props) {
 
   return (
     <div style={{background:BG,minHeight:"100vh",paddingBottom:80,fontFamily:"Inter,Arial,sans-serif"}}>
-      <div style={{background:BG,padding:"24px 16px 16px",borderBottom:"1px solid "+BORDER}}>
-        <div style={{fontSize:22,fontWeight:900,color:T1}}>{t("more.title")}</div>
-        <div style={{fontSize:12,color:T2,marginTop:4}}>{t("more.subtitle")}</div>
+      <div style={{background:BG,padding:D.on?"12px 16px 8px":"24px 16px 16px",borderBottom:"1px solid "+BORDER}}>
+        <div style={{fontSize:D.on?20:22,fontWeight:900,color:T1}}>{t("more.title")}</div>
+        <div style={{fontSize:12,color:T2,marginTop:D.on?2:4}}>{t("more.subtitle")}</div>
       </div>
-      <div style={{padding:"12px 16px"}}>
+      <div style={D.on ? {padding:"12px 16px",columnWidth:400,columnGap:12} : {padding:"12px 16px"}}>
         {sections.map(function(sec){
           return (
-            <div key={sec.title} style={{marginBottom:16}}>
-              <div style={{fontSize:12,fontWeight:700,color:T3,letterSpacing:1,marginBottom:12,paddingLeft:4}}>{t("more.sec."+sec.sk, sec.title).toUpperCase()}</div>
-              <div style={{background:CARD,border:"1px solid "+BORDER,borderRadius:16,overflow:"hidden"}}>
+            <div key={sec.title} style={{marginBottom:D.on?12:16,minWidth:0,breakInside:D.on?"avoid":undefined}}>
+              <div style={{fontSize:12,fontWeight:700,color:T3,letterSpacing:1,marginBottom:D.on?6:12,paddingLeft:4}}>{t("more.sec."+sec.sk, sec.title).toUpperCase()}</div>
+              <div style={{background:CARD,border:"1px solid "+BORDER,borderRadius:D.on?12:16,overflow:"hidden"}}>
                 {sec.items.map(function(item,i){
                   var isAction = !!item.action;
                   var iconBg = isAction ? "rgba(37,99,235,0.08)" : CARD2;
                   var iconBorder = isAction ? BLUE : BORDER;
                   var iconColor = isAction ? BLUE : T2;
                   return (
-                    <div key={item.id} onClick={function(){props.setTab(item.id);}} style={{display:"flex",alignItems:"center",gap:12,padding:"16px 16px",borderBottom:i<sec.items.length-1?"1px solid "+BORDER2:"none",cursor:"pointer"}}>
-                      <div style={{width:40,height:40,borderRadius:12,background:iconBg,border:"1px solid "+iconBorder,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,color:iconColor}} dangerouslySetInnerHTML={{__html:ICONS[item.id]||ICONS.tools}}/>
-                      <div style={{flex:1}}>
+                    <div key={item.id} onClick={function(){props.setTab(item.id);}} style={{display:"flex",alignItems:"center",gap:12,padding:D.on?"8px 12px":"16px 16px",borderBottom:i<sec.items.length-1?"1px solid "+BORDER2:"none",cursor:"pointer"}}>
+                      <div style={{width:D.on?34:40,height:D.on?34:40,borderRadius:D.on?10:12,background:iconBg,border:"1px solid "+iconBorder,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,color:iconColor}} dangerouslySetInnerHTML={{__html:ICONS[item.id]||ICONS.tools}}/>
+                      <div style={{flex:1,minWidth:0}}>
                         <div style={{fontSize:14,fontWeight:700,color:isAction?BLUE:T1}}>{t("more."+item.id+".l", item.label)}</div>
-                        <div style={{fontSize:12,color:T2,marginTop:4}}>{t("more."+item.id+".s", item.sub)}</div>
+                        <div style={{fontSize:12,color:T2,marginTop:D.on?2:4}}>{t("more."+item.id+".s", item.sub)}</div>
                       </div>
                       <span style={{color:T3,fontSize:18}}>&#8250;</span>
                     </div>
@@ -732,10 +734,11 @@ function AppInner() {
   // zoomed behavior unchanged (flagged here, not silently decided) since
   // removing zoom for lg/xl/xxl must not silently change tv/tv4k too.
   var showRightPanel = (bp=="xl" || isXxl || isTvClass) && tab!="home";
-  var rightW = 280;
+  var rightW = isTvClass?280:(isXxl?300:264);
   var shellMax = isXxl?2200:(isTvClass?2200:1800);
-  var shellPad = isXxl?32:(isTvClass?32:24);
-  var shellGap = isXxl?28:(isTvClass?28:24);
+  var shellPad = isXxl?24:(isTvClass?32:16);
+  var shellGap = isXxl?20:(isTvClass?28:16);
+  var shellChromeH = 56 + shellPad; // header + vertical shell padding
   var zoomLevel = isTvClass?1.5:1; // lg/xl/xxl: no zoom (locked contract). tv/tv4k: unchanged current value.
   var centerMaxW = isDesktop ? "none" : (isTablet ? 1000 : 430);
 
@@ -801,11 +804,11 @@ function AppInner() {
       {tab!="rangeintel" ? <GlobalHeader setTab={goTo} onSelectStock={onSelectStock} tab={tab} user={user} onLogout={logout}/> : null}
       <div style={{flex:1,width:"100%",maxWidth:noShellCap?"none":shellMax,margin:noShellCap?0:"0 auto",display:"grid",gridTemplateColumns:showRightPanel?"minmax(0, 1fr) "+rightW+"px":"minmax(0, 1fr)",gap:shellGap,padding:(shellPad/2)+"px "+shellPad+"px",boxSizing:"border-box",minHeight:0}}>
         <div style={{minWidth:0,height:"100%",overflowY:"auto",overflowX:"hidden",background:theme.c.bg}}>
-          <div style={{zoom:isTvClass?zoomLevel:undefined,width:"100%",maxWidth:(tab=="home"||isTvClass)?"none":1360,margin:"0 auto"}}>
+          <div style={{zoom:isTvClass?zoomLevel:undefined,width:"100%",maxWidth:(tab=="home"||isTvClass)?"none":1440,margin:"0 auto"}}>
             {appColumn}
           </div>
         </div>
-        {showRightPanel ? <DesktopRightSidebar setTab={goTo} liveNews={LIVE_NEWS} width={rightW} onSelectStock={onSelectStock}/> : null}
+        {showRightPanel ? <DesktopRightSidebar setTab={goTo} liveNews={LIVE_NEWS} width={rightW} chromeH={shellChromeH} onSelectStock={onSelectStock}/> : null}
       </div>
       {tutorialOverlay}
     </div>
@@ -830,7 +833,7 @@ function GlobalHeader(props){
     setQuery("");
   }
   return (
-    <div style={{height:64,flexShrink:0,display:"flex",alignItems:"center",padding:"0 20px",borderBottom:"1px solid "+BD,gap:14,background:BG}}>
+    <div style={{height:56,flexShrink:0,display:"flex",alignItems:"center",padding:"0 16px",borderBottom:"1px solid "+BD,gap:12,background:BG}}>
       <div onClick={function(){props.setTab("home");}} style={{fontSize:16,fontWeight:900,letterSpacing:-0.5,flexShrink:0,cursor:"pointer"}}>
         <span style={{color:T1}}>Breakout</span><span style={{color:theme.c.brand}}>Pro</span>
       </div>
@@ -938,7 +941,7 @@ function DesktopRightSidebar(props){
     return wlQuery.length===0 || sym.toLowerCase().indexOf(wlQuery.toLowerCase())>=0;
   });
   return (
-    <div style={{width:W,flexShrink:0,height:"calc(100vh - 88px)",position:"sticky",top:12,overflowY:"auto",overflowX:"hidden",paddingRight:4}}>
+    <div style={{width:W,flexShrink:0,height:"calc(100vh - "+(props.chromeH||88)+"px)",position:"sticky",top:0,overflowY:"auto",overflowX:"hidden",paddingRight:4}}>
       <Card title="Watchlist" action="All" onAction={function(){props.setTab("watchlist");}}>
         <input
           value={wlQuery}

@@ -7,8 +7,8 @@ import { useTheme } from "../theme/ThemeProvider";
 // Lightweight, reusable. Rules: no backtick, no triple-equals, ASCII.
 
 var CARD="#101318",CARD2="#0B0E13",BD="#1B2330",BD2="#141821";
-var UP="#22C55E",DOWN="#EF4444",BLUE="#3B82F6",WARN="#F97316";
-var T1="#FFFFFF",T2="#A0A7B4",T3="#5B6472",BRAND="#00C853";
+var UP="#4D8DF8",DOWN="#F59E42",BLUE="#3B82F6",WARN="#F97316";   // neutral fallbacks, no red/green
+var T1="#FFFFFF",T2="#A0A7B4",T3="#5B6472",BRAND="#4D8DF8";
 
 // ---- 1. MARKET STATUS BADGE ----
 export function MarketBadge(){
@@ -34,7 +34,7 @@ export function MarketBadge(){
 // ---- 2. LIVE API HEALTH ----
 export function ApiHealth(props){
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
-  DOWN=theme.c.down;
+  DOWN=theme.c.warning;   // not red: connection state is not a market move
   T2=theme.c.text2; 
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
   var T2=theme.c.text2;
@@ -54,6 +54,7 @@ export function ApiHealth(props){
 
 // ---- 3. OFFLINE BANNER ----
 export function OfflineBanner(){
+  var theme = useTheme();
   var [off,setOff]=useState(function(){ try{ return !navigator.onLine; }catch(e){ return false; } });
   useEffect(function(){
     function on(){ setOff(false); } function down(){ setOff(true); }
@@ -62,8 +63,8 @@ export function OfflineBanner(){
   },[]);
   if(!off) return null;
   return (
-    <div style={{background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:8,padding:"8px 12px",margin:"8px 16px"}}>
-      <div style={{fontSize:12,fontWeight:700,color:DOWN}}>No internet. Showing last saved observations.</div>
+    <div role="status" style={{background:theme.c.warningSoft,border:"1px solid "+theme.c.border,borderRadius:8,padding:"8px 12px",margin:"8px 16px"}}>
+      <div style={{fontSize:12,fontWeight:700,color:theme.c.text1}}>! No internet. Showing last saved observations.</div>
     </div>
   );
 }

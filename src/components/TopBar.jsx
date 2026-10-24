@@ -28,8 +28,8 @@ export default function TopBar(props){
 
   var mktIsLive = mkt.status=="open" || mkt.status=="muhurat";
   var mktIsNeutral = mkt.status=="weekend" || mkt.status=="preopen" || mkt.status=="muhurat_upcoming" || mkt.status=="holiday" || mkt.status=="postclose";
-  var mktColor = mktIsLive ? theme.c.up : (mktIsNeutral ? theme.c.text3 : theme.c.down);
-  var mktBg = mktIsLive ? theme.c.bullSoft : (mktIsNeutral ? theme.c.card2 : theme.c.bearSoft);
+  var mktColor = mktIsLive ? theme.c.info : theme.c.text3;   // session state is not a price move: no red/green
+  var mktBg = mktIsLive ? theme.c.infoSoft : theme.c.card2;
 
   return (
     <div style={{background:BG,borderBottom:"1px solid "+BD,padding:"12px 16px"}}>

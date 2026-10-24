@@ -30,8 +30,8 @@ export var PROVENANCE = {
 };
 
 export var PROVENANCE_META = {
-  live:        { label: "LIVE",        colorKey: "up",    dot: true  },
-  calculated:  { label: "CALCULATED",  colorKey: "blue",  dot: true  },
+  live:        { label: "LIVE",        colorKey: "info",  dot: true  },
+  calculated:  { label: "CALCULATED",  colorKey: "text2", dot: true  },
   demo:        { label: "EDUCATIONAL DEMO", colorKey: "gold", dot: true },
   unavailable: { label: "NOT AVAILABLE", colorKey: "text3", dot: false }
 };

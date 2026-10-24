@@ -12,48 +12,48 @@
 var DARK = {
   id:"dark", scheme:"dark",
   // backgrounds
-  bg:"#0B0F14", bgAlt:"#0F141B",
-  card:"#131922", card2:"#0E131A",
+  bg:"#0B1220", bgAlt:"#0F172A",
+  card:"#131C2E", card2:"#0E1626",
   // borders
-  border:"#27303D", border2:"#1B222D",
+  border:"#27344D", border2:"#1B2639",
   // text
-  text1:"#F1F5F9", text2:"#A9B4C4", text3:"#8591A3",
-  // semantic (market data only)
+  text1:"#E8EDF6", text2:"#A9B5C9", text3:"#8895AB",
+  // semantic (market data only: up/down are reserved for positive/negative market meaning)
   up:"#1FAE5B", down:"#F26B6B",
   // accents
   blue:"#4D8DF8", blueSoft:"rgba(77,141,248,0.14)",
   gold:"#E0B84C", warn:"#F59E42",
   // brand
-  brand:"#00C853", brandDark:"#00A040",
+  brand:"#4D8DF8", brandDark:"#3B7BEA",
   // overlay
   overlay:"rgba(0,0,0,0.7)",
   // semantic states
   bull:"#1FAE5B", bear:"#F26B6B", neutral:"#E0B84C", warning:"#F59E42", info:"#5B9DF9",
   bullSoft:"rgba(31,174,91,0.16)", bearSoft:"rgba(242,107,107,0.16)", neutralSoft:"rgba(224,184,76,0.16)",
   warningSoft:"rgba(245,158,66,0.16)", infoSoft:"rgba(91,157,249,0.16)",
-  onAccent:"#FFFFFF", onBrand:"#04210F", accent:"#2563EB", danger:"#DC2626",
+  onAccent:"#FFFFFF", onBrand:"#0B1220", accent:"#2563EB", danger:"#475569", accent2:"#7C83F5", accent2Soft:"rgba(124,131,245,0.16)",
   // chart
-  chartGrid:"#222B38", chartAxis:"#8591A3", chartLine:"#5B9DF9", chartArea:"rgba(91,157,249,0.14)",
+  chartGrid:"#222D40", chartAxis:"#8895AB", chartLine:"#5B9DF9", chartArea:"rgba(91,157,249,0.14)",
   chartUp:"#1FAE5B", chartDown:"#F26B6B"
 };
 
 var LIGHT = {
   id:"light", scheme:"light",
-  bg:"#F3F5F8", bgAlt:"#EAEEF3",
-  card:"#FFFFFF", card2:"#F7F9FC",
-  border:"#D5DBE4", border2:"#E6EAF0",
-  text1:"#0F172A", text2:"#475569", text3:"#566275",
-  up:"#00632F", down:"#B91C1C",
-  blue:"#1D4ED8", blueSoft:"rgba(29,78,216,0.10)",
+  bg:"#F4F6FA", bgAlt:"#EBEFF5",
+  card:"#FFFFFF", card2:"#F8FAFC",
+  border:"#D8DEE8", border2:"#E8ECF3",
+  text1:"#172033", text2:"#4F5D73", text3:"#58657A",
+  up:"#127336", down:"#B91C1C",
+  blue:"#215AD5", blueSoft:"rgba(33,90,213,0.10)",
   gold:"#755800", warn:"#9A4405",
-  brand:"#00A040", brandDark:"#00803A",
+  brand:"#215AD5", brandDark:"#1B4DB8",
   overlay:"rgba(15,23,42,0.4)",
-  bull:"#00632F", bear:"#B91C1C", neutral:"#755800", warning:"#9A4405", info:"#1D4ED8",
-  bullSoft:"rgba(0,99,47,0.10)", bearSoft:"rgba(185,28,28,0.10)", neutralSoft:"rgba(117,88,0,0.12)",
-  warningSoft:"rgba(154,68,5,0.12)", infoSoft:"rgba(29,78,216,0.10)",
-  onAccent:"#FFFFFF", onBrand:"#04210F", accent:"#1D4ED8", danger:"#B91C1C",
-  chartGrid:"#E1E6EE", chartAxis:"#566275", chartLine:"#1D4ED8", chartArea:"rgba(29,78,216,0.10)",
-  chartUp:"#00632F", chartDown:"#B91C1C"
+  bull:"#127336", bear:"#B91C1C", neutral:"#755800", warning:"#9A4405", info:"#215AD5",
+  bullSoft:"rgba(18,115,54,0.10)", bearSoft:"rgba(185,28,28,0.10)", neutralSoft:"rgba(117,88,0,0.12)",
+  warningSoft:"rgba(154,68,5,0.12)", infoSoft:"rgba(33,90,213,0.10)",
+  onAccent:"#FFFFFF", onBrand:"#FFFFFF", accent:"#2563EB", danger:"#334155", accent2:"#6366F1", accent2Soft:"rgba(99,102,241,0.12)",
+  chartGrid:"#E1E6EE", chartAxis:"#58657A", chartLine:"#215AD5", chartArea:"rgba(33,90,213,0.10)",
+  chartUp:"#127336", chartDown:"#B91C1C"
 };
 
 // Pure black page for OLED panels; cards stay a hair above black so they are
@@ -62,18 +62,18 @@ var AMOLED = {
   id:"amoled", scheme:"dark",
   bg:"#000000", bgAlt:"#000000",
   card:"#0A0A0A", card2:"#050505",
-  border:"#262B33", border2:"#16191E",
-  text1:"#FFFFFF", text2:"#B0B8C4", text3:"#8A93A1",
+  border:"#262E3B", border2:"#171C25",
+  text1:"#FFFFFF", text2:"#B0B9C8", text3:"#8A95A8",
   up:"#22B862", down:"#FF6B6B",
   blue:"#4D8DF8", blueSoft:"rgba(77,141,248,0.16)",
   gold:"#E0B84C", warn:"#F59E42",
-  brand:"#00C853", brandDark:"#00A040",
+  brand:"#4D8DF8", brandDark:"#3B7BEA",
   overlay:"rgba(0,0,0,0.8)",
   bull:"#22B862", bear:"#FF6B6B", neutral:"#E0B84C", warning:"#F59E42", info:"#5B9DF9",
   bullSoft:"rgba(34,184,98,0.18)", bearSoft:"rgba(255,107,107,0.18)", neutralSoft:"rgba(224,184,76,0.18)",
   warningSoft:"rgba(245,158,66,0.18)", infoSoft:"rgba(91,157,249,0.18)",
-  onAccent:"#FFFFFF", onBrand:"#04210F", accent:"#2563EB", danger:"#DC2626",
-  chartGrid:"#1C2026", chartAxis:"#8A93A1", chartLine:"#5B9DF9", chartArea:"rgba(91,157,249,0.16)",
+  onAccent:"#FFFFFF", onBrand:"#000000", accent:"#2563EB", danger:"#475569", accent2:"#7C83F5", accent2Soft:"rgba(124,131,245,0.18)",
+  chartGrid:"#1C222B", chartAxis:"#8A95A8", chartLine:"#5B9DF9", chartArea:"rgba(91,157,249,0.16)",
   chartUp:"#22B862", chartDown:"#FF6B6B"
 };
 

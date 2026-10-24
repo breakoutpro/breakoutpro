@@ -11,17 +11,17 @@ export default function MarketBadge(){
   useLang();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   var BD = theme.c.border, BLUE = theme.c.blue;
-  var UP = theme.c.up, DOWN = theme.c.down;
+  var T3 = theme.c.text3, NEUT = theme.c.neutral;   // session state is not a price move: no red/green
 
   var d=new Date();
   var mins=d.getHours()*60+d.getMinutes();
   var day=d.getDay(); // 0 Sun, 6 Sat
   var st;
-  if(day==0||day==6){ st={label:"Closed",col:DOWN,dot:DOWN}; }
-  else if(mins>=9*60+15&&mins<15*60+30){ st={label:"Open",col:UP,dot:UP}; }
-  else if(mins>=9*60&&mins<9*60+15){ st={label:"Pre-Market",col:BLUE,dot:BLUE}; }
-  else if(mins>=15*60+30&&mins<16*60){ st={label:"Post-Market",col:BLUE,dot:BLUE}; }
-  else { st={label:"Closed",col:DOWN,dot:DOWN}; }
+  if(day==0||day==6){ st={label:"Closed",col:T3,dot:T3}; }
+  else if(mins>=9*60+15&&mins<15*60+30){ st={label:"Open",col:BLUE,dot:BLUE}; }
+  else if(mins>=9*60&&mins<9*60+15){ st={label:"Pre-Market",col:NEUT,dot:NEUT}; }
+  else if(mins>=15*60+30&&mins<16*60){ st={label:"Post-Market",col:NEUT,dot:NEUT}; }
+  else { st={label:"Closed",col:T3,dot:T3}; }
   return (
     <span style={{display:"inline-flex",alignItems:"center",gap:4,background:theme.c.card2,border:"1px solid "+BD,borderRadius:20,padding:"3px 7px",whiteSpace:"nowrap"}}>
       <span style={{width:5,height:5,borderRadius:"50%",background:st.dot,animation:st.label=="Open"?"pulse-dot 1.4s infinite":"none",flexShrink:0}}></span>

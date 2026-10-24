@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from "react";
-import { G, DISCLAIMER } from "./utils/helpers";
+import { DISCLAIMER } from "./utils/helpers";
 import { STOCKS } from "./data/stocks";
 import { useLiveNews } from "./hooks/useLiveNews";
 import { useMarketMood } from "./hooks/useMarketMood";
@@ -89,7 +89,7 @@ var AlertCenterPro = lazy(function(){ return import("./screens/AlertCenterPro");
 
 function Loader() {
   return (
-    <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:200,color:G,fontSize:14,fontWeight:700}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:200,color:"var(--bp-text2,#64748B)",fontSize:14,fontWeight:700}}>
       Loading...
     </div>
   );
@@ -187,22 +187,22 @@ function AuthScreen(props) {
             <svg width="52" height="52" viewBox="0 0 100 100" style={{margin:"0 auto 14px",display:"block"}}>
               <rect x="2" y="2" width="96" height="96" rx="22" fill="#0c1119" stroke="url(#bpBorder)" strokeWidth="2"/>
               <line x1="24" y1="56" x2="24" y2="70" stroke="#ff8d8d" strokeWidth="4" strokeLinecap="round"/>
-              <rect x="18" y="60" width="12" height="12" rx="2" fill="#e5484d"/>
+              <rect x="18" y="60" width="12" height="12" rx="2" fill="#7C83F5"/>
               <line x1="42" y1="46" x2="42" y2="70" stroke="#9fffc0" strokeWidth="4" strokeLinecap="round"/>
               <rect x="36" y="50" width="12" height="18" rx="2" fill="#1fae4d"/>
               <line x1="60" y1="34" x2="60" y2="70" stroke="#9fffc0" strokeWidth="4" strokeLinecap="round"/>
-              <rect x="54" y="40" width="12" height="26" rx="2" fill="#2fe86a"/>
-              <path d="M 16 72 C 32 66, 50 48, 76 26" fill="none" stroke="#2fe86a" strokeWidth="5" strokeLinecap="round"/>
-              <polygon points="70,22 84,24 76,36" fill="#2fe86a"/>
+              <rect x="54" y="40" width="12" height="26" rx="2" fill="#4D8DF8"/>
+              <path d="M 16 72 C 32 66, 50 48, 76 26" fill="none" stroke="#4D8DF8" strokeWidth="5" strokeLinecap="round"/>
+              <polygon points="70,22 84,24 76,36" fill="#4D8DF8"/>
               <defs>
                 <linearGradient id="bpBorder" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#2dd4ff"/>
-                  <stop offset="50%" stopColor="#1b8a6b"/>
-                  <stop offset="100%" stopColor="#22c55e"/>
+                  <stop offset="0%" stopColor="#4D8DF8"/>
+                  <stop offset="50%" stopColor="#6366F1"/>
+                  <stop offset="100%" stopColor="#4D8DF8"/>
                 </linearGradient>
               </defs>
             </svg>
-            <div style={{fontSize:21,fontWeight:800,color:"#F3F4F6",letterSpacing:0.3}}>Breakout<span style={{color:G}}> Pro</span></div>
+            <div style={{fontSize:21,fontWeight:800,color:"#F3F4F6",letterSpacing:0.3}}>Breakout<span style={{color:"#6FA1FA"}}> Pro</span></div>
             <div style={{fontSize:13,color:"#9CA3AF",marginTop:6}}>{mode=="login"?"Log in to your account":"Create your account"}</div>
           </div>
           <div style={{padding:"8px 28px 28px"}}>
@@ -212,7 +212,7 @@ function AuthScreen(props) {
                 return <button key={kv[0]} onClick={function(){setMode(kv[0]);setErr("");}} style={{flex:1,padding:"11px",borderRadius:9,border:"none",background:act?theme.c.blue:"transparent",color:act?"#fff":"#9CA3AF",fontWeight:act?700:500,fontSize:12,cursor:"pointer",fontFamily:"inherit",transition:"background 0.15s"}}>{kv[1]}</button>;
               })}
             </div>
-            {err?<div style={{background:"rgba(229,72,77,0.12)",border:"1px solid rgba(229,72,77,0.35)",borderRadius:10,padding:"11px 12px",marginBottom:14,fontSize:12,color:"#ff9b9e"}}>! {err}</div>:null}
+            {err?<div role="alert" style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.22)",borderRadius:10,padding:"11px 12px",marginBottom:14,fontSize:12,color:"#E8EDF6"}}>! {err}</div>:null}
 
             {mode=="register"?
               <div style={iconWrap}>
@@ -251,7 +251,7 @@ function AuthScreen(props) {
               </label>
             :<div style={{height:8}}/>}
 
-            <button style={{width:"100%",boxSizing:"border-box",background:"linear-gradient(135deg,"+theme.c.blue+","+G+")",border:"none",borderRadius:12,padding:"15px",fontSize:14,fontWeight:700,color:"#fff",cursor:"pointer",fontFamily:"inherit",transition:"filter 0.15s",boxShadow:"0 8px 20px rgba(37,99,235,0.3)"}} onMouseOver={function(e){e.target.style.filter="brightness(1.08)";}} onMouseOut={function(e){e.target.style.filter="none";}} onClick={submit}>
+            <button style={{width:"100%",boxSizing:"border-box",background:"linear-gradient(135deg,#2563EB,#6366F1)",border:"none",borderRadius:12,padding:"15px",fontSize:14,fontWeight:700,color:"#fff",cursor:"pointer",fontFamily:"inherit",transition:"filter 0.15s",boxShadow:"0 4px 12px rgba(37,99,235,0.25)"}} onMouseOver={function(e){e.target.style.filter="brightness(1.08)";}} onMouseOut={function(e){e.target.style.filter="none";}} onClick={submit}>
               {mode=="login"?"Login":"Create Account"}
             </button>
 
@@ -339,7 +339,7 @@ function HeatmapScreen() {
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
 
   var DB=theme.c.bg,G2=theme.c.up,R=theme.c.down,T1=theme.c.text1;
-  function col(chg){if(chg>=3)return{bg:theme.c.brand,tx:"#fff"};if(chg>=1.5)return{bg:"#4CAF50",tx:"#fff"};if(chg>=0)return{bg:"rgba(0,153,68,0.12)",tx:G2};if(chg>=-1.5)return{bg:"rgba(220,38,38,0.12)",tx:R};return{bg:R,tx:"#fff"};}
+  function col(chg){if(chg>=1.5)return{bg:G2,tx:theme.c.bg};if(chg>=0)return{bg:theme.c.bullSoft,tx:G2};if(chg>-1.5)return{bg:theme.c.bearSoft,tx:R};return{bg:R,tx:theme.c.bg};}
   return (
     <div style={{background:DB,minHeight:"100%",paddingBottom:80,fontFamily:"Inter,Arial,sans-serif"}}>
       <div style={{padding:"16px 16px 8px",fontSize:16,fontWeight:900,color:T1}}>NIFTY 50 <span style={{color:theme.c.brand}}>Heatmap</span></div>
@@ -750,13 +750,13 @@ function AppInner() {
       {!isDesktop ? <TabBar tab={tab} setTab={goTo}/> : null}
       {sidebar?(
         <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,zIndex:200,display:"flex"}}>
-          <div style={{width:260,background:"#fff",borderRight:"1px solid #E5E7EB",display:"flex",flexDirection:"column",boxShadow:"4px 0 24px rgba(0,0,0,0.1)"}}>
-            <div style={{padding:"24px 16px",borderBottom:"1px solid #F0F0F0"}}>
+          <div style={{width:260,background:theme.c.card,borderRight:"1px solid "+theme.c.border,display:"flex",flexDirection:"column",boxShadow:"4px 0 24px rgba(0,0,0,0.1)"}}>
+            <div style={{padding:"24px 16px",borderBottom:"1px solid "+theme.c.border2}}>
               <div style={{display:"flex",alignItems:"center",gap:12}}>
-                <div style={{width:40,height:40,borderRadius:"50%",background:"#2563EB",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:900,color:"#fff"}}>{user.name[0].toUpperCase()}</div>
+                <div style={{width:40,height:40,borderRadius:"50%",background:theme.c.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:900,color:theme.c.onAccent}}>{user.name[0].toUpperCase()}</div>
                 <div>
-                  <div style={{fontSize:14,fontWeight:800,color:"#111827"}}>{user.name}</div>
-                  <div style={{fontSize:12,color:"#9CA3AF"}}>{user.phone}</div>
+                  <div style={{fontSize:14,fontWeight:800,color:theme.c.text1}}>{user.name}</div>
+                  <div style={{fontSize:12,color:theme.c.text3}}>{user.phone}</div>
                 </div>
               </div>
             </div>
@@ -764,15 +764,15 @@ function AppInner() {
               {navItems.map(function(item){
                 var act=tab==item.id;
                 return (
-                  <button key={item.id} style={{width:"100%",boxSizing:"border-box",background:act?"#F0FDF4":"none",border:"none",borderLeft:act?"3px solid "+G:"3px solid transparent",padding:"12px 16px",display:"flex",alignItems:"center",cursor:"pointer",fontFamily:"inherit",textAlign:"left"}} onClick={function(){setTab(item.id);setSidebar(false);}}>
-                    <span style={{fontSize:14,fontWeight:act?700:500,color:act?G:"#374151"}}>{t("side."+item.id, item.label)}</span>
+                  <button key={item.id} style={{width:"100%",boxSizing:"border-box",background:act?theme.c.blueSoft:"none",border:"none",borderLeft:act?"3px solid "+theme.c.blue:"3px solid transparent",padding:"12px 16px",display:"flex",alignItems:"center",cursor:"pointer",fontFamily:"inherit",textAlign:"left"}} onClick={function(){setTab(item.id);setSidebar(false);}}>
+                    <span style={{fontSize:14,fontWeight:act?700:500,color:act?theme.c.blue:theme.c.text2}}>{t("side."+item.id, item.label)}</span>
                   </button>
                 );
               })}
             </div>
-            <div style={{padding:"16px",borderTop:"1px solid #F0F0F0"}}>
-              <div style={{fontSize:12,color:"#9CA3AF",marginBottom:12,lineHeight:1.6}}>! {DISCLAIMER}</div>
-              <button style={{width:"100%",boxSizing:"border-box",background:"#FEF2F2",border:"1px solid #FECACA",borderRadius:10,padding:"12px",color:theme.c.down,fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}} onClick={logout}>{t("side.logout")}</button>
+            <div style={{padding:"16px",borderTop:"1px solid "+theme.c.border2}}>
+              <div style={{fontSize:12,color:theme.c.text3,marginBottom:12,lineHeight:1.6}}>! {DISCLAIMER}</div>
+              <button style={{width:"100%",boxSizing:"border-box",background:theme.c.card2,border:"1px solid "+theme.c.border,borderRadius:10,padding:"12px",color:theme.c.text1,fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}} onClick={logout}>{t("side.logout")}</button>
             </div>
           </div>
           <div style={{flex:1,background:"rgba(0,0,0,0.3)"}} onClick={function(){setSidebar(false);}}></div>
@@ -798,7 +798,7 @@ function AppInner() {
       {tab!="rangeintel" ? <GlobalHeader setTab={goTo} onSelectStock={onSelectStock} tab={tab} user={user} onLogout={logout}/> : null}
       <div style={{flex:1,width:"100%",maxWidth:noShellCap?"none":shellMax,margin:noShellCap?0:"0 auto",display:"grid",gridTemplateColumns:showRightPanel?"minmax(0, 1fr) "+rightW+"px":"minmax(0, 1fr)",gap:shellGap,padding:(shellPad/2)+"px "+shellPad+"px",boxSizing:"border-box",minHeight:0}}>
         <div style={{minWidth:0,height:"100%",overflowY:"auto",overflowX:"hidden",background:theme.c.bg}}>
-          <div style={{zoom:isTvClass?zoomLevel:undefined,width:"100%"}}>
+          <div style={{zoom:isTvClass?zoomLevel:undefined,width:"100%",maxWidth:(tab=="home"||isTvClass)?"none":1360,margin:"0 auto"}}>
             {appColumn}
           </div>
         </div>
@@ -903,7 +903,7 @@ function GlobalHeader(props){
               </div>
             </div>
             <button onMouseDown={function(){props.setTab("profile");}} style={{width:"100%",boxSizing:"border-box",background:"none",border:"none",textAlign:"left",padding:"10px 14px",color:T2,fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>{t("gh.view_profile")}</button>
-            <button onMouseDown={props.onLogout} style={{width:"100%",boxSizing:"border-box",background:"rgba(239,68,68,0.08)",border:"none",textAlign:"left",padding:"10px 14px",color:"#EF4444",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{t("side.logout")}</button>
+            <button onMouseDown={props.onLogout} style={{width:"100%",boxSizing:"border-box",background:"none",border:"none",textAlign:"left",padding:"10px 14px",color:T1,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{t("side.logout")}</button>
           </div>
         ) : null}
       </div>

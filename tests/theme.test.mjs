@@ -53,7 +53,7 @@ test("three themes exist with identical token keys (theme.c API preserved)", fun
 });
 
 test("semantic, chart and accessibility tokens are present", function(){
-  ["bull", "bear", "neutral", "warning", "info", "bullSoft", "bearSoft", "neutralSoft", "warningSoft", "infoSoft", "onAccent", "onBrand", "accent", "danger",
+  ["bull", "bear", "neutral", "warning", "info", "bullSoft", "bearSoft", "neutralSoft", "warningSoft", "infoSoft", "onAccent", "onBrand", "accent", "danger", "accent2", "accent2Soft",
    "chartGrid", "chartAxis", "chartLine", "chartArea", "chartUp", "chartDown"].forEach(function(k){
     THEME_IDS.forEach(function(id){ assert.ok(THEMES[id][k], id + " missing " + k); });
   });
@@ -289,7 +289,7 @@ test("theme labels exist in all five languages with native script", function(){
 });
 
 test("Settings and the alert widget use theme tokens instead of fixed dark-only colours", function(){
-  var st = read("src/screens/Settings.jsx").split("\n").filter(function(l){ return l.indexOf("sw:[") < 0 && l.indexOf('background:"#F3F5F8"') < 0 && l.indexOf("var ") != 0 && l.indexOf("boxShadow") < 0; }).join("\n");
+  var st = read("src/screens/Settings.jsx").split("\n").filter(function(l){ return l.indexOf("sw:[") < 0 && l.indexOf('background:"#F4F6FA"') < 0 && l.indexOf("var ") != 0 && l.indexOf("boxShadow") < 0; }).join("\n");
   assert.ok(!/rgba\(255,255,255/.test(st), "Settings has white-tint fills");
   var vw = read("src/screens/VoiceAlertWidget.jsx");
   assert.ok(!/rgba\(255,255,255/.test(vw) && !/rgba\(34,197,94/.test(vw), "VoiceAlertWidget has fixed tints");

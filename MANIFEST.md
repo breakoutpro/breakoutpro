@@ -1,8 +1,14 @@
-# Four UI fixes - manifest
-- src/App.jsx: password eye icon now visible (it was white-on-white after the theme work), 44px tap target, aria-label/aria-pressed, applies to the single password field used by Login and Register; welcome modal no longer opens (showTutorial starts false); "Enable Alert Notifications" banner removed; new goBack() (browser-history aware); Home navigation now uses goTo so browser Back works; Market Mood, Scanner and Range Intelligence Back buttons use goBack.
-- src/screens/NextMoveHomeCard.jsx: "View Full Analysis" link removed; card taps now reach the card (Detailed Analysis section keeps its own taps).
-- src/screens/home/EquityHome{Mobile,Tablet,Laptop,Desktop}.jsx: dropped the now-unused onOpen prop; Laptop/Desktop Live Breakouts card opens the scanner as a whole (rows no longer double-fire).
-- tests/theme.test.mjs: one assertion changed (it required the removed banner's button; now asserts the banner is gone).
-- tests/home-ui-fixes.test.mjs: new source-level tests for the four changes.
-Not changed: auth logic, APIs, calculations, alerts logic, themes, translations.
-Results: npm test 438/438 pass. Browser checks (fixture data) at 390 and 1366 px: 42/42 pass. Layout harness at 390/1366 (2 themes x 2 scenarios): 0 issues. vite build NOT run (registry unreachable, vite not installed).
+# Desktop layout + trader colour system - manifest (27 files)
+
+Layout
+- src/App.jsx: on screens other than Home, the desktop content column is capped at 1360px and centred (readable width at 1920). Home keeps its own 1280px cap. No other shell change.
+- Home (4 layouts) from the previous task is unchanged; Alerts status tiles get a bottom gap.
+
+Colour system
+- src/theme/tokens.js: new palettes. Light #F4F6FA / #FFFFFF / #172033, border #D8DEE8, accent #2563EB; brand, blue, info and chart line are now blue (#215AD5 in light, #4D8DF8 in dark/AMOLED); indigo accent2 added; danger is neutral slate. up/down stay green/red (#127336 / #B91C1C light) and are reserved for market meaning. Values are slightly darker than the suggested #15803D / #2563EB text colours so every text and tinted-chip pair passes WCAG AA 4.5:1 (enforced by tests).
+- Shell and status: App.jsx (login logo, button, error box, drawer, heatmap, header logout), TopBar, MarketBadge, LaunchKit, provenance.js, MarketMoodData (LIVE/session now blue, DELAYED amber).
+- Screens: Settings (swatches, toggles), VoiceAlertWidget, Alerts, AIBriefing, AI, OptionsIntelPro, PaperTrading, GlobalHome, InlineScreens, OIChain, Learn, AcademyData, AcademyHome, MarketMood, DetailedAnalysis, NextMoveCard, EarlyDirectionPanel.
+- index.html: pre-paint background matches the new light page colour.
+- tests: color-policy.test.mjs (new), theme.test.mjs (updated).
+
+Not changed: APIs, calculations, auth, alert logic, translations.

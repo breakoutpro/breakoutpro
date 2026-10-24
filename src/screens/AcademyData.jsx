@@ -88,7 +88,7 @@ export var MODULES = [
     ]
   },
   {
-    id:"candles", title:"Candlestick School", icon:"\u{1F56F}", color:"#22C55E",
+    id:"candles", title:"Candlestick School", icon:"\u{1F56F}", color:"#6366F1",
     lessons:[
       {
         id:"cs1", title:"Reading a Single Candle",
@@ -155,7 +155,7 @@ export var MODULES = [
     ]
   },
   {
-    id:"pa_trendlines", title:"Trendlines", icon:"\u{1F4C9}", color:"#22C55E",
+    id:"pa_trendlines", title:"Trendlines", icon:"\u{1F4C9}", color:"#6366F1",
     lessons:[
       {
         id:"pat1", title:"Drawing and Reading Trendlines",
@@ -177,7 +177,7 @@ export var MODULES = [
     ]
   },
   {
-    id:"pa_breakout", title:"Breakout", icon:"\u{1F680}", color:"#EF4444",
+    id:"pa_breakout", title:"Breakout", icon:"\u{1F680}", color:"#8B5CF6",
     lessons:[
       {
         id:"pab1", title:"Understanding Breakouts",
@@ -331,7 +331,7 @@ export var MODULES = [
     ]
   },
   {
-    id:"riskmgmt", title:"Risk Management", icon:"\u{1F6E1}", color:"#EF4444",
+    id:"riskmgmt", title:"Risk Management", icon:"\u{1F6E1}", color:"#8B5CF6",
     lessons:[
       {
         id:"rm1", title:"Why Risk Management Comes Before Strategy",
@@ -460,7 +460,7 @@ export var MODULES = [
     ]
   },
   {
-    id:"progress", title:"Progress Tracking", icon:"\u{1F4C8}", color:"#22C55E",
+    id:"progress", title:"Progress Tracking", icon:"\u{1F4C8}", color:"#6366F1",
     lessons:[
       {
         id:"pt1", title:"How Your Progress Is Tracked",

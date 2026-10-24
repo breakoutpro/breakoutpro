@@ -47,7 +47,7 @@ function EvidenceSection(props){
       {ev.groups.map(function(g){
         var sup = g.id=="first";
         var mark = sup ? "\u25b2" : "\u25c6";
-        var markColor = sup ? MT.SENT_GREEN : MT.WARN;
+        var markColor = sup ? MT.BLUE : MT.WARN;
         return (
           <div key={g.id} style={{background:MT.CARD2,border:"1px solid "+MT.BD,borderRadius:8,padding:"7px 9px",minWidth:0,boxSizing:"border-box"}}>
             <div style={Object.assign({fontSize:10,fontWeight:800,color:MT.T2,marginBottom:4,letterSpacing:0.3}, WRAP)}>{g.title}</div>
@@ -170,7 +170,7 @@ function TimelineSection(props){
     <div data-testid="nm-timeline">
       {tl.entries.map(function(e, i){
         var last = i==tl.entries.length-1;
-        var col = e.status=="confirmed" ? MT.SENT_GREEN : (e.status=="developing" ? MT.BLUE : (e.current ? MT.BLUE : MT.T3));
+        var col = e.status=="confirmed" ? MT.BLUE : (e.status=="developing" ? MT.BLUE : (e.current ? MT.BLUE : MT.T3));
         return (
           <div key={e.id} style={{display:"flex",gap:8,alignItems:"stretch"}}>
             <div style={{display:"flex",flexDirection:"column",alignItems:"center",width:10,flexShrink:0}}>
@@ -217,7 +217,7 @@ function QualitySection(props){
                     <td style={td}>{r.name}</td>
                     <td style={td}><span style={{display:"inline-flex",flexWrap:"wrap",gap:"3px 6px",alignItems:"center"}}><Chip status={r.status}/>{why ? <span style={{fontSize:10,color:MT.T3}}>{why}</span> : null}</span></td>
                     <td style={td}>{r.time || DASH}</td>
-                    <td style={Object.assign({}, td, {fontWeight:800,color:r.used ? MT.SENT_GREEN : MT.T3})}>{usedText(r)}</td>
+                    <td style={Object.assign({}, td, {fontWeight:800,color:r.used ? MT.T1 : MT.T3})}>{usedText(r)}</td>
                   </tr>
                 );
               })}
@@ -233,7 +233,7 @@ function QualitySection(props){
                     <span style={Object.assign({fontSize:11,fontWeight:700,color:MT.T1}, WRAP)}>{r.name}</span>
                     <span style={{display:"inline-flex",gap:6,alignItems:"center",flexShrink:0}}>
                       <Chip status={r.status}/>
-                      <span style={{fontSize:10,fontWeight:800,color:r.used ? MT.SENT_GREEN : MT.T3,minWidth:22,textAlign:"right"}}>{usedText(r)}</span>
+                      <span style={{fontSize:10,fontWeight:800,color:r.used ? MT.T1 : MT.T3,minWidth:22,textAlign:"right"}}>{usedText(r)}</span>
                     </span>
                   </div>
                   <div style={Object.assign({fontSize:10,color:MT.T3,marginTop:1}, WRAP)}>{(r.time || DASH) + (why ? " \u00b7 " + why : "")}</div>

@@ -102,7 +102,7 @@ export default function EarlyDirectionPanel(props){
   var directional = d.outlook=="bullish" || d.outlook=="bearish";
   var neutral = d.outlook=="neutral";
   var insufficient = d.outlook=="insufficient";
-  var confColor = d.confidence=="high" ? MT.SENT_GREEN : (d.confidence=="moderate" ? MT.SENT_YELLOW : MT.T2);
+  var confColor = d.confidence=="high" ? MT.BLUE : (d.confidence=="moderate" ? MT.SENT_YELLOW : MT.T2);
   var grid = { display:"grid", gridTemplateColumns: wide ? "repeat(auto-fit, minmax(260px, 1fr))" : "minmax(0, 1fr)", gap:6, marginTop:8 };
 
   return (

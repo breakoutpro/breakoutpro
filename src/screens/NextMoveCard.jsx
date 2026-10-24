@@ -86,7 +86,7 @@ function trendMeta(f, MT){
   if(!f || f.lastBarAsOf==null || st==null || st=="UNAVAILABLE") return { text:t("nm.trend.na"), color:MT.T3 };
   if(st=="STALE") return { text:t("nm.trend.stale"), color:MT.WARN };
   if(f.behind) return { text:t("nm.trend.behind"), color:MT.WARN };
-  return { text:t("nm.trend.ok"), color:MT.GREEN };
+  return { text:t("nm.trend.ok"), color:MT.T2 };
 }
 
 export default function NextMoveCard(props){

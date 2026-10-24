@@ -31,7 +31,7 @@ export default function GlobalHome(props) {
   var responsive = useResponsive();
   BD=theme.c.border; CB=theme.c.card; DB=theme.c.bg; G2=theme.c.up; R=theme.c.down; T2=theme.c.text2;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
-  var BLUE = theme.c.blue, G = theme.c.brand; T1=theme.c.text1;
+  var BLUE = theme.c.blue, G = theme.c.up; T1=theme.c.text1;   // G = market up
 
   var setTab = props.setTab || function(){};
   var user = props.user || {};

@@ -9,7 +9,7 @@ import { useTheme } from "../theme/ThemeProvider";
 // Rules: no backticks, no triple-equals, ASCII only.
 
 var CARD="#101318",BD="#1B2330";
-var UP="#22C55E",DOWN="#EF4444",BLUE="#3B82F6";
+var UP="#4D8DF8",DOWN="#94A3B8",BLUE="#3B82F6";   // neutral fallbacks, no red/green
 var T1="#FFFFFF",T2="#A0A7B4",T3="#5B6472";
 
 function kindColor(k){
@@ -25,7 +25,7 @@ function kindLabel(k){
 
 function MiniToggle(props){
   var theme = useTheme();
-  CARD=theme.c.card; BD=theme.c.border; UP=theme.c.up; DOWN=theme.c.down; BLUE=theme.c.blue; T1=theme.c.text1; T2=theme.c.text2; T3=theme.c.text3;
+  CARD=theme.c.card; BD=theme.c.border; UP=theme.c.blue; DOWN=theme.c.down; BLUE=theme.c.blue; T1=theme.c.text1; T2=theme.c.text2; T3=theme.c.text3;
   return (
     <button onClick={props.onClick} style={{display:"flex",alignItems:"center",gap:8,background:theme.c.card2,border:"1px solid "+BD,borderRadius:10,padding:"8px 12px",cursor:"pointer",fontFamily:"inherit",flex:1}}>
       <span style={{fontSize:14}} dangerouslySetInnerHTML={{__html:props.icon}}/>
@@ -39,10 +39,10 @@ function MiniToggle(props){
 
 export default function VoiceAlertWidget(props){
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
-  CARD=theme.c.card; BD=theme.c.border; UP=theme.c.up; DOWN=theme.c.down; BLUE=theme.c.blue; T1=theme.c.text1; T2=theme.c.text2; T3=theme.c.text3;
+  CARD=theme.c.card; BD=theme.c.border; UP=theme.c.blue; DOWN=theme.c.down; BLUE=theme.c.blue; T1=theme.c.text1; T2=theme.c.text2; T3=theme.c.text3;
   BD=theme.c.border;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
-  var BLUE = theme.c.blue, CARD = theme.c.card, T2 = theme.c.text2, T3 = theme.c.text3; T1=theme.c.text1; UP=theme.c.up;
+  var BLUE = theme.c.blue, CARD = theme.c.card, T2 = theme.c.text2, T3 = theme.c.text3; T1=theme.c.text1; UP=theme.c.blue;
 
   var va=useVoiceAlerts();
   var [showLang,setShowLang]=useState(false);
@@ -65,12 +65,12 @@ export default function VoiceAlertWidget(props){
 
   return (
     <div style={{padding:"16px 16px 0"}}>
-      <div style={{background:CARD,border:"1px solid "+(va.enabled?theme.c.up:BD),borderRadius:16,padding:"16px"}}>
+      <div style={{background:CARD,border:"1px solid "+(va.enabled?theme.c.blue:BD),borderRadius:16,padding:"16px"}}>
 
         {/* HEADER ROW + MASTER TOGGLE */}
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:va.enabled?12:0}}>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <div style={{width:34,height:34,borderRadius:10,background:va.enabled?theme.c.bullSoft:theme.c.card2,border:"1px solid "+(va.enabled?theme.c.up:BD),display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+            <div style={{width:34,height:34,borderRadius:10,background:va.enabled?theme.c.blueSoft:theme.c.card2,border:"1px solid "+(va.enabled?theme.c.blue:BD),display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
               <span style={{fontSize:16}} dangerouslySetInnerHTML={{__html:va.speaking?"&#128266;":"&#128276;"}}/>
             </div>
             <div>
@@ -98,7 +98,7 @@ export default function VoiceAlertWidget(props){
               {[["normal","&#128276;","Normal"],["voice","&#128266;","Voice"],["priority","&#128680;","Priority"]].map(function(opt){
                 var act=va.mode==opt[0];
                 return (
-                  <button key={opt[0]} onClick={function(){va.setMode(opt[0]);}} style={{flex:1,background:act?theme.c.bullSoft:theme.c.card2,border:"1px solid "+(act?theme.c.up:BD),borderRadius:9,padding:"8px 4px",cursor:"pointer",fontFamily:"inherit",textAlign:"center"}}>
+                  <button key={opt[0]} onClick={function(){va.setMode(opt[0]);}} style={{flex:1,background:act?theme.c.blueSoft:theme.c.card2,border:"1px solid "+(act?theme.c.blue:BD),borderRadius:9,padding:"8px 4px",cursor:"pointer",fontFamily:"inherit",textAlign:"center"}}>
                     <div style={{fontSize:14}} dangerouslySetInnerHTML={{__html:opt[1]}}/>
                     <div style={{fontSize:12,color:act?UP:T3,fontWeight:act?700:600,marginTop:4}}>{opt[2]}</div>
                   </button>
@@ -108,7 +108,7 @@ export default function VoiceAlertWidget(props){
 
             {/* SCANNING + LANGUAGE */}
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
-              <div style={{display:"flex",alignItems:"center",gap:8,flex:1,background:theme.c.bullSoft,borderRadius:8,padding:"8px 12px"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,flex:1,background:theme.c.blueSoft,borderRadius:8,padding:"8px 12px"}}>
                 <div style={{width:7,height:7,borderRadius:"50%",background:UP,animation:"pulse-dot 1.4s infinite"}}></div>
                 <span style={{fontSize:12,color:UP,fontWeight:700}}>Live scanning</span>
               </div>

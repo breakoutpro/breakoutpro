@@ -18,7 +18,7 @@ var FREE_TRADES = 5;
 
 var MARKETS = {
   equity: {
-    label:"Equity", color:G2, icon:"EQ",
+    label:"Equity", color:BLUE, icon:"EQ",
     stocks:[
       {sym:"RELIANCE",  ltp:2845.60, lot:1,  type:"equity"},
       {sym:"TCS",       ltp:3654.20, lot:1,  type:"equity"},
@@ -119,7 +119,7 @@ export default function PaperTrading(props) {
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   BD=theme.c.border; CB=theme.c.card; DB=theme.c.bg; G2=theme.c.up; R=theme.c.down; T2=theme.c.text2;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
-  var BLUE = theme.c.blue, G = theme.c.brand; T1=theme.c.text1;
+  var BLUE = theme.c.blue, G = theme.c.up; T1=theme.c.text1;   // G = BUY / win: market meaning
 
   var isPrem = props.isPrem||false;
   var [data, setData] = useState(loadPT);
@@ -239,7 +239,7 @@ export default function PaperTrading(props) {
         <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:4,marginBottom:12}}>
           {[
             ["Balance","Rs"+fmt(data.balance),T1],
-            ["Free",isPrem?"Unlimited":(tradesLeft+"/"+FREE_TRADES),canTrade?G2:R],
+            ["Free",isPrem?"Unlimited":(tradesLeft+"/"+FREE_TRADES),canTrade?T1:T2],
             ["Win%",winRate+"%",winRate>=50?G2:R],
             ["Trades",data.wins+data.losses,BLUE],
             ["Total P&L",(data.totalPnl>=0?"+":"")+fmt(data.totalPnl),data.totalPnl>=0?G2:R],
@@ -309,7 +309,7 @@ export default function PaperTrading(props) {
           {/* LTP Card */}
           <div style={{background:CB,border:"1px solid rgba(0,200,83,0.2)",borderRadius:16,padding:"12px 16px",marginBottom:12,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div>
-              <div style={{fontSize:22,fontWeight:900,fontFamily:"monospace",color:G2}}>Rs{ltp.toLocaleString("en-IN",{minimumFractionDigits:2})}</div>
+              <div style={{fontSize:22,fontWeight:900,fontFamily:"monospace",color:T1}}>Rs{ltp.toLocaleString("en-IN",{minimumFractionDigits:2})}</div>
               <div style={{fontSize:12,color:T2,marginTop:4}}>{selSym} &#8226; Simulated Live Price</div>
             </div>
             <div style={{textAlign:"right"}}>
@@ -360,7 +360,7 @@ export default function PaperTrading(props) {
               <input style={inp} type="number" placeholder="SL price" value={sl} onChange={function(e){setSl(e.target.value);}}/>
             </div>
             <div>
-              <div style={{fontSize:12,color:G2,marginBottom:4}}>Target</div>
+              <div style={{fontSize:12,color:T2,marginBottom:4}}>Target</div>
               <input style={inp} type="number" placeholder="Target price" value={tgt} onChange={function(e){setTgt(e.target.value);}}/>
             </div>
           </div>

@@ -232,7 +232,7 @@ export default function MarketMood(props){
                         <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid "+MT.BD,fontSize:11,color:MT.T2}}>
                           <div>Support: <b style={{color:MT.T1}}>{lvl.support.toLocaleString("en-IN")}</b></div>
                           <div>Resistance: <b style={{color:MT.T1}}>{lvl.resistance.toLocaleString("en-IN")}</b></div>
-                          <div>Trend: <b style={{color:MT.SENT_RED}}>{lvl.trend}</b></div>
+                          <div>Trend: <b style={{color:MT.T1}}>{lvl.trend}</b></div>
                         </div>
                       ) : null}
                     </div>
@@ -334,7 +334,7 @@ export default function MarketMood(props){
                   {DEMO_EVOLUTION.map(function(m,i){
                     return (
                       <span key={i} style={{display:"flex",alignItems:"center",gap:8}}>
-                        <span style={{fontSize:12,fontWeight:700,color:MT.SENT_RED}}>{m}</span>
+                        <span style={{fontSize:12,fontWeight:700,color:MT.T1}}>{m}</span>
                         {i<DEMO_EVOLUTION.length-1 ? <span style={{color:MT.T3}}>&#8594;</span> : null}
                       </span>
                     );
@@ -349,13 +349,13 @@ export default function MarketMood(props){
             <div style={{background:MT.CARD,border:"1px solid "+MT.BD,borderRadius:8,padding:padV}}>
               {usingDemo ? (
                 <div>
-                  <div style={{fontSize:13,fontWeight:800,color:MT.SENT_RED,marginBottom:4}}>{DEMO_RISK.level}</div>
+                  <div style={{fontSize:13,fontWeight:800,color:MT.WARN,marginBottom:4}}>{DEMO_RISK.level}</div>
                   <div style={{fontSize:12,color:MT.T3}}>{DEMO_RISK.note}</div>
                 </div>
               ) : vixRow && vixRow.available ? (function(){
                 var vixNum = parseFloat(String(vixRow.ltp).replace(/,/g,""));
                 var riskLabel = isNaN(vixNum) ? null : (vixNum<13?"Low":(vixNum<=18?"Moderate":"High"));
-                var riskColor = riskLabel==="Low"?MT.SENT_GREEN:(riskLabel==="High"?MT.SENT_RED:MT.SENT_YELLOW);
+                var riskColor = riskLabel==="Low"?MT.BLUE:(riskLabel==="High"?MT.WARN:MT.SENT_YELLOW);
                 return riskLabel ? (
                   <div>
                     <div style={{fontSize:13,fontWeight:800,color:riskColor,marginBottom:4}}>{riskLabel}</div>

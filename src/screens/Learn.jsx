@@ -58,7 +58,7 @@ function CandleCard(props){
 
   var p=props.pattern;
   var [open,setOpen]=useState(false);
-  var tc=p.type=="Bullish"?G:p.type=="Bearish"?R:BLUE;
+  var tc=p.type=="Bullish"?theme.c.up:p.type=="Bearish"?theme.c.down:BLUE;
   return (
     <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,marginBottom:8,overflow:"hidden"}}>
       <div style={{padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer"}} onClick={function(){setOpen(!open);}}>

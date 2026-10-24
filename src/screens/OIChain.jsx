@@ -74,7 +74,7 @@ export default function OIChainScreen(){
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   G2=theme.c.up; R=theme.c.down; T1=theme.c.text1; T2=theme.c.text2;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
-  var BD = theme.c.border, BLUE = theme.c.blue, CB = theme.c.card, DB = theme.c.bg, G = theme.c.brand;
+  var BD = theme.c.border, BLUE = theme.c.blue, CB = theme.c.card, DB = theme.c.bg, G = theme.c.up;
 
   var [sym,setSym]=useState("NIFTY");
   var [exp,setExp]=useState(null);

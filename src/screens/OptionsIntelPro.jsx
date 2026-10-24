@@ -81,9 +81,9 @@ export default function OptionsIntelPro(props){
         </div>
         <div style={{padding:responsive.isMobile?12:16}}>
           {onOpenLiveChain ? (
-            <div onClick={onOpenLiveChain} style={{background:"linear-gradient(135deg, rgba(34,197,94,0.14), rgba(37,99,235,0.10))",border:"1px solid "+UP+"55",borderRadius:14,padding:responsive.isMobile?"12px 14px":16,marginBottom:14,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}>
+            <div onClick={onOpenLiveChain} style={{background:theme.c.blueSoft,border:"1px solid "+theme.c.blue,borderRadius:14,padding:responsive.isMobile?"12px 14px":16,marginBottom:14,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}>
               <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0}}>
-                <span style={{width:8,height:8,borderRadius:"50%",background:UP,flexShrink:0}}></span>
+                <span style={{width:8,height:8,borderRadius:"50%",background:theme.c.blue,flexShrink:0}}></span>
                 <div style={{minWidth:0}}>
                   <div style={{fontSize:13,fontWeight:800,color:T1}}>{t("opt.live_chain")}</div>
                   <div style={{fontSize:11,color:T2}}>{t("opt.live_chain_sub")}</div>

@@ -87,7 +87,7 @@ export default function AcademyHome(props){
         </div>
 
         <div onClick={function(){setOpenPractice(true);}} style={{background:CB,border:"1px solid "+BD,borderRadius:16,padding:16,marginBottom:16,cursor:"pointer",display:"flex",alignItems:"center",gap:12}}>
-          <div style={{width:44,height:44,borderRadius:12,background:"#22C55E18",border:"1px solid #22C55E40",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{"\u{1F3AF}"}</div>
+          <div style={{width:44,height:44,borderRadius:12,background:"#6366F118",border:"1px solid #6366F140",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{"\u{1F3AF}"}</div>
           <div style={{flex:1,minWidth:0}}>
             <div style={{fontSize:14,fontWeight:700,color:T1}}>Practice Zone</div>
             <div style={{fontSize:12,color:T3,marginTop:4}}>Candlestick ID, patterns, calculators & more</div>

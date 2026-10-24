@@ -26,7 +26,7 @@ var SESSION_META = {
 };
 // Optional second argument: the active theme palette (theme.c). With it the dot
 // colour follows the selected theme; without it the static fallback is used.
-var SESSION_DOT = { OPEN:"up", PRE_OPEN:"info", POST_CLOSE:"text3", CLOSED:"text3", WEEKEND:"text3" };
+var SESSION_DOT = { OPEN:"info", PRE_OPEN:"neutral", POST_CLOSE:"text3", CLOSED:"text3", WEEKEND:"text3" };
 export function getSessionMeta(session, c){
   var m = SESSION_META[session] || { label:"Unknown", sub:"Session status unavailable", dot:MT.T3 };
   if(c){ m = { label:m.label, sub:m.sub, dot: c[SESSION_DOT[session] || "text3"] }; }
@@ -36,7 +36,7 @@ export function getSessionMeta(session, c){
 // --- Freshness / data-honesty labels. Every real value must carry one of
 // these; never render a number without a status next to it.
 var FRESHNESS_META = {
-  LIVE:        { text:"LIVE",        color:MT.GREEN },
+  LIVE:        { text:"LIVE",        color:MT.BLUE },
   DELAYED:     { text:"DELAYED",     color:MT.BLUE },
   STALE:       { text:"STALE",       color:MT.WARN },
   PARTIAL:     { text:"PARTIAL",     color:MT.BLUE },
@@ -45,7 +45,7 @@ var FRESHNESS_META = {
   UNAVAILABLE: { text:"UNAVAILABLE", color:MT.T3 }
 };
 // Theme role per status (semantic tokens), used when the active palette is passed.
-var FRESHNESS_ROLE = { LIVE:"up", DELAYED:"info", STALE:"warning", PARTIAL:"info", DEMO:"warning", OFFLINE:"text3", UNAVAILABLE:"text3" };
+var FRESHNESS_ROLE = { LIVE:"info", DELAYED:"neutral", STALE:"warning", PARTIAL:"neutral", DEMO:"warning", OFFLINE:"text3", UNAVAILABLE:"text3" };
 export function getFreshnessMeta(status, c){
   var m = FRESHNESS_META[status] || FRESHNESS_META.UNAVAILABLE;
   if(c){

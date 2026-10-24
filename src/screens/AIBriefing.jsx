@@ -24,7 +24,7 @@ function buildPrompt() {
 
 export default function AIBriefing() {
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
-  BD=theme.c.border; CB=theme.c.card; DB=theme.c.bg; G2=theme.c.up; R=theme.c.down; T2=theme.c.text2;
+  BD=theme.c.border; CB=theme.c.card; DB=theme.c.bg; G2=theme.c.blue; R=theme.c.down; T2=theme.c.text2;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
   var BLUE = theme.c.blue, G = theme.c.brand; T1=theme.c.text1;
 
@@ -115,7 +115,7 @@ export default function AIBriefing() {
           </div>
           <div style={{textAlign:"right"}}>
             {lastFetch ? <div style={{fontSize:12,color:T2,marginBottom:4}}>Last: {lastFetch}</div> : null}
-            <button onClick={getBriefing} disabled={loading} style={{background:loading?"rgba(0,200,83,0.2)":G,border:"none",borderRadius:12,padding:"12px 16px",color:"#fff",fontSize:12,fontWeight:700,cursor:loading?"default":"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:8}}>
+            <button onClick={getBriefing} disabled={loading} style={{background:loading?theme.c.blueSoft:theme.c.accent,border:"none",borderRadius:12,padding:"12px 16px",color:"#fff",fontSize:12,fontWeight:700,cursor:loading?"default":"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:8}}>
               {loading ? (
                 <span style={{display:"inline-block",width:12,height:12,border:"2px solid rgba(255,255,255,0.3)",borderTop:"2px solid #fff",borderRadius:"50%",animation:"spin 0.8s linear infinite"}}></span>
               ) : null}
@@ -129,7 +129,7 @@ export default function AIBriefing() {
           <div style={{background:"rgba(30,144,255,0.1)",border:"1px solid rgba(30,144,255,0.2)",borderRadius:20,padding:"4px 12px"}}>
             <span style={{fontSize:12,color:BLUE,fontWeight:700}}>Powered by Groq Llama 3.3</span>
           </div>
-          <div style={{background:"rgba(0,200,83,0.1)",border:"1px solid rgba(0,200,83,0.2)",borderRadius:20,padding:"4px 12px"}}>
+          <div style={{background:theme.c.blueSoft,border:"1px solid "+theme.c.border,borderRadius:20,padding:"4px 12px"}}>
             <span style={{fontSize:12,color:G2,fontWeight:700}}>Ultra Fast AI</span>
           </div>
         </div>
@@ -161,7 +161,7 @@ export default function AIBriefing() {
             <div style={{background:CB,border:"1px solid rgba(0,200,83,0.15)",borderRadius:16,padding:16,marginBottom:12}}>
               {renderBriefing(briefing)}
             </div>
-            <button onClick={getBriefing} style={{width:"100%",background:"rgba(0,200,83,0.08)",border:"1px solid rgba(0,200,83,0.2)",borderRadius:12,padding:12,color:G2,fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit",marginBottom:12}}>
+            <button onClick={getBriefing} style={{width:"100%",background:theme.c.blueSoft,border:"1px solid "+theme.c.border,borderRadius:12,padding:12,color:G2,fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit",marginBottom:12}}>
               Refresh Briefing
             </button>
           </div>

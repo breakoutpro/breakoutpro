@@ -14,7 +14,7 @@ export function ToolsScreen() {
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   BD=theme.c.border; CB=theme.c.card; DB=theme.c.bg; G2=theme.c.up; R=theme.c.down; T2=theme.c.text2;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
-  var G = theme.c.brand, BLUE = theme.c.blue; T1=theme.c.text1;
+  var G = theme.c.up, BLUE = theme.c.blue; T1=theme.c.text1;   // G = long / up: market meaning
 
   var [tool, setTool] = React.useState("rr");
   var [e1, setE1] = React.useState("22500");
@@ -109,7 +109,7 @@ export function JournalScreen() {
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   BD=theme.c.border; CB=theme.c.card; DB=theme.c.bg; G2=theme.c.up; R=theme.c.down; T2=theme.c.text2;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
-  var G = theme.c.brand, BLUE = theme.c.blue; T1=theme.c.text1;
+  var G = theme.c.up, BLUE = theme.c.blue; T1=theme.c.text1;   // G = long / up: market meaning
 
   var stored = [];
   try{stored = JSON.parse(localStorage.getItem("bp_journal")||"[]");}catch(e){}
@@ -246,7 +246,7 @@ export function ChallengesScreen() {
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   BD=theme.c.border; CB=theme.c.card; DB=theme.c.bg; G2=theme.c.up; R=theme.c.down; T2=theme.c.text2;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
-  var G = theme.c.brand, BLUE = theme.c.blue; T1=theme.c.text1;
+  var G = theme.c.up, BLUE = theme.c.blue; T1=theme.c.text1;   // G = long / up: market meaning
 
   var xp0=0; try{xp0=parseInt(localStorage.getItem("bp_xp")||"0");}catch(e){}
   var done0=[]; try{done0=JSON.parse(localStorage.getItem("bp_done")||"[]");}catch(e){}
@@ -280,7 +280,7 @@ export function ChallengesScreen() {
         <div style={{fontSize:16,fontWeight:700,color:T1,lineHeight:1.5,marginBottom:16}}>{active.q}</div>
         {active.opts.map(function(opt,i){
           var bg=sel==null?"rgba(255,255,255,0.04)":i==active.ans?"rgba(0,200,83,0.2)":i==sel?"rgba(239,68,68,0.2)":"rgba(255,255,255,0.04)";
-          var bd=sel==null?BD:i==active.ans?G:i==sel?R:BD;
+          var bd=sel==null?BD:i==active.ans?BLUE:i==sel?T2:BD;
           return <button key={i} onClick={function(){answer(i);}} disabled={sel!=null} style={{width:"100%",background:bg,border:"1px solid "+bd,borderRadius:12,padding:"12px 16px",marginBottom:8,textAlign:"left",cursor:sel!=null?"default":"pointer",fontFamily:"inherit",fontSize:14,color:T1}}>{opt}</button>;
         })}
         {sel!=null ? <div style={{textAlign:"center",padding:"12px 0",fontSize:14,fontWeight:700,color:sel==active.ans?G2:R}}>{sel==active.ans?"Correct! +"+active.xp+" XP":"Wrong! Study the topic."}</div> : null}
@@ -324,7 +324,7 @@ export function SubScreen(props) {
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   BD=theme.c.border; CB=theme.c.card; DB=theme.c.bg; G2=theme.c.up; R=theme.c.down; T2=theme.c.text2;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
-  var G = theme.c.brand, BLUE = theme.c.blue; T1=theme.c.text1;
+  var G = theme.c.up, BLUE = theme.c.blue; T1=theme.c.text1;   // G = long / up: market meaning
 
   var [paying,setPaying]=React.useState(null);
   var [payStatus,setPayStatus]=React.useState("");
@@ -407,7 +407,7 @@ export function SubScreen(props) {
               </button>
             </div>
             {plan.features.map(function(f){
-              return <div key={f} style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}><span style={{color:G2,fontSize:12}}>OK</span><span style={{fontSize:12,color:T2}}>{f}</span></div>;
+              return <div key={f} style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}><span style={{color:BLUE,fontSize:12}}>OK</span><span style={{fontSize:12,color:T2}}>{f}</span></div>;
             })}
           </div>
         );

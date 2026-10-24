@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { G, nowT, localAI } from "../utils/helpers";
+import { nowT, localAI } from "../utils/helpers";
+var G = "#4D8DF8";   // accent (not green): brand colour policy
 import { AI_KB, CANDLE_PATTERNS } from "../data/globals";
 
 import { useTheme } from "../theme/ThemeProvider";

@@ -9,9 +9,9 @@ import { useTheme } from "../theme/ThemeProvider";
 var DB = "#050505";
 var CB = "#101318";
 var BD = "#20242D";
-var G = "#00C853";
-var G2 = "#00E676";
-var R = "#EF4444";
+var G = "#4D8DF8";
+var G2 = "#4D8DF8";
+var R = "#94A3B8";
 var BLUE = "#3B82F6";
 var T1 = "#FFFFFF";
 var T2 = "#8899BB";
@@ -70,7 +70,7 @@ function SectionHeader(props) {
 export default function SettingsScreen(props) {
 
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
-  G2=theme.c.up;
+  G2=theme.c.blue;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks
   // above so this screen actually switches with the selected theme.
   var DB = theme.c.bg, CB = theme.c.card, BD = theme.c.border;
@@ -153,9 +153,9 @@ export default function SettingsScreen(props) {
         <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:12}}>{t("set.appearance")}</div>
         <div role="radiogroup" aria-label={t("set.theme_aria")} style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
           {[
-            {id:"light", label:t("set.light"), sw:["#F3F5F8","#FFFFFF","#00632F"]},
-            {id:"dark", label:t("set.dark"), sw:["#0B0F14","#131922","#1FAE5B"]},
-            {id:"amoled", label:t("set.amoled"), sw:["#000000","#0A0A0A","#22B862"]},
+            {id:"light", label:t("set.light"), sw:["#F4F6FA","#FFFFFF","#2563EB"]},
+            {id:"dark", label:t("set.dark"), sw:["#0B1220","#131C2E","#4D8DF8"]},
+            {id:"amoled", label:t("set.amoled"), sw:["#000000","#0A0A0A","#4D8DF8"]},
             {id:"system", label:t("set.system"), sw:null}
           ].map(function(m){
             var act = theme.mode==m.id;
@@ -167,7 +167,7 @@ export default function SettingsScreen(props) {
                   </span>
                 ) : (
                   <span aria-hidden="true" style={{display:"flex",width:44,height:18,borderRadius:5,overflow:"hidden",border:"1px solid "+BD}}>
-                    <span style={{flex:1,background:"#F3F5F8"}}></span><span style={{flex:1,background:"#0B0F14"}}></span>
+                    <span style={{flex:1,background:"#F4F6FA"}}></span><span style={{flex:1,background:"#0B1220"}}></span>
                   </span>
                 )}
                 <span style={{overflowWrap:"anywhere",textAlign:"center"}}>{m.label}{act ? " \u2713" : ""}</span>
@@ -312,7 +312,7 @@ export default function SettingsScreen(props) {
           <SettingRow icon="&#128737;" label={t("set.sebi")} arrow={true} iconBg={theme.c.warningSoft} iconBorder={theme.c.border}/>
         </div>
         <div style={{padding:"12px 16px",cursor:"pointer"}} onClick={function(){props.onLogout && props.onLogout();}}>
-          <div style={{fontSize:12,fontWeight:700,color:R,textAlign:"center"}}>{t("set.logout")}</div>
+          <div style={{fontSize:12,fontWeight:700,color:theme.c.text1,textAlign:"center"}}>{t("set.logout")}</div>
         </div>
       </div>
 

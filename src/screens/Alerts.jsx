@@ -111,10 +111,10 @@ export default function SmartAlerts(props){
       </div>
 
       {/* STATUS BANNER - read only. Master switch lives ONLY in Settings. */}
-      <div style={{display:"flex",alignItems:"center",gap:8,background:master?"rgba(34,197,94,0.08)":"rgba(239,68,68,0.06)",border:"1px solid "+(master?"rgba(34,197,94,0.3)":"rgba(239,68,68,0.25)"),borderRadius:12,margin:"12px 16px 0",padding:"12px 16px"}}>
-        <span style={{width:9,height:9,borderRadius:"50%",background:master?UP:DOWN,flexShrink:0}}></span>
+      <div style={{display:"flex",alignItems:"center",gap:8,background:master?theme.c.blueSoft:theme.c.card2,border:"1px solid "+(master?theme.c.blue:theme.c.border),borderRadius:12,margin:"12px 16px 0",padding:"12px 16px"}}>
+        <span style={{width:9,height:9,borderRadius:"50%",background:master?BLUE2:T3,flexShrink:0}}></span>
         <div>
-          <div style={{fontSize:14,fontWeight:800,color:master?UP:DOWN}}>{master?t("al.enabled"):t("al.disabled")}</div>
+          <div style={{fontSize:14,fontWeight:800,color:master?BLUE2:T1}}>{master?t("al.enabled"):t("al.disabled")}</div>
           <div style={{fontSize:12,color:T3,marginTop:4}}>{master?t("al.on_note"):t("al.off_note")}</div>
         </div>
       </div>
@@ -128,7 +128,7 @@ export default function SmartAlerts(props){
       ):(
       <div>
       {/* STATUS SUMMARY */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,padding:"12px 16px 0"}}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,padding:"12px 16px 12px"}}>
         <Stat label={t("al.stat.watching")} value={t("al.stat.stocks",{n:watchlist.length})} tone="blue"/>
         <Stat label={t("al.stat.scanning")} value={master?t("al.stat.running"):t("al.stat.stopped")} tone={master?"up":"muted"}/>
         <Stat label={t("al.tab.tf")} value={timeframe} tone="gold"/>
@@ -187,7 +187,7 @@ export default function SmartAlerts(props){
                       <div style={{fontSize:12,fontWeight:700,color:T1}}>{t("al.cat."+cat.id, cat.label)}</div>
                       <div style={{fontSize:12,color:T3,marginTop:4}}>{t("al.n_types",{n:cat.types.length})}</div>
                     </div>
-                    <button onClick={function(){toggleCat(cat.id);}} style={{background:on?UP:CARD2,border:"1px solid "+(on?UP:BD2),borderRadius:20,padding:"4px 16px",color:on?"#fff":T2,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{on?"ON":"OFF"}</button>
+                    <button onClick={function(){toggleCat(cat.id);}} style={{background:on?theme.c.accent:CARD2,border:"1px solid "+(on?theme.c.accent:BD2),borderRadius:20,padding:"4px 16px",color:on?theme.c.onAccent:T2,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{on?"ON":"OFF"}</button>
                   </div>
                   {on&&(
                     <div style={{padding:"0 14px 10px",display:"flex",flexWrap:"wrap",gap:4}}>
@@ -239,7 +239,7 @@ export default function SmartAlerts(props){
                       var pc=alertPriority(al);
                       var col=pc.col;
                       var confTier=al.conf>=80?"High":al.conf>=65?"Medium":"Low"; // stays English (logic); shown via t()
-                      var confCol=al.conf>=80?UP:al.conf>=65?BLUE:DOWN;
+                      var confCol=al.conf>=80?BLUE2:T2;
                       var inWl=wl.has(al.sym);
                       return (
                         <div key={al.id} style={{background:al.unread?"rgba(59,130,246,0.05)":CARD,border:"1px solid "+(al.unread?"rgba(59,130,246,0.25)":BD),borderRadius:14,padding:"12px 12px",marginBottom:8,borderLeft:"3px solid "+col}}>
@@ -266,12 +266,12 @@ export default function SmartAlerts(props){
                             <div><div style={{fontSize:12,color:T3}}>{t("al.current")}</div><div style={{fontSize:12,fontWeight:700,color:T1,fontFamily:"monospace"}}>{al.cur?"\u20B9"+al.cur:"--"}</div></div>
                             <div><div style={{fontSize:12,color:T3}}>{t("al.change")}</div><div style={{fontSize:12,fontWeight:700,color:parseFloat(al.chg)>=0?UP:DOWN}}>{al.chg?(parseFloat(al.chg)>=0?"+":"")+al.chg+"%":"--"}</div></div>
                             <div style={{flex:1}}></div>
-                            <div style={{textAlign:"right"}}><div style={{fontSize:12,color:T3}}>{t("al.volume")}</div><div style={{fontSize:12,fontWeight:700,color:al.vol?UP:T3}}>{al.vol?t("al.vol_conf"):t("al.vol_norm")}</div></div>
+                            <div style={{textAlign:"right"}}><div style={{fontSize:12,color:T3}}>{t("al.volume")}</div><div style={{fontSize:12,fontWeight:700,color:al.vol?BLUE2:T3}}>{al.vol?t("al.vol_conf"):t("al.vol_norm")}</div></div>
                           </div>
                           {/* actions */}
                           <div style={{display:"flex",gap:8,marginTop:8}}>
                             <button onClick={function(){setTab("markets");}} style={{flex:1,background:"rgba(59,130,246,0.12)",border:"1px solid rgba(59,130,246,0.3)",borderRadius:9,padding:"8px",color:BLUE2,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{t("al.view_chart")}</button>
-                            <button onClick={function(){ if(!inWl) wl.add(al.sym); dismissAlert(al.id); }} style={{flex:1,background:inWl?"rgba(34,197,94,0.12)":CARD2,border:"1px solid "+(inWl?"rgba(34,197,94,0.3)":BD),borderRadius:9,padding:"8px",color:inWl?UP:T2,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{inWl?t("al.in_wl"):t("al.add_wl")}</button>
+                            <button onClick={function(){ if(!inWl) wl.add(al.sym); dismissAlert(al.id); }} style={{flex:1,background:inWl?theme.c.blueSoft:CARD2,border:"1px solid "+(inWl?theme.c.blue:BD),borderRadius:9,padding:"8px",color:inWl?BLUE2:T2,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{inWl?t("al.in_wl"):t("al.add_wl")}</button>
                             <button onClick={function(){dismissAlert(al.id);}} style={{background:CARD2,border:"1px solid "+BD,borderRadius:12,padding:"12px 24px",color:T3,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>&#10005;</button>
                           </div>
                         </div>
@@ -330,7 +330,7 @@ function Stat(props){
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
   var CARD = theme.c.card, T3 = theme.c.text3; T1=theme.c.text1; UP=theme.c.up;
 
-  var col=props.tone=="up"?UP:props.tone=="blue"?BLUE2:props.tone=="gold"?BLUE:props.tone=="muted"?T3:T1;
+  var col=props.tone=="up"?BLUE2:props.tone=="blue"?BLUE2:props.tone=="gold"?BLUE:props.tone=="muted"?T3:T1;
   return (
     <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:"8px 8px"}}>
       <div style={{fontSize:12,color:T3,marginBottom:4}}>{props.label}</div>

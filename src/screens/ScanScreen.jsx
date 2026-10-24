@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SECTIONS } from "./ScannerData";
 import { hasAccess, t, useLang } from "../i18n/translations";
 import ScannerDetailPro from "./ScannerDetailPro";
+import { useDensity } from "../theme/density";
 
 import { useTheme } from "../theme/ThemeProvider";
 // BreakoutPro - ScanScreen.jsx (Scanner Hub)
@@ -17,6 +18,7 @@ var SEC_ICON=["&#128202;","&#128200;","&#127919;","&#129302;","&#128218;","&#128
 
 export default function ScanScreen(props){
   useLang();
+  var D = useDensity();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   BD=theme.c.border;
   BLUE=theme.c.blue; 
@@ -37,7 +39,7 @@ export default function ScanScreen(props){
 
   return (
     <div style={{background:BG,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:90}}>
-      <div style={{background:BG,padding:"16px 16px 12px",borderBottom:"1px solid "+BD,position:"sticky",top:0,zIndex:10}}>
+      <div style={{background:BG,padding:D.on?"10px 16px 8px":"16px 16px 12px",borderBottom:"1px solid "+BD,position:"sticky",top:0,zIndex:10}}>
         <div style={{fontSize:18,fontWeight:900,color:T1}}>{t("hub.title")}</div>
         <div style={{fontSize:12,color:T2,marginTop:4}}>{t("hub.subtitle")}</div>
         <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8}}>
@@ -46,21 +48,21 @@ export default function ScanScreen(props){
         </div>
       </div>
 
-      <div style={{padding:16}}>
+      <div style={{padding:D.on?12:16}}>
         {SECTIONS.map(function(sec,si){
           return (
-            <div key={sec.name} style={{marginBottom:24}}>
-              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+            <div key={sec.name} style={{marginBottom:D.on?14:24}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:D.on?6:12}}>
                 <span style={{fontSize:14}} dangerouslySetInnerHTML={{__html:SEC_ICON[si]||"&#128202;"}}/>
                 <span style={{fontSize:12,fontWeight:800,color:T1,letterSpacing:0.3}}>{t("hub.sec."+sec.name.toLowerCase().replace(/[^a-z]+/g,"_"), sec.name)}</span>
                 {sec.pro?<span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 8px",borderRadius:4}}>{t("hub.pro")}</span>:null}
               </div>
 
-              <div style={{display:"grid",gridTemplateColumns:"1fr",gap:8}}>
+              <div style={{display:"grid",gridTemplateColumns:D.on?"repeat(auto-fill, minmax(min(100%, 300px), 1fr))":"1fr",gap:8}}>
                 {sec.items.map(function(it){
                   var locked=it.pro && !prem;
                   return (
-                    <button key={it.id} onClick={function(){ if(locked){setTab("sub");return;} openItem(it); }} style={{display:"flex",alignItems:"center",gap:12,background:CARD,border:"1px solid "+BD,borderRadius:12,padding:"12px 24px",cursor:"pointer",fontFamily:"inherit",textAlign:"left",width:"100%"}}>
+                    <button key={it.id} onClick={function(){ if(locked){setTab("sub");return;} openItem(it); }} style={{display:"flex",alignItems:"center",gap:12,background:CARD,border:"1px solid "+BD,borderRadius:12,padding:D.on?"8px 12px":"12px 24px",cursor:"pointer",fontFamily:"inherit",textAlign:"left",width:"100%"}}>
                       <div style={{width:38,height:38,background:CARD2,border:"1px solid "+BD2,borderRadius:16,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                         <span style={{fontSize:16}} dangerouslySetInnerHTML={{__html:SEC_ICON[si]||"&#128202;"}}/>
                       </div>

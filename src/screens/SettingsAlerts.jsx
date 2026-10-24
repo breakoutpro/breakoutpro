@@ -1,5 +1,6 @@
 import { useTheme } from "../theme/ThemeProvider";
 import { t, useLang } from "../i18n/translations";
+import { useDensity } from "../theme/density";
 // BreakoutPro - SettingsAlerts.jsx
 // Alert Types section for Settings (breakout, breakdown, pattern, volume, vwap, rsi).
 // Rules: no backtick, no triple-equals, ASCII only.
@@ -21,16 +22,17 @@ function Toggle(props){
 }
 
 function Row(props){
+  var D = useDensity();
   var theme = useTheme();
   var BD = theme.c.border, T1 = theme.c.text1, T2 = theme.c.text2;
   return (
-    <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderBottom:"1px solid "+BD}}>
-      <div style={{width:36,height:36,borderRadius:10,background:props.bg,border:"1px solid "+props.bd,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+    <div style={{display:"flex",alignItems:"center",gap:12,padding:D.on?"8px 12px":"12px 16px",borderBottom:"1px solid "+BD}}>
+      <div style={{width:D.on?32:36,height:D.on?32:36,borderRadius:10,background:props.bg,border:"1px solid "+props.bd,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
         <span style={{fontSize:16,color:theme.c.text1}} dangerouslySetInnerHTML={{__html:props.icon}}/>
       </div>
       <div style={{flex:1}}>
         <div style={{fontSize:12,fontWeight:600,color:T1}}>{props.label}</div>
-        <div style={{fontSize:12,color:T2,marginTop:4}}>{props.sub}</div>
+        <div style={{fontSize:12,color:T2,marginTop:D.on?2:4}}>{props.sub}</div>
       </div>
       <Toggle value={props.value} onChange={props.onChange}/>
     </div>
@@ -52,7 +54,7 @@ export default function SettingsAlerts(props){
   var st=props.st||{};
   var toggle=props.toggle||function(){};
   return (
-    <div style={{background:theme.c.card,border:"1px solid "+theme.c.border,borderRadius:16,margin:"0 14px",overflow:"hidden"}}>
+    <div style={{background:theme.c.card,border:"1px solid "+theme.c.border,borderRadius:16,margin:props.flush?0:"0 14px",overflow:"hidden"}}>
       {TYPES.map(function(ty){
         return <Row key={ty.key} icon={ty.icon} label={t("set.t."+ty.k, ty.label)} sub={t("set.t."+ty.k+"_sub", ty.sub)} bg={ty.bg} bd={ty.bd} value={st[ty.key]} onChange={function(){toggle(ty.key);}}/>;
       })}

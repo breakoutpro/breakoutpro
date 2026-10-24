@@ -3,6 +3,7 @@ import { useTheme } from "../theme/ThemeProvider";
 import { INDICES } from "../data/marketsMeta";
 import { genSpark } from "../utils/genSpark";
 import MiniChart from "../components/MiniChart";
+import { useDensity } from "../theme/density";
 // BreakoutPro - MarketsUI. Pure black theme, neutral accents.
 // Green/red only for market direction. Rules: no backtick, no triple-equals, ASCII.
 
@@ -16,24 +17,25 @@ function BackBtn(props) {
 }
 
 function StockRow(props) {
+  var D=useDensity();
   var TH=useTheme().c;
   var DB=TH.bg,CB=TH.card,BD=TH.border,G=TH.up,G2=TH.up,R=TH.down,BLUE=TH.blue,T1=TH.text1,T2=TH.text2,T3=TH.text3,WARN=TH.warn;
   var s=props.s,spark=genSpark(s.ltp,{points:14,additive:true});
   return (
-    <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderBottom:"1px solid "+BD,cursor:"pointer"}} onClick={props.onClick}>
-      <div style={{width:36,height:36,borderRadius:10,background:"rgba(255,255,255,0.04)",border:"1px solid "+BD,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+    <div style={{display:"flex",alignItems:"center",gap:12,padding:D.on?"6px 12px":"12px 16px",borderBottom:"1px solid "+BD,cursor:"pointer",minWidth:0}} onClick={props.onClick}>
+      <div style={{width:D.on?32:36,height:D.on?32:36,borderRadius:10,background:"rgba(255,255,255,0.04)",border:"1px solid "+BD,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
         <span style={{fontSize:12,fontWeight:800,color:T2}}>{s.sym.slice(0,3)}</span>
       </div>
-      <div style={{flex:1}}>
+      <div style={{flex:1,minWidth:0}}>
         <div style={{fontSize:12,fontWeight:700,color:T1}}>{s.sym}</div>
-        <div style={{fontSize:12,color:T2,marginTop:4}}>{s.sect}</div>
+        <div style={{fontSize:12,color:T2,marginTop:D.on?2:4}}>{s.sect}</div>
       </div>
       <MiniChart data={spark} color={s.up?G:R} w={44} h={20}/>
       <div style={{textAlign:"right",minWidth:80}}>
         <div style={{fontFamily:"monospace",fontSize:12,fontWeight:800,color:T1}}>
           Rs{s.ltp>=1000?(s.ltp/1000).toFixed(1)+"K":s.ltp.toFixed(2)}
         </div>
-        <div style={{background:s.up?"rgba(34,197,94,0.12)":"rgba(239,68,68,0.12)",borderRadius:5,padding:"4px 8px",fontSize:12,fontWeight:700,color:s.up?G2:R,marginTop:4}}>{s.up?"+":""}{s.chgPct.toFixed(2)}%</div>
+        <div style={{background:s.up?"rgba(34,197,94,0.12)":"rgba(239,68,68,0.12)",borderRadius:5,padding:D.on?"2px 8px":"4px 8px",fontSize:12,fontWeight:700,color:s.up?G2:R,marginTop:D.on?2:4}}>{s.up?"+":""}{s.chgPct.toFixed(2)}%</div>
       </div>
       <span style={{color:T2,fontSize:14}}>&#8250;</span>
     </div>

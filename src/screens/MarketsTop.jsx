@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TAGLINE, INDEX_STRIP, MOOD, FIIDII, GLOBAL } from "./MarketsTopData";
 import { IndexDetailPage, VIXDetailPage, FlowDetailPage } from "./MarketsTopDetail";
 import IndexFullPage from "./IndexFullPage";
+import { useDensity } from "../theme/density";
 
 import { useTheme } from "../theme/ThemeProvider";
 // BreakoutPro - MarketsTop.jsx
@@ -21,6 +22,7 @@ function Head(props){
 }
 
 export default function MarketsTop(props){
+  var D = useDensity();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   BD=theme.c.border; DOWN=theme.c.down;
   BLUE=theme.c.blue; 
@@ -43,19 +45,19 @@ export default function MarketsTop(props){
   }
 
   return (
-    <div style={{padding:"4px 16px 0"}}>
+    <div style={{padding:D.on?"0 16px 0":"4px 16px 0"}}>
 
       {/* TAGLINE */}
-      <div style={{marginBottom:12}}>
+      <div style={{marginBottom:D.on?8:12}}>
         <div style={{fontSize:16,fontWeight:900,color:T1}} dangerouslySetInnerHTML={{__html:TAGLINE.main}}/>
         <div style={{fontSize:12,color:T3,fontWeight:600,marginTop:4}} dangerouslySetInnerHTML={{__html:TAGLINE.sub}}/>
       </div>
 
       {/* INDEX STRIP - compact horizontal scroll */}
-      <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:8,marginBottom:16}}>
+      <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:D.on?4:8,marginBottom:D.on?10:16}}>
         {INDEX_STRIP.map(function(x){
           return (
-            <div key={x.key} onClick={function(){openIdx(x.key);}} style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:"8px 12px",minWidth:108,flexShrink:0,cursor:"pointer"}}>
+            <div key={x.key} onClick={function(){openIdx(x.key);}} style={{background:CARD,border:"1px solid "+BD,borderRadius:D.on?12:16,padding:"8px 12px",minWidth:108,flexShrink:0,cursor:"pointer"}}>
               <div style={{fontSize:12,color:T2,fontWeight:600,marginBottom:4}}>{x.name}</div>
               <div style={{fontSize:14,fontWeight:800,color:T1,fontFamily:"monospace"}}>{x.val}</div>
               <div style={{fontSize:12,fontWeight:700,color:x.up?UP:DOWN,marginTop:4}}>{x.chg}</div>
@@ -64,31 +66,34 @@ export default function MarketsTop(props){
         })}
       </div>
 
+      <div style={D.on ? {display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 380px), 1fr))",gap:D.gap,marginBottom:D.on?10:16,alignItems:"start"} : null}>
+      <div style={{minWidth:0}}>
       {/* MARKET SENTIMENT */}
       <Head>MARKET SENTIMENT</Head>
-      <div style={{display:"flex",gap:8,marginBottom:16}}>
-        <div style={{flex:1,background:CARD,border:"1px solid "+BD,borderRadius:16,padding:12,textAlign:"center"}}>
+      <div style={{display:"flex",gap:8,marginBottom:D.on?0:16}}>
+        <div style={{flex:1,background:CARD,border:"1px solid "+BD,borderRadius:D.on?12:16,padding:D.on?"8px 12px":12,textAlign:"center"}}>
           <div style={{fontSize:12,color:T2,marginBottom:4}}>Market Mood</div>
           <div style={{fontSize:18,fontWeight:900,color:MOOD.label=="Bullish"?UP:MOOD.label=="Bearish"?DOWN:BLUE}}>{MOOD.label}</div>
           <div style={{fontSize:12,color:T3,marginTop:4}}>Score {MOOD.score}/100</div>
         </div>
-        <div style={{flex:1,background:CARD,border:"1px solid "+BD,borderRadius:16,padding:12,textAlign:"center"}}>
+        <div style={{flex:1,background:CARD,border:"1px solid "+BD,borderRadius:D.on?12:16,padding:D.on?"8px 12px":12,textAlign:"center"}}>
           <div style={{fontSize:12,color:T2,marginBottom:4}}>Fear &amp; Greed</div>
           <div style={{fontSize:18,fontWeight:900,color:MOOD.fg>=55?UP:MOOD.fg<=45?DOWN:BLUE}}>{MOOD.fg}</div>
           <div style={{fontSize:12,color:T3,marginTop:4}}>{MOOD.fgLabel}</div>
         </div>
       </div>
 
+      </div>
       {/* FII / DII - clickable to full details */}
-      <div onClick={function(){setView({type:"flow"});}} style={{cursor:"pointer"}}>
+      <div onClick={function(){setView({type:"flow"});}} style={{cursor:"pointer",minWidth:0}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",margin:"0 0 9px"}}>
           <span style={{fontSize:12,color:T2,fontWeight:800,letterSpacing:0.6}}>INSTITUTIONAL FLOW  &#8226;  FII / DII</span>
           <span style={{fontSize:12,color:BLUE,fontWeight:700}}>View details &#8250;</span>
         </div>
-        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,overflow:"hidden",marginBottom:16}}>
+        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:D.on?12:16,overflow:"hidden",marginBottom:D.on?0:16}}>
           {FIIDII.map(function(x,i){
             return (
-              <div key={x.name} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 12px",borderBottom:i<FIIDII.length-1?"1px solid "+BD:"none"}}>
+              <div key={x.name} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:D.on?"6px 12px":"12px 12px",borderBottom:i<FIIDII.length-1?"1px solid "+BD:"none"}}>
                 <div>
                   <div style={{fontSize:12,fontWeight:700,color:T1}}>{x.name}</div>
                   <div style={{fontSize:12,color:T3,marginTop:4}}>{x.note}</div>
@@ -100,12 +105,13 @@ export default function MarketsTop(props){
         </div>
       </div>
 
+      </div>
       {/* GLOBAL MARKETS */}
       <Head>GLOBAL MARKETS</Head>
-      <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:8,marginBottom:8}}>
+      <div style={D.on ? {display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(92px, 1fr))",gap:8,marginBottom:8} : {display:"flex",gap:8,overflowX:"auto",paddingBottom:8,marginBottom:8}}>
         {GLOBAL.map(function(x){
           return (
-            <div key={x.name} style={{background:CARD2,border:"1px solid "+BD,borderRadius:16,padding:"8px 12px",minWidth:96,flexShrink:0}}>
+            <div key={x.name} style={{background:CARD2,border:"1px solid "+BD,borderRadius:D.on?12:16,padding:"8px 12px",minWidth:D.on?0:96,flexShrink:0}}>
               <div style={{fontSize:12,color:T2,marginBottom:4}}>{x.name}</div>
               <div style={{fontSize:14,fontWeight:800,color:T1,fontFamily:"monospace"}}>{x.val}</div>
               <div style={{fontSize:12,fontWeight:700,color:x.up?UP:DOWN,marginTop:4}}>{x.chg}</div>

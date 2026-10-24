@@ -3,6 +3,7 @@ import CandleIcon from "../components/CandleIcon";
 import { CANDLE_DETAIL } from "./CandleDetailData";
 
 import { useTheme } from "../theme/ThemeProvider";
+import { useDensity } from "../theme/density";
 var DB="#0A0E1A",CB="#0F1629",BD="#1E2D4A",G="#00C853",G2="#00E676",R="#EF4444",BLUE="#3B82F6",T1="#FFFFFF",T2="#8899BB",T3="#475569";
 
 var CANDLES=[
@@ -64,6 +65,7 @@ export default function CandleLibrary(props){
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
   var BLUE = theme.c.blue;
 
+  var D = useDensity();
   var setTab = props.setTab || function(){};
   var [filter,setFilter]=useState("all");
   var [selected,setSelected]=useState(null);
@@ -119,7 +121,7 @@ export default function CandleLibrary(props){
       </div>
 
       <div style={{padding:"12px 16px"}}>
-        <div style={{display:"flex",gap:8,marginBottom:16}}>
+        <div style={{display:"flex",gap:8,marginBottom:D.on?12:16,maxWidth:D.on?480:undefined}}>
           {[["all","All"],["bullish","Bullish"],["bearish","Bearish"],["neutral","Neutral"]].map(function(f){
             var act=filter==f[0];
             var col=f[0]=="bullish"?G2:f[0]=="bearish"?R:f[0]=="neutral"?BLUE:BLUE;
@@ -127,11 +129,11 @@ export default function CandleLibrary(props){
           })}
         </div>
 
-        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+        <div style={D.on?{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(min(100%,300px),1fr))",gap:D.gap}:{display:"flex",flexDirection:"column",gap:8}}>
           {filtered.map(function(c){
             var col=c.type=="bullish"?G2:c.type=="bearish"?R:BLUE;
             return (
-              <div key={c.name} onClick={function(){setSelected(c);}} style={{background:CB,border:"1px solid "+BD,borderRadius:16,padding:"12px 12px",cursor:"pointer",display:"flex",alignItems:"center",gap:12}}>
+              <div key={c.name} onClick={function(){setSelected(c);}} style={{background:CB,border:"1px solid "+BD,borderRadius:D.on?D.radius:16,padding:D.on?"8px 12px":"12px 12px",cursor:"pointer",minWidth:0,display:"flex",alignItems:"center",gap:12}}>
                 <div style={{width:46,height:46,background:"rgba(255,255,255,0.02)",border:"1px solid "+BD,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                   <CandleIcon name={c.name} size={38}/>
                 </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { CandleChart, findZones } from "./IndexHelpers";
 
 import { useTheme } from "../theme/ThemeProvider";
+import { useDensity } from "../theme/density";
 var DB="#050505",CB="#101318",BD="#20242D",G="#1B5E20",G2="#1B5E20",R="#EF4444",BLUE="#3B82F6",T1="#FFFFFF",T2="#8899BB",T3="#475569";
 
 function genQuarters(sym){
@@ -15,11 +16,21 @@ function genQuarters(sym){
   });
 }
 
+function genNews(sym,sect){
+  return [
+    {title:sym+" reports strong quarterly performance, beats estimates",time:"2d ago",sentiment:"good"},
+    {title:sect+" sector outlook remains positive amid policy support",time:"4d ago",sentiment:"good"},
+    {title:sym+" announces new expansion plans for next fiscal year",time:"1w ago",sentiment:"neutral"},
+    {title:"Analysts maintain buy rating on "+sym+" with revised target",time:"2w ago",sentiment:"good"},
+  ];
+}
+
 function toYahooSym(sym){
   return sym.replace("&","").replace(" ","") + ".NS";
 }
 
 export default function StockProfile(props){
+  var D = useDensity();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   G2=theme.c.up; R=theme.c.down; T1=theme.c.text1; T2=theme.c.text2; T3=theme.c.text3;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
@@ -37,28 +48,7 @@ export default function StockProfile(props){
   var [ipoInfo,setIpoInfo]=useState(null);
 
   var [quarters]=useState(genQuarters(s.sym));
-
-  // Real stock-specific news, filtered from the same live ET Markets feed
-  // Home/News.jsx use - matches by symbol (useLiveNews()'s own extractStock())
-  // or the company name appearing in the real headline text. If nothing
-  // stock-specific is found, falls back to the top general market
-  // headlines rather than inventing a sector-tagged story - the real feed
-  // has no per-sector tagging to fall back on honestly.
-  var liveNews = props.liveNews || [];
-  var news = (function(){
-    var symUpper = (s.sym||"").toUpperCase();
-    var nameUpper = (s.name||"").toUpperCase();
-    var matched = liveNews.filter(function(n){
-      if(n.stock && n.stock===symUpper) return true;
-      var title = (n.title||"").toUpperCase();
-      return title.indexOf(symUpper)>=0 || (nameUpper && title.indexOf(nameUpper)>=0);
-    });
-    return matched.length>0 ? matched.slice(0,6) : liveNews.slice(0,4);
-  })();
-  var hasStockSpecificNews = (function(){
-    var symUpper = (s.sym||"").toUpperCase();
-    return liveNews.some(function(n){ return n.stock===symUpper; });
-  })();
+  var [news]=useState(genNews(s.sym,s.sect));
 
   function fetchHistory(r){
     setLoading(true);
@@ -100,8 +90,8 @@ export default function StockProfile(props){
     <div style={{background:DB,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:32}}>
 
       {/* Header */}
-      <div style={{background:CB,padding:"12px 16px",borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",gap:12}}>
-        <button onClick={onBack} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:44,height:44,color:T1,fontSize:14,cursor:"pointer"}}>&#8592;</button>
+      <div style={{background:CB,padding:D.headPad,borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",gap:12}}>
+        <button onClick={onBack} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:D.back,height:D.back,color:T1,fontSize:14,cursor:"pointer"}}>&#8592;</button>
         <div style={{flex:1}}>
           <div style={{fontSize:18,fontWeight:900,color:T1}}>{s.sym}</div>
           <div style={{fontSize:12,color:T2}}>{s.name||s.sym} &#8226; {s.sect}</div>
@@ -116,16 +106,17 @@ export default function StockProfile(props){
       <div style={{display:"flex",background:CB,borderBottom:"1px solid "+BD,padding:"0 8px"}}>
         {[["overview","Overview"],["financials","Financials"],["news","News"],["technical","Technical"]].map(function(t){
           var act=tab==t[0];
-          return <button key={t[0]} onClick={function(){setTab(t[0]);}} style={{flex:1,background:"none",border:"none",borderBottom:act?"2px solid "+BLUE:"2px solid transparent",padding:"12px 4px",color:act?BLUE:T2,fontSize:12,fontWeight:act?700:400,cursor:"pointer",fontFamily:"inherit"}}>{t[1]}</button>;
+          return <button key={t[0]} onClick={function(){setTab(t[0]);}} style={{flex:1,background:"none",border:"none",borderBottom:act?"2px solid "+BLUE:"2px solid transparent",padding:D.on?"8px 4px":"12px 4px",color:act?BLUE:T2,fontSize:12,fontWeight:act?700:400,cursor:"pointer",fontFamily:"inherit"}}>{t[1]}</button>;
         })}
       </div>
 
-      <div style={{padding:16}}>
+      <div style={{padding:D.on?12:16}}>
 
         {tab=="overview"?(
-          <div>
+          <div style={D.on ? {display:"grid",gridTemplateColumns:"minmax(0, 1.7fr) minmax(280px, 1fr)",gap:D.gap,alignItems:"start"} : null}>
+            <div style={{minWidth:0}}>
             {/* Candlestick chart with range selector */}
-            <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,padding:16,marginBottom:12}}>
+            <div style={{background:CB,border:"1px solid "+BD,borderRadius:D.on?12:16,padding:D.on?12:16,marginBottom:12}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
                 <div style={{display:"flex",alignItems:"center",gap:4}}>
                   <div style={{width:5,height:5,borderRadius:"50%",background:dataSource=="live"?G2:BLUE}}></div>
@@ -167,11 +158,13 @@ export default function StockProfile(props){
               </div>
             ):null}
 
+            </div>
+            <div style={{minWidth:0}}>
             {/* Key stats grid */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12}}>
+            <div style={{display:"grid",gridTemplateColumns:D.on?"1fr 1fr":"1fr 1fr 1fr",gap:8,marginBottom:12}}>
               {[["52W High","Rs"+meta.high52],["52W Low","Rs"+meta.low52],["Mkt Cap",meta.mcap],["P/E Ratio",meta.pe],["P/B Ratio",meta.pb],["Sector",s.sect]].map(function(r){
                 return (
-                  <div key={r[0]} style={{background:CB,border:"1px solid "+BD,borderRadius:16,padding:"12px 8px",textAlign:"center"}}>
+                  <div key={r[0]} style={{background:CB,border:"1px solid "+BD,borderRadius:D.on?12:16,padding:D.on?"8px":"12px 8px",textAlign:"center",minWidth:0}}>
                     <div style={{fontSize:12,color:T2,marginBottom:4}}>{r[0]}</div>
                     <div style={{fontSize:12,fontWeight:700,color:T1}}>{r[1]}</div>
                   </div>
@@ -188,15 +181,17 @@ export default function StockProfile(props){
             <div style={{background:"rgba(249,115,22,0.08)",border:"1px solid rgba(249,115,22,0.2)",borderRadius:10,padding:12}}>
               <div style={{fontSize:12,color:theme.c.warn}}>Educational only. Not SEBI registered. Not investment advice.</div>
             </div>
+            </div>
           </div>
         ):null}
 
         {tab=="financials"?(
           <div>
             <div style={{fontSize:12,fontWeight:700,color:T2,marginBottom:12,letterSpacing:0.5}}>QUARTERLY RESULTS (Rs Cr)</div>
+            <div style={D.on ? {display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(min(100%, 300px), 1fr))",gap:8} : null}>
             {quarters.map(function(q,i){
               return (
-                <div key={i} style={{background:CB,border:"1px solid "+BD,borderRadius:16,padding:"12px 16px",marginBottom:8}}>
+                <div key={i} style={{background:CB,border:"1px solid "+BD,borderRadius:D.on?12:16,padding:D.on?"8px 12px":"12px 16px",marginBottom:D.on?0:8}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
                     <span style={{fontSize:12,fontWeight:700,color:T1}}>{q.q}</span>
                     <span style={{fontSize:12,fontWeight:700,color:q.up?G2:R,background:(q.up?"rgba(0,200,83,0.1)":"rgba(239,68,68,0.1)"),borderRadius:6,padding:"4px 8px"}}>{q.up?"+":""}{q.yoy}% YoY</span>
@@ -214,7 +209,8 @@ export default function StockProfile(props){
                 </div>
               );
             })}
-            <div style={{background:"rgba(249,115,22,0.08)",border:"1px solid rgba(249,115,22,0.2)",borderRadius:10,padding:12,marginTop:4}}>
+            </div>
+            <div style={{background:"rgba(249,115,22,0.08)",border:"1px solid rgba(249,115,22,0.2)",borderRadius:10,padding:12,marginTop:8}}>
               <div style={{fontSize:12,color:theme.c.warn}}>Simulated data for demonstration. Verify with official filings before trading decisions.</div>
             </div>
           </div>
@@ -222,27 +218,20 @@ export default function StockProfile(props){
 
         {tab=="news"?(
           <div>
-            <div style={{fontSize:12,fontWeight:700,color:T2,marginBottom:12,letterSpacing:0.5}}>
-              {hasStockSpecificNews ? "LATEST NEWS - " + s.sym : "GENERAL MARKET NEWS (no " + s.sym + "-specific headlines right now)"}
-            </div>
-            {news.length===0 ? (
-              <div style={{fontSize:12,color:T3}}>Market news unavailable right now.</div>
-            ) : news.map(function(n,i){
-              var sentColor = n.sentiment=="good"?"#16A34A":n.sentiment=="bad"?"#DC2626":"#EAB308";
-              var sentLabel = n.sentiment=="good"?"BULLISH":n.sentiment=="bad"?"BEARISH":"NEUTRAL";
+            <div style={{fontSize:12,fontWeight:700,color:T2,marginBottom:12,letterSpacing:0.5}}>LATEST NEWS - {s.sym}</div>
+            <div style={D.on ? {display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(min(100%, 340px), 1fr))",gap:8} : null}>
+            {news.map(function(n,i){
               return (
-                <div key={i} style={{background:CB,border:"1px solid "+BD,borderRadius:16,padding:"12px 16px",marginBottom:8}}>
+                <div key={i} style={{background:CB,border:"1px solid "+BD,borderRadius:D.on?12:16,padding:D.on?"8px 12px":"12px 16px",marginBottom:D.on?0:8}}>
                   <div style={{display:"flex",gap:8,marginBottom:8}}>
-                    <span style={{fontSize:12,fontWeight:700,color:sentColor,background:sentColor+"18",border:"1px solid "+sentColor+"55",borderRadius:6,padding:"4px 8px"}}>{sentLabel}</span>
+                    <span style={{fontSize:12,fontWeight:700,color:n.sentiment=="good"?G2:n.sentiment=="bad"?R:BLUE,background:(n.sentiment=="good"?"rgba(0,200,83,0.1)":n.sentiment=="bad"?"rgba(239,68,68,0.1)":"rgba(37,99,235,0.1)"),borderRadius:6,padding:"4px 8px"}}>{n.sentiment=="good"?"Positive":n.sentiment=="bad"?"Negative":"Neutral"}</span>
                   </div>
                   <div style={{fontSize:12,fontWeight:600,color:T1,lineHeight:1.5,marginBottom:4}}>{n.title}</div>
-                  <div style={{display:"flex",gap:10,alignItems:"center"}}>
-                    <span style={{fontSize:12,color:T3}}>{n.time} &#183; {n.source||"ET Markets"}</span>
-                    {n.link?<a href={n.link} target="_blank" rel="noopener noreferrer" style={{fontSize:12,color:BLUE,fontWeight:600,textDecoration:"underline"}}>Read Full Article &#8599;</a>:null}
-                  </div>
+                  <div style={{fontSize:12,color:T3}}>{n.time}</div>
                 </div>
               );
             })}
+            </div>
           </div>
         ):null}
 

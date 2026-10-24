@@ -2,6 +2,7 @@ import { useState } from "react";
 import PatternSVG from "./PatternSVG";
 
 import { useTheme } from "../theme/ThemeProvider";
+import { useDensity } from "../theme/density";
 var DB = "#0A0E1A";
 var CB = "#0F1629";
 var BD = "#1E2D4A";
@@ -13,6 +14,7 @@ var T1 = "#FFFFFF";
 var T2 = "#8899BB";
 
 export function PatternCard(props) {
+  var D = useDensity();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   var CB = theme.c.card, BD = theme.c.border, T1 = theme.c.text1, T2 = theme.c.text2;
   var G2 = theme.c.up, R = theme.c.down, BLUE = theme.c.blue;
@@ -22,7 +24,7 @@ export function PatternCard(props) {
   var isFav = props.isFav;
   var isDone = props.isDone;
   return (
-    <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,padding:16,marginBottom:8,cursor:"pointer"}} onClick={props.onClick}>
+    <div style={{background:CB,border:"1px solid "+BD,borderRadius:D.on?12:16,padding:D.on?"10px 12px":16,marginBottom:D.on?0:8,cursor:"pointer",minWidth:0}} onClick={props.onClick}>
       <div style={{display:"flex",alignItems:"flex-start",gap:12}}>
         <div style={{background:tb,border:"1px solid "+tc+"44",borderRadius:10,padding:"8px 12px",flexShrink:0,textAlign:"center",minWidth:44}}>
           <div style={{fontSize:12,fontWeight:700,color:tc}}>{p.type[0]}</div>

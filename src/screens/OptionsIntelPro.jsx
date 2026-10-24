@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAcademyProgress } from "../hooks/useAcademyProgress";
 import { useResponsive } from "../hooks/useResponsive";
+import { useDensity } from "../theme/density";
 import { GREEKS, STRATEGY_CARDS, MAX_PAIN_SAMPLE, QUIZ_QUESTIONS } from "./OptionsIntelProData";
 import { useTheme } from "../theme/ThemeProvider";
 import { t, useLang } from "../i18n/translations";
@@ -66,22 +67,23 @@ export default function OptionsIntelPro(props){
   var onOpenLiveChain = props.onOpenLiveChain || null;
   var progress = useAcademyProgress(); // same hook/storage as the rest of Academy
   var responsive = useResponsive();
+  var D = useDensity();
   var [section, setSection] = useState(props.initialSection || null);
 
   if(!section){
     var quizDone = progress.isComplete("oip_quiz");
     return (
       <div style={{background:theme.c.bg,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:40}}>
-        <div style={{background:CARD,padding:"12px 16px",borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",gap:12}}>
-          <button onClick={onBack} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:44,height:44,color:T1,fontSize:16,cursor:"pointer"}}>&#8592;</button>
+        <div style={{background:CARD,padding:D.headPad,borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",gap:12}}>
+          <button onClick={onBack} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:D.back,height:D.back,color:T1,fontSize:16,cursor:"pointer"}}>&#8592;</button>
           <div>
             <div style={{fontSize:16,fontWeight:800,color:T1}}>Options Intelligence Pro</div>
             <div style={{fontSize:12,color:T2}}>{onOpenLiveChain ? t("opt.sub_live") : t("opt.sub_off")}</div>
           </div>
         </div>
-        <div style={{padding:responsive.isMobile?12:16}}>
+        <div style={{padding:responsive.isMobile?12:(D.on?12:16)}}>
           {onOpenLiveChain ? (
-            <div onClick={onOpenLiveChain} style={{background:theme.c.blueSoft,border:"1px solid "+theme.c.blue,borderRadius:14,padding:responsive.isMobile?"12px 14px":16,marginBottom:14,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}>
+            <div onClick={onOpenLiveChain} style={{background:theme.c.blueSoft,border:"1px solid "+theme.c.blue,borderRadius:14,padding:responsive.isMobile?"12px 14px":(D.on?"10px 14px":16),marginBottom:D.on?10:14,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}>
               <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0}}>
                 <span style={{width:8,height:8,borderRadius:"50%",background:theme.c.blue,flexShrink:0}}></span>
                 <div style={{minWidth:0}}>
@@ -92,9 +94,10 @@ export default function OptionsIntelPro(props){
               <span style={{color:T3,fontSize:16,flexShrink:0}}>&#8250;</span>
             </div>
           ) : null}
+          <div style={D.on ? {display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(min(100%, 340px), 1fr))",gap:8} : null}>
           {SECTIONS.map(function(s){
             return (
-              <div key={s.id} onClick={function(){setSection(s.id);}} style={{background:CARD,border:"1px solid "+BD,borderRadius:14,padding:responsive.isMobile?"12px 14px":16,marginBottom:10,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}>
+              <div key={s.id} onClick={function(){setSection(s.id);}} style={{background:CARD,border:"1px solid "+BD,borderRadius:14,padding:responsive.isMobile?"12px 14px":(D.on?"10px 14px":16),marginBottom:D.on?0:10,cursor:"pointer",minWidth:0,display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}>
                 <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0}}>
                   <span style={{fontSize:16,flexShrink:0}} dangerouslySetInnerHTML={{__html:s.ic}}/>
                   <span style={{fontSize:12,fontWeight:700,color:T1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{t("opt.m."+s.id, s.label)}</span>
@@ -103,7 +106,8 @@ export default function OptionsIntelPro(props){
               </div>
             );
           })}
-          <div style={{background:"rgba(249,115,22,0.06)",border:"1px solid rgba(249,115,22,0.15)",borderRadius:10,padding:12,marginTop:12}}>
+          </div>
+          <div style={{background:"rgba(249,115,22,0.06)",border:"1px solid rgba(249,115,22,0.15)",borderRadius:10,padding:12,marginTop:D.on?10:12}}>
             <div style={{fontSize:12,color:T2,lineHeight:1.5}}>{t("opt.disclaimer")}</div>
           </div>
         </div>
@@ -113,8 +117,8 @@ export default function OptionsIntelPro(props){
 
   return (
     <div style={{background:theme.c.bg,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:40}}>
-      <div style={{background:CARD,padding:"12px 16px",borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",gap:12}}>
-        <button onClick={function(){setSection(null);}} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:44,height:44,color:T1,fontSize:16,cursor:"pointer"}}>&#8592;</button>
+      <div style={{background:CARD,padding:D.headPad,borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",gap:12}}>
+        <button onClick={function(){setSection(null);}} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:D.back,height:D.back,color:T1,fontSize:16,cursor:"pointer"}}>&#8592;</button>
         <div style={{fontSize:14,fontWeight:800,color:T1}}>{t("opt.m."+section, SECTIONS.filter(function(s){return s.id==section;})[0].label)}</div>
       </div>
       <div style={{padding:16}}>

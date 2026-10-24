@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTheme } from "../theme/ThemeProvider";
 import { genSpark } from "../utils/genSpark";
 import { t, useLang } from "../i18n/translations";
+import { useDensity } from "../theme/density";
 
 var DB = "#050505";
 var CB = "#101318";
@@ -155,6 +156,7 @@ function StockDetail(props) {
 }
 
 export default function ScannerScreen(props) {
+  var D = useDensity();
   useLang();
 
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
@@ -215,11 +217,11 @@ export default function ScannerScreen(props) {
     <div style={{background:DB,minHeight:"100%",paddingBottom:80,fontFamily:"Inter,Arial,sans-serif"}}>
 
       {/* Scan Tabs */}
-      <div style={{display:"flex",gap:8,overflowX:"auto",padding:"12px 16px",background:CB,borderBottom:"1px solid "+BD}}>
+      <div style={{display:"flex",gap:8,overflowX:"auto",padding:D.on?"8px 16px":"12px 16px",background:CB,borderBottom:"1px solid "+BD}}>
         {SCANS.map(function(sc){
           var act = active==sc.id;
           return (
-            <button key={sc.id} style={{background:act?BLUE:"rgba(255,255,255,0.06)",border:"1px solid "+(act?BLUE:BD),borderRadius:20,padding:"8px 16px",color:act?"#fff":T2,fontSize:12,fontWeight:act?700:500,cursor:"pointer",fontFamily:"inherit",flexShrink:0}} onClick={function(){runScan(sc.id);}}>
+            <button key={sc.id} style={{background:act?BLUE:"rgba(255,255,255,0.06)",border:"1px solid "+(act?BLUE:BD),borderRadius:20,padding:D.on?"6px 14px":"8px 16px",color:act?"#fff":T2,fontSize:12,fontWeight:act?700:500,cursor:"pointer",fontFamily:"inherit",flexShrink:0}} onClick={function(){runScan(sc.id);}}>
               {sc.label}
             </button>
           );
@@ -232,8 +234,8 @@ export default function ScannerScreen(props) {
         <span style={{fontSize:12,fontWeight:700,color:BLUE}}>{results.length} {t("sc.found")}</span>
       </div>
 
-      <div style={{padding:"12px 16px"}}>
-        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+      <div style={{padding:D.on?"8px 16px":"12px 16px"}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:D.on?8:12}}>
           <span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 8px",borderRadius:5,letterSpacing:0.5}}>{t("c.demo_data")}</span>
           <span style={{fontSize:12,color:T3}}>{t("sc.simulated")}</span>
         </div>
@@ -243,17 +245,17 @@ export default function ScannerScreen(props) {
             <div style={{fontSize:12,color:T3}}>{t("sc.try_other")}</div>
           </div>
         ):(
-          <div style={{background:CB,borderRadius:16,border:"1px solid "+BD,overflow:"hidden"}}>
+          <div style={D.on ? {display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(min(100%, 420px), 1fr))",gap:8} : {background:CB,borderRadius:16,border:"1px solid "+BD,overflow:"hidden"}}>
             {results.map(function(s){
               var spark = genSpark(s.ltp,{points:14,additive:true,bias:s.up?0.4:0.6});
               return (
-                <div key={s.sym} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderBottom:"1px solid "+BD,cursor:"pointer"}} onClick={function(){setSelStock(s);}}>
+                <div key={s.sym} style={D.on ? {display:"flex",alignItems:"center",gap:12,padding:"8px 12px",background:CB,border:"1px solid "+BD,borderRadius:12,cursor:"pointer",minWidth:0} : {display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderBottom:"1px solid "+BD,cursor:"pointer"}} onClick={function(){setSelStock(s);}}>
                   <div style={{width:38,height:38,borderRadius:10,background:"rgba(30,144,255,0.1)",border:"1px solid rgba(30,144,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                     <span style={{fontSize:12,fontWeight:800,color:BLUE}}>{s.sym.slice(0,3)}</span>
                   </div>
-                  <div style={{flex:1}}>
+                  <div style={{flex:1,minWidth:0}}>
                     <div style={{fontSize:12,fontWeight:700,color:T1}}>{s.sym}</div>
-                    <div style={{fontSize:12,color:T2,marginTop:4}}>{s.sect}</div>
+                    <div style={{fontSize:12,color:T2,marginTop:D.on?2:4}}>{s.sect}</div>
                   </div>
                   <SparkLine data={spark} color={s.up?G:R} w={44} h={20}/>
                   <div style={{textAlign:"right",minWidth:80}}>

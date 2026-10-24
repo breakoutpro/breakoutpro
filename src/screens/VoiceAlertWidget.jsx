@@ -64,7 +64,7 @@ export default function VoiceAlertWidget(props){
   var curLang=LANGS.filter(function(l){return l.id==va.lang;})[0]||LANGS[0];
 
   return (
-    <div style={{padding:"16px 16px 0"}}>
+    <div style={{padding:props.flush?0:"16px 16px 0"}}>
       <div style={{background:CARD,border:"1px solid "+(va.enabled?theme.c.blue:BD),borderRadius:16,padding:"16px"}}>
 
         {/* HEADER ROW + MASTER TOGGLE */}

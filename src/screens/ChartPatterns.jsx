@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PatternCard, PatternDetail } from "./ChartPatternsUI";
+import { useDensity } from "../theme/density";
 import { PATTERNS } from "./PatternData";
 
 import { useTheme } from "../theme/ThemeProvider";
@@ -14,6 +15,7 @@ var T2 = "#8899BB";
 
 
 export default function ChartPatterns() {
+  var D = useDensity();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   BD=theme.c.border; CB=theme.c.card; DB=theme.c.bg; G2=theme.c.up; R=theme.c.down; T2=theme.c.text2;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
@@ -52,7 +54,7 @@ export default function ChartPatterns() {
 
   return (
     <div style={{background:DB,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:80}}>
-      <div style={{background:CB,padding:"12px 16px",borderBottom:"1px solid "+BD}}>
+      <div style={{background:CB,padding:D.on?"8px 16px":"12px 16px",borderBottom:"1px solid "+BD}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
           <div>
             <div style={{fontSize:18,fontWeight:900,color:T1}}>Chart <span style={{color:BLUE}}>Patterns</span></div>
@@ -86,7 +88,9 @@ export default function ChartPatterns() {
           </div>
         ):null}
         <div style={{fontSize:12,fontWeight:700,color:T2,marginBottom:8}}>{filtered.length} PATTERNS</div>
+        <div style={D.on ? {display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(min(100%, 380px), 1fr))",gap:8} : null}>
         {filtered.map(function(p){return <PatternCard key={p.id} p={p} isFav={favs.indexOf(p.id)!=-1} isDone={done.indexOf(p.id)!=-1} onClick={function(){open(p);}} onFav={function(){toggleFav(p.id);}}/>;  })}
+        </div>
         {filtered.length==0?<div style={{textAlign:"center",padding:"40px 0",color:T2}}><div style={{fontSize:14,fontWeight:700,marginBottom:4}}>No patterns found</div><div style={{fontSize:12}}>Try different search or filter</div></div>:null}
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { DATA_LABEL, DAILY_FLOWS, netFlow, aggregate, METRIC_EXPLANATIONS, generateInsight } from "./FiiDiiData";
 import { useFiiDiiBookmarks } from "../hooks/useFiiDiiBookmarks";
+import { useDensity } from "../theme/density";
 
 import { useTheme } from "../theme/ThemeProvider";
 // BreakoutPro - FiiDiiIntelligencePro.jsx
@@ -26,19 +27,21 @@ function fmtCr(n){
 }
 
 function Explain(props){
+  var D = useDensity();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   T2=theme.c.text2; T1=theme.c.text1;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
   var BD = theme.c.border, CARD = theme.c.card;
 
   return (
-    <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:12,marginBottom:12}}>
+    <div style={{background:CARD,border:"1px solid "+BD,borderRadius:D.on?12:16,padding:12,marginBottom:D.on?0:12,minWidth:0}}>
       <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:8}}>{props.title.toUpperCase()}</div>
       <div style={{fontSize:12,color:T1,lineHeight:1.6}}>{props.text}</div>
     </div>
   );
 }
 function NetCard(props){
+  var D = useDensity();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   T2=theme.c.text2;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
@@ -46,8 +49,8 @@ function NetCard(props){
 
   var col = props.value>=0 ? UP : R;
   return (
-    <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:16,flex:1}}>
-      <div style={{fontSize:12,color:T2,marginBottom:8}}>{props.label}</div>
+    <div style={{background:CARD,border:"1px solid "+BD,borderRadius:D.on?12:16,padding:D.on?"10px 12px":16,flex:1,minWidth:0}}>
+      <div style={{fontSize:12,color:T2,marginBottom:D.on?4:8}}>{props.label}</div>
       <div style={{fontSize:16,fontWeight:800,color:col}}>{fmtCr(props.value)}</div>
     </div>
   );
@@ -59,6 +62,7 @@ export default function FiiDiiIntelligencePro(props){
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
   var BD = theme.c.border, BLUE = theme.c.blue, CARD = theme.c.card, R = theme.c.down, T3 = theme.c.text3, UP = theme.c.up, T2=theme.c.text2; T1=theme.c.text1;
 
+  var D = useDensity();
   var onBack = props.onBack || function(){};
   var bookmarks = useFiiDiiBookmarks(); // single instance for this whole subtree
 
@@ -90,69 +94,87 @@ export default function FiiDiiIntelligencePro(props){
 
   return (
     <div style={{background:theme.c.bg,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:40}}>
-      <div style={{background:CARD,padding:"12px 16px",borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",gap:12}}>
-        <button onClick={onBack} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:44,height:44,color:T1,fontSize:16,cursor:"pointer"}}>&#8592;</button>
+      <div style={{background:CARD,padding:D.headPad,borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",gap:12}}>
+        <button onClick={onBack} style={{background:"rgba(255,255,255,0.06)",border:"none",borderRadius:8,width:D.back,height:D.back,color:T1,fontSize:16,cursor:"pointer"}}>&#8592;</button>
         <div>
           <div style={{fontSize:18,fontWeight:800,color:T1}}>FII / DII Intelligence Pro</div>
           <div style={{fontSize:12,color:T2}}>{DATA_LABEL}</div>
         </div>
       </div>
 
-      <div style={{padding:16}}>
-        <div style={{background:"rgba(37,99,235,0.06)",border:"1px solid rgba(37,99,235,0.15)",borderRadius:10,padding:12,marginBottom:16}}>
+      <div style={{padding:D.pagePad}}>
+        <div style={{background:"rgba(37,99,235,0.06)",border:"1px solid rgba(37,99,235,0.15)",borderRadius:10,padding:D.on?"8px 12px":12,marginBottom:D.on?12:16}}>
           <div style={{fontSize:12,color:T2,lineHeight:1.5}}>Breakout Pro has no live FII/DII data feed connected. All figures below are fixed illustrative examples for learning purposes, not live institutional data. Never investment advice, never a market-direction prediction.</div>
         </div>
 
-        <div style={{display:"flex",gap:8,marginBottom:16}}>
+        <div style={{display:"flex",gap:8,marginBottom:D.on?12:16,maxWidth:D.on?440:"none"}}>
           {["Daily","Weekly","Monthly"].map(function(p){
             var act=p==period;
             return <button key={p} onClick={function(){setPeriod(p);}} style={{flex:1,background:act?BLUE:"transparent",border:"1px solid "+(act?BLUE:BD),borderRadius:9,padding:"8px 4px",color:act?"#fff":T2,fontSize:12,fontWeight:act?800:600,cursor:"pointer",fontFamily:"inherit",minHeight:44}}>{p} Flow</button>;
           })}
         </div>
 
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-          <div style={{fontSize:12,fontWeight:800,color:T2}}>FII DASHBOARD</div>
-          <span onClick={function(){bookmarks.toggleBookmark(viewId);}} style={{fontSize:18,color:saved?T2:T3,cursor:"pointer",minWidth:44,minHeight:44,display:"flex",alignItems:"center",justifyContent:"center"}}>{saved?"\u2605":"\u2606"}</span>
-        </div>
-        <div style={{display:"flex",gap:12,marginBottom:16}}>
-          <NetCard label="FII Buy" value={agg.fiiBuy}/>
-          <NetCard label="FII Sell" value={-agg.fiiSell}/>
-        </div>
-        <div style={{marginBottom:16}}>
-          <NetCard label="FII Net Flow" value={agg.fiiNet}/>
+        <div style={D.on ? {display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 420px), 1fr))",gap:D.gap,marginBottom:D.gap} : null}>
+          <div style={{minWidth:0}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:D.on?6:12}}>
+              <div style={{fontSize:12,fontWeight:800,color:T2}}>FII DASHBOARD</div>
+              <span onClick={function(){bookmarks.toggleBookmark(viewId);}} style={{fontSize:18,color:saved?T2:T3,cursor:"pointer",minWidth:D.on?36:44,minHeight:D.on?28:44,display:"flex",alignItems:"center",justifyContent:"center"}}>{saved?"\u2605":"\u2606"}</span>
+            </div>
+            <div style={D.on ? {display:"flex",gap:8} : null}>
+              <div style={{display:"flex",gap:12,marginBottom:D.on?0:16,flex:D.on?2:undefined}}>
+                <NetCard label="FII Buy" value={agg.fiiBuy}/>
+                <NetCard label="FII Sell" value={-agg.fiiSell}/>
+              </div>
+              <div style={{marginBottom:D.on?0:16,flex:D.on?1:undefined,display:"flex"}}>
+                <NetCard label="FII Net Flow" value={agg.fiiNet}/>
+              </div>
+            </div>
+          </div>
+          <div style={{minWidth:0}}>
+            <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:D.on?6:12,minHeight:D.on?28:undefined,display:"flex",alignItems:"center"}}>DII DASHBOARD</div>
+            <div style={D.on ? {display:"flex",gap:8} : null}>
+              <div style={{display:"flex",gap:12,marginBottom:D.on?0:16,flex:D.on?2:undefined}}>
+                <NetCard label="DII Buy" value={agg.diiBuy}/>
+                <NetCard label="DII Sell" value={-agg.diiSell}/>
+              </div>
+              <div style={{marginBottom:D.on?0:16,flex:D.on?1:undefined,display:"flex"}}>
+                <NetCard label="DII Net Flow" value={agg.diiNet}/>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:12}}>DII DASHBOARD</div>
-        <div style={{display:"flex",gap:12,marginBottom:16}}>
-          <NetCard label="DII Buy" value={agg.diiBuy}/>
-          <NetCard label="DII Sell" value={-agg.diiSell}/>
-        </div>
-        <div style={{marginBottom:16}}>
-          <NetCard label="DII Net Flow" value={agg.diiNet}/>
-        </div>
-
-        <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:12}}>BUY VS SELL COMPARISON</div>
-        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:16,marginBottom:16}}>
+        <div style={D.on ? {display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 420px), 1fr))",gap:D.gap,marginBottom:D.gap} : null}>
+        <div style={{minWidth:0}}>
+        <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:D.on?6:12}}>BUY VS SELL COMPARISON</div>
+        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:D.on?12:16,padding:D.on?"4px 12px":16,marginBottom:D.on?0:16}}>
           <Row label="FII Gross Buy" value={fmtCr(agg.fiiBuy)}/>
           <Row label="FII Gross Sell" value={fmtCr(agg.fiiSell)}/>
           <Row label="DII Gross Buy" value={fmtCr(agg.diiBuy)}/>
           <Row label="DII Gross Sell" value={fmtCr(agg.diiSell)} last={true}/>
         </div>
+        </div>
 
-        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:16,marginBottom:16}}>
+        <div style={{minWidth:0}}>
+        <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:D.on?6:0,display:D.on?"block":"none"}}>&nbsp;</div>
+        <div style={{background:CARD,border:"1px solid "+BD,borderRadius:D.on?12:16,padding:D.on?12:16,marginBottom:D.on?0:16}}>
           <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:8}}>RULE-BASED INSIGHT</div>
           {insight.map(function(line,i){
             return <div key={i} style={{fontSize:12,color:T1,lineHeight:1.6,marginBottom:8}}>{line}</div>;
           })}
         </div>
+        </div>
+        </div>
 
-        <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:12}}>EDUCATIONAL EXPLANATIONS</div>
+        <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:D.on?6:12}}>EDUCATIONAL EXPLANATIONS</div>
+        <div style={D.on ? {display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 240px), 1fr))",gap:D.gap,marginBottom:D.gap} : null}>
         <Explain title="FII Net Flow" text={METRIC_EXPLANATIONS.fiiNet}/>
         <Explain title="DII Net Flow" text={METRIC_EXPLANATIONS.diiNet}/>
         <Explain title="Buy vs Sell" text={METRIC_EXPLANATIONS.buyVsSell}/>
         <Explain title={period+" Flow"} text={METRIC_EXPLANATIONS[period.toLowerCase()+"Flow"]}/>
+        </div>
 
-        <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:12,marginTop:8}}>TIMELINE</div>
+        <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:D.on?6:12,marginTop:D.on?0:8}}>TIMELINE</div>
         <div style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap"}}>
           <input value={search} onChange={function(e){setSearch(e.target.value);}} placeholder="Search date (e.g. Mon, Tue)..." style={{flex:1,minWidth:160,background:CARD,border:"1px solid "+BD,borderRadius:16,padding:"8px 12px",color:T1,fontSize:12,fontFamily:"inherit"}}/>
           <input value={dateFilter} onChange={function(e){setDateFilter(e.target.value);}} type="date" style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:"8px 12px",color:T1,fontSize:12,fontFamily:"inherit"}}/>
@@ -160,17 +182,21 @@ export default function FiiDiiIntelligencePro(props){
 
         {filteredTimeline.length==0 ? (
           <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:24,textAlign:"center",color:T3,fontSize:12}}>No entries match your filters.</div>
-        ) : filteredTimeline.map(function(e,i){
-          var d = dateOf(e.daysAgo);
-          var nf = netFlow(e);
-          return (
-            <div key={i} style={{background:CARD,border:"1px solid "+BD,borderRadius:16,padding:16,marginBottom:12}}>
-              <div style={{fontSize:12,color:T3,marginBottom:8}}>{fmtDate(d)}</div>
-              <Row label="FII Net" value={fmtCr(nf.fiiNet)} color={nf.fiiNet>=0?UP:R}/>
-              <Row label="DII Net" value={fmtCr(nf.diiNet)} color={nf.diiNet>=0?UP:R} last={true}/>
-            </div>
-          );
-        })}
+        ) : (
+          <div style={D.on ? {display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(min(100%, 240px), 1fr))",gap:D.gap} : null}>
+            {filteredTimeline.map(function(e,i){
+              var d = dateOf(e.daysAgo);
+              var nf = netFlow(e);
+              return (
+                <div key={i} style={{background:CARD,border:"1px solid "+BD,borderRadius:D.on?12:16,padding:D.on?"8px 12px":16,marginBottom:D.on?0:12,minWidth:0}}>
+                  <div style={{fontSize:12,color:T3,marginBottom:D.on?4:8}}>{fmtDate(d)}</div>
+                  <Row label="FII Net" value={fmtCr(nf.fiiNet)} color={nf.fiiNet>=0?UP:R}/>
+                  <Row label="DII Net" value={fmtCr(nf.diiNet)} color={nf.diiNet>=0?UP:R} last={true}/>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -183,7 +209,7 @@ function Row(props){
   var BD = theme.c.border; T1=theme.c.text1;
 
   return (
-    <div style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:props.last?"none":"1px solid "+BD}}>
+    <div style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:props.last?"none":"1px solid "+BD}}>
       <span style={{fontSize:12,color:T2}}>{props.label}</span>
       <span style={{fontSize:12,fontWeight:700,color:props.color||T1}}>{props.value}</span>
     </div>

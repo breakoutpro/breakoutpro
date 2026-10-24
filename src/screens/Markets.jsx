@@ -7,10 +7,12 @@ import StockProfile from "./StockProfile";
 import IndexFullPage from "./IndexFullPage";
 import MarketsTop from "./MarketsTop";
 import { t, useLang } from "../i18n/translations";
+import { useDensity } from "../theme/density";
 
 // Colors come from the theme via useTheme() inside the component.
 
 export default function MarketsScreen(props) {
+  var D = useDensity();
   useLang();
   var TH=useTheme().c;
   var DB=TH.bg,CB=TH.card,BD=TH.border;
@@ -158,8 +160,8 @@ export default function MarketsScreen(props) {
 
   return (
     <div style={{background:DB,minHeight:"100%",paddingBottom:80,fontFamily:"Inter,Arial,sans-serif"}}>
-      <div style={{background:CB,padding:"12px 16px",borderBottom:"1px solid "+BD}}>
-        <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",border:"1px solid "+BD,borderRadius:9,padding:"8px 12px",marginBottom:12}}>
+      <div style={{background:CB,padding:D.on?"8px 16px":"12px 16px",borderBottom:"1px solid "+BD}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.04)",border:"1px solid "+BD,borderRadius:9,padding:D.on?"6px 12px":"8px 12px",marginBottom:D.on?8:12}}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T2} strokeWidth="2.2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input style={{flex:1,background:"none",border:"none",outline:"none",fontSize:12,color:T1,fontFamily:"inherit"}} placeholder={t("mk.search")} value={search} onChange={function(e){setSearch(e.target.value);}}/>
           {search?<button onClick={function(){setSearch("");}} style={{background:"none",border:"none",cursor:"pointer",color:T2,fontSize:12}}>X</button>:null}
@@ -181,12 +183,12 @@ export default function MarketsScreen(props) {
 
       {/* STOCKS */}
       {activeTab=="stocks"?(
-        <div style={{margin:"12px 16px 0"}}>
+        <div style={{margin:D.on?"8px 16px 0":"12px 16px 0"}}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
             <span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 8px",borderRadius:5,letterSpacing:0.5}}>{t("c.demo_data")}</span>
             <span style={{fontSize:12,color:T3}}>{t("mk.demo_note")}</span>
           </div>
-          <div style={{background:CB,borderRadius:16,border:"1px solid "+BD,overflow:"hidden"}}>
+          <div style={Object.assign({background:CB,borderRadius:D.on?12:16,border:"1px solid "+BD,overflow:"hidden"}, D.on ? {display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(min(100%, 440px), 1fr))"} : {})}>
             {filtered.length==0?(
               <div style={{padding:24,textAlign:"center",color:T2,fontSize:12}}>{t("mk.no_stocks")}</div>
             ):filtered.map(function(s){

@@ -6,6 +6,7 @@ import BookLibrary from "./BookLibrary";
 import PracticeZone from "./PracticeZone";
 import AcademyDashboard from "./AcademyDashboard";
 import { useTheme } from "../theme/ThemeProvider";
+import { useDensity } from "../theme/density";
 
 // BreakoutPro - AcademyHome.jsx
 // Trading Academy entry screen: module grid + real progress overview.
@@ -20,6 +21,7 @@ export default function AcademyHome(props){
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   DB=theme.c.bg; CB=theme.c.card; BD=theme.c.border;
   T1=theme.c.text1; T2=theme.c.text2; T3=theme.c.text3; BLUE=theme.c.blue; UP=theme.c.up; T2=theme.c.text2;
+  var D = useDensity();
   var onBack = props.onBack || function(){};
   var lang = props.lang || "en";
   var progress = useAcademyProgress(); // single instance for the whole Academy subtree
@@ -96,10 +98,11 @@ export default function AcademyHome(props){
         </div>
 
         <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:12}}>{at("modules",lang).toUpperCase()}</div>
+        <div style={D.on?{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(min(100%,320px),1fr))",gap:D.gap}:undefined}>
         {MODULES.map(function(m){
           var mp = progress.moduleProgress(m);
           return (
-            <div key={m.id} onClick={function(){setOpenModuleId(m.id);}} style={{background:CB,border:"1px solid "+BD,borderRadius:16,padding:16,marginBottom:12,cursor:"pointer",display:"flex",alignItems:"center",gap:12}}>
+            <div key={m.id} onClick={function(){setOpenModuleId(m.id);}} style={{background:CB,border:"1px solid "+BD,borderRadius:16,padding:D.on?12:16,marginBottom:D.on?0:12,cursor:"pointer",display:"flex",alignItems:"center",gap:12,minWidth:0}}>
               <div style={{width:44,height:44,borderRadius:12,background:m.color+"18",border:"1px solid "+m.color+"40",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{m.icon}</div>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontSize:14,fontWeight:700,color:T1}}>{m.title}</div>
@@ -112,6 +115,7 @@ export default function AcademyHome(props){
             </div>
           );
         })}
+        </div>
 
         <div style={{background:"rgba(249,115,22,0.06)",border:"1px solid rgba(249,115,22,0.15)",borderRadius:10,padding:12,marginTop:16}}>
           <div style={{fontSize:12,color:T2,lineHeight:1.5}}>Educational content only. No investment advice, no buy/sell recommendations. Progress is tracked locally on your device only.</div>

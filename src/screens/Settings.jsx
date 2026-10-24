@@ -5,6 +5,7 @@ import { t, useLang, LANGUAGES } from "../i18n/translations";
 import VoiceAlertWidget from "./VoiceAlertWidget";
 import SettingsAlerts from "./SettingsAlerts";
 import { useTheme } from "../theme/ThemeProvider";
+import { useDensity } from "../theme/density";
 
 var DB = "#050505";
 var CB = "#101318";
@@ -39,19 +40,20 @@ function Toggle(props) {
 }
 
 function SettingRow(props) {
+  var D = useDensity();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   T1=theme.c.text1; T2=theme.c.text2;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks above.
   var BD = theme.c.border, BLUE = theme.c.blue;
 
   return (
-    <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderBottom:"1px solid "+BD}}>
-      <div style={{width:36,height:36,borderRadius:10,background:props.iconBg||theme.c.blueSoft,border:"1px solid "+(props.iconBorder||theme.c.border),display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+    <div style={{display:"flex",alignItems:"center",gap:12,padding:D.on?"8px 12px":"12px 16px",borderBottom:"1px solid "+BD}}>
+      <div style={{width:D.on?32:36,height:D.on?32:36,borderRadius:10,background:props.iconBg||theme.c.blueSoft,border:"1px solid "+(props.iconBorder||theme.c.border),display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
         <span style={{fontSize:16,color:theme.c.text1}} dangerouslySetInnerHTML={{__html:props.icon}}/>
       </div>
       <div style={{flex:1}}>
         <div style={{fontSize:12,fontWeight:600,color:T1}}>{props.label}</div>
-        {props.sub ? <div style={{fontSize:12,color:T2,marginTop:4}}>{props.sub}</div> : null}
+        {props.sub ? <div style={{fontSize:12,color:T2,marginTop:D.on?2:4}}>{props.sub}</div> : null}
       </div>
       {props.toggle != undefined ? <Toggle value={props.toggle} onChange={props.onChange}/> : null}
       {props.value != undefined && props.toggle == undefined ? <div style={{fontSize:12,fontWeight:600,color:BLUE}}>{props.value}</div> : null}
@@ -62,13 +64,14 @@ function SettingRow(props) {
 
 function SectionHeader(props) {
   var theme = useTheme();
+  var D = useDensity();
   return (
-    <div style={{padding:"16px 16px 8px",fontSize:12,fontWeight:700,color:theme.c.text2,letterSpacing:1.2}}>{props.title}</div>
+    <div style={{padding:D.on?"4px 4px 6px":"16px 16px 8px",fontSize:12,fontWeight:700,color:theme.c.text2,letterSpacing:1.2}}>{props.title}</div>
   );
 }
 
 export default function SettingsScreen(props) {
-
+  var D = useDensity();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   G2=theme.c.blue;
   // Theme-sourced overrides - shadow the module-level hardcoded fallbacks
@@ -140,16 +143,18 @@ export default function SettingsScreen(props) {
     <div style={{background:DB,minHeight:"100vh",fontFamily:"Inter,Arial,sans-serif",paddingBottom:80}}>
 
       {/* Header */}
-      <div style={{background:CB,padding:"16px 16px",borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",gap:12}}>
-        <button onClick={function(){props.setTab&&props.setTab("home");}} style={{background:theme.c.card2,border:"none",borderRadius:8,width:44,height:44,color:T1,fontSize:14,cursor:"pointer",flexShrink:0}}>&#8592;</button>
+      <div style={{background:CB,padding:D.on?"10px 16px":"16px 16px",borderBottom:"1px solid "+BD,display:"flex",alignItems:"center",gap:12}}>
+        <button onClick={function(){props.setTab&&props.setTab("home");}} style={{background:theme.c.card2,border:"none",borderRadius:8,width:D.back,height:D.back,color:T1,fontSize:14,cursor:"pointer",flexShrink:0}}>&#8592;</button>
         <div>
           <div style={{fontSize:18,fontWeight:900,color:T1}}>{t("set.title")}</div>
-          <div style={{fontSize:12,color:T2,marginTop:4}}>Breakout Pro v1.0</div>
+          <div style={{fontSize:12,color:T2,marginTop:D.on?2:4}}>Breakout Pro v1.0</div>
         </div>
       </div>
 
+      <div style={D.on ? {columnWidth:420,columnGap:16,padding:"12px 16px 0"} : null}>
+      <div style={D.on ? {breakInside:"avoid",marginBottom:12} : null}>
       {/* Theme Settings */}
-      <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,margin:"16px 16px 0",padding:16}}>
+      <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,margin:D.on?0:"16px 16px 0",padding:D.on?12:16}}>
         <div style={{fontSize:12,fontWeight:800,color:T2,marginBottom:12}}>{t("set.appearance")}</div>
         <div role="radiogroup" aria-label={t("set.theme_aria")} style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
           {[
@@ -177,9 +182,10 @@ export default function SettingsScreen(props) {
         </div>
         <div style={{fontSize:10,color:T3,marginTop:8}}>{t("set.theme_hint")}</div>
       </div>
-
+      </div>
+      <div style={D.on ? {breakInside:"avoid",marginBottom:12} : null}>
       {/* Profile */}
-      <div style={{background:theme.c.card,border:"1px solid "+theme.c.border,borderRadius:16,margin:"16px 16px 0",padding:16,display:"flex",alignItems:"center",gap:12}}>
+      <div style={{background:theme.c.card,border:"1px solid "+theme.c.border,borderRadius:16,margin:D.on?0:"16px 16px 0",padding:D.on?12:16,display:"flex",alignItems:"center",gap:12}}>
         <div style={{width:52,height:52,borderRadius:14,background:theme.c.blue,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,fontWeight:900,color:theme.c.onAccent}}>
           {user.name ? user.name[0].toUpperCase() : "A"}
         </div>
@@ -197,14 +203,16 @@ export default function SettingsScreen(props) {
           <button onClick={function(){props.setTab && props.setTab("sub");}} style={{background:theme.c.accent,border:"none",borderRadius:12,padding:"12px 24px",color:theme.c.onAccent,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{t("set.upgrade")}</button>
         ) : null}
       </div>
-
+      </div>
+      <div style={D.on ? {breakInside:"avoid",marginBottom:12} : null}>
       {/* VOICE SMART ALERTS */}
       <SectionHeader title={t("set.voice_alerts")}/>
-      <VoiceAlertWidget/>
-
+      <VoiceAlertWidget flush={D.on}/>
+      </div>
+      <div style={D.on ? {breakInside:"avoid",marginBottom:12} : null}>
       {/* ALERTS SECTION */}
       <SectionHeader title={t("set.alert_settings")}/>
-      <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,margin:"0 14px",overflow:"hidden"}}>
+      <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,margin:D.on?0:"0 14px",overflow:"hidden"}}>
         <SettingRow icon="&#128276;" label={t("set.alert_sound")} sub={t("set.alert_sound_sub")} toggle={st.alertSound} onChange={function(){toggle("alertSound");}} iconBg={theme.c.blueSoft} iconBorder={theme.c.border}/>
         <SettingRow icon="&#128243;" label={t("set.vibration")} sub={t("set.vibration_sub")} toggle={st.alertVibrate} onChange={function(){toggle("alertVibrate");}} iconBg={theme.c.blueSoft} iconBorder={theme.c.border}/>
         <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderBottom:"1px solid "+BD}}>
@@ -224,14 +232,16 @@ export default function SettingsScreen(props) {
         </div>
         <SettingRow icon="&#9200;" label={t("set.reminder")} sub={t("set.reminder_sub")} toggle={st.marketReminder} onChange={function(){toggle("marketReminder");}} iconBg={theme.c.blueSoft} iconBorder={theme.c.border}/>
       </div>
-
+      </div>
+      <div style={D.on ? {breakInside:"avoid",marginBottom:12} : null}>
       {/* ALERT TYPES */}
       <SectionHeader title={t("set.alert_types")}/>
-      <SettingsAlerts st={st} toggle={toggle}/>
-
+      <SettingsAlerts st={st} toggle={toggle} flush={D.on}/>
+      </div>
+      <div style={D.on ? {breakInside:"avoid",marginBottom:12} : null}>
       {/* APP SETTINGS */}
       <SectionHeader title={t("set.app_settings")}/>
-      <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,margin:"0 14px",overflow:"hidden"}}>
+      <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,margin:D.on?0:"0 14px",overflow:"hidden"}}>
         {/* Language: opens the shared selector; applies instantly, no reload. */}
         <div onClick={function(){setShowLang(true);}} style={{cursor:"pointer"}}>
           <SettingRow icon="&#127760;" label={t("set.language_row")} sub={t("set.language_sub")} value={curLangRow.native} arrow={true} iconBg={theme.c.blueSoft} iconBorder={theme.c.border}/>
@@ -278,12 +288,13 @@ export default function SettingsScreen(props) {
           </div>
         </div>
       </div>
-
+      </div>
+      <div style={D.on ? {breakInside:"avoid",marginBottom:12} : null}>
       {/* ADMIN - Home Preview Override */}
       {isAdmin?(
         <div>
           <SectionHeader title="ADMIN"/>
-          <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,margin:"0 14px",overflow:"hidden"}}>
+          <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,margin:D.on?0:"0 14px",overflow:"hidden"}}>
             <div style={{padding:"12px 16px"}}>
               <div style={{fontSize:12,fontWeight:600,color:T1,marginBottom:4}}>Home Page Preview</div>
               <div style={{fontSize:12,color:T2,marginBottom:8}}>Force a specific home page to test/debug, instead of auto session switching</div>
@@ -300,10 +311,11 @@ export default function SettingsScreen(props) {
           </div>
         </div>
       ):null}
-
+      </div>
+      <div style={D.on ? {breakInside:"avoid",marginBottom:12} : null}>
       {/* ABOUT */}
       <SectionHeader title={t("set.about")}/>
-      <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,margin:"0 14px",overflow:"hidden"}}>
+      <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,margin:D.on?0:"0 14px",overflow:"hidden"}}>
         <SettingRow icon="&#8505;" label={t("set.app_version")} value="v1.0.0" iconBg={theme.c.card2} iconBorder={BD}/>
         <div onClick={function(){setShowPrivacy(true);}} style={{cursor:"pointer"}}>
           <SettingRow icon="&#128196;" label={t("set.privacy")} arrow={true} iconBg={theme.c.card2} iconBorder={BD}/>
@@ -315,10 +327,13 @@ export default function SettingsScreen(props) {
           <div style={{fontSize:12,fontWeight:700,color:theme.c.text1,textAlign:"center"}}>{t("set.logout")}</div>
         </div>
       </div>
-
+      </div>
+      <div style={D.on ? {breakInside:"avoid",marginBottom:12} : null}>
       {/* Disclaimer */}
-      <div style={{background:theme.c.warningSoft,border:"1px solid "+theme.c.border,borderRadius:10,margin:"16px 16px 0",padding:12}}>
+      <div style={{background:theme.c.warningSoft,border:"1px solid "+theme.c.border,borderRadius:10,margin:D.on?0:"16px 16px 0",padding:12}}>
         <div style={{fontSize:12,color:theme.c.warn,lineHeight:1.7}}>{t("set.disclaimer")}</div>
+      </div>
+      </div>
       </div>
 
     </div>

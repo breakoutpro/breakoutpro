@@ -113,22 +113,67 @@ self.addEventListener("fetch", function(e) {
   );
 });
 
+// ---- Smart Alerts push ------------------------------------------------------------------
+// Payload (server-built, already in the user's language):
+//   { title, body, tag, lang, data:{ url:"/?tab=alerts&open=<id>", symbol, id } }
+// The text is shown as sent. Nothing here invents an alert: no payload, no fabricated body.
+function safeUrl(u){
+  try{
+    if(typeof u != "string" || u.charAt(0) != "/" || u.charAt(1) == "/") return "/?tab=alerts";
+    return u;
+  }catch(ex){ return "/?tab=alerts"; }
+}
+
 self.addEventListener("push", function(e) {
-  var data = {};
-  try { data = e.data.json(); } catch(ex) {}
+  var data = null;
+  try { data = e.data ? e.data.json() : null; } catch(ex) { data = null; }
+  if(!data || !data.title){ return; }   // an empty/invalid push shows nothing instead of a generic fake alert
+  var meta = data.data || {};
   e.waitUntil(
-    self.registration.showNotification(data.title || "Breakout Pro Alert", {
-      body: data.body || "New market alert",
+    self.registration.showNotification(String(data.title).slice(0, 120), {
+      body: String(data.body || "").slice(0, 300),
       icon: "/icons/icon-192.png",
       badge: "/icons/icon-192.png",
-      vibrate: [200, 100, 200],
       tag: data.tag || "bp-alert",
+      lang: data.lang || "en",
+      data: { url: safeUrl(meta.url), symbol: meta.symbol || null, id: meta.id || null },
       requireInteraction: !!data.requireInteraction
     })
   );
 });
 
+// Click: focus an open Breakout Pro window and ask it to open the alert, else open a new one.
 self.addEventListener("notificationclick", function(e) {
   e.notification.close();
-  e.waitUntil(self.clients.openWindow("/"));
+  var meta = e.notification.data || {};
+  var url = safeUrl(meta.url);
+  e.waitUntil(
+    self.clients.matchAll({ type:"window", includeUncontrolled:true }).then(function(list){
+      for(var i = 0; i < list.length; i++){
+        var c = list[i];
+        if(c.url.indexOf(self.location.origin) == 0 && "focus" in c){
+          try{ c.postMessage({ type:"bp-open", url:url, id:meta.id || null, symbol:meta.symbol || null }); }catch(ex){}
+          return c.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});
+
+// The push service rotated the subscription: re-subscribe so the browser keeps receiving, and
+// tell any open window. The new endpoint reaches the server the next time the app opens
+// (the service worker has no access to the device credential by design).
+self.addEventListener("pushsubscriptionchange", function(e) {
+  e.waitUntil(
+    Promise.resolve().then(function(){
+      var old = e.oldSubscription;
+      var opts = (e.newSubscription ? null : (old && old.options)) || null;
+      return e.newSubscription ? e.newSubscription : (opts ? self.registration.pushManager.subscribe(opts) : null);
+    }).catch(function(){ return null; }).then(function(){
+      return self.clients.matchAll({ type:"window", includeUncontrolled:true }).then(function(list){
+        for(var i = 0; i < list.length; i++){ try{ list[i].postMessage({ type:"bp-resubscribe" }); }catch(ex){} }
+      });
+    })
+  );
 });

@@ -21,7 +21,7 @@ THEME_IDS.forEach(function(id){
       assert.ok(!isGreen(P[k]) && !isRed(P[k]), id + " token " + k + " (" + P[k] + ") must not be red or green");
     });
     var hb = hue(P.brand).h; assert.ok(hb >= 200 && hb <= 250, "brand is blue, hue " + hb);
-    var ha = hue(P.accent2.length == 7 ? P.accent2 : "#6366F1").h; assert.ok(ha >= 225 && ha <= 260, "accent2 is indigo");
+    var ha = hue(P.accent2).h; assert.ok(ha >= 245 && ha <= 275, "accent2 is violet, hue " + ha);
   });
 });
 
@@ -52,4 +52,34 @@ test("session and data-status indicators are not red/green", function(){
 });
 test("wide screens keep a readable content width", function(){
   assert.ok(read("src/App.jsx").indexOf('maxWidth:(tab=="home"||isTvClass)?"none":1440') >= 0);
+});
+
+THEME_IDS.forEach(function(id){
+  test("colour system " + id + ": primary blue, teal and violet tokens exist and are not red/green", function(){
+    var P = THEMES[id];
+    assert.equal(P.primary, "#2563EB"); assert.equal(P.accent, "#2563EB");
+    assert.equal(P.tealBase, "#0D9488"); assert.equal(P.violetBase, "#8B5CF6");
+    ["teal", "tealBase", "violet", "violetBase", "primary"].forEach(function(k){
+      assert.ok(!isGreen(P[k]) && !isRed(P[k]), id + " " + k + " must not read as red or green");
+    });
+    var ht = hue(P.tealBase).h; assert.ok(ht >= 166 && ht <= 190, "teal hue " + ht);
+    var hv = hue(P.violetBase).h; assert.ok(hv >= 255 && hv <= 270, "violet hue " + hv);
+    assert.ok(/^rgba\(/.test(P.tealSoft) && /^rgba\(/.test(P.violetSoft), "soft tints are translucent, never full-card fills");
+  });
+});
+function lum(hex){ var h = hex.replace("#", ""); var a = [0,2,4].map(function(i){ var v = parseInt(h.slice(i,i+2),16)/255; return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); }); return 0.2126*a[0] + 0.7152*a[1] + 0.0722*a[2]; }
+function ratio(a, b){ var x = lum(a), y = lum(b); return (Math.max(x,y)+0.05) / (Math.min(x,y)+0.05); }
+THEME_IDS.forEach(function(id){
+  test("colour system " + id + ": teal and violet text meet AA on bg and card", function(){
+    var P = THEMES[id];
+    ["teal", "violet"].forEach(function(k){ ["bg", "card", "card2"].forEach(function(s){
+      assert.ok(ratio(P[k], P[s]) >= 4.5, id + " " + k + " on " + s + " = " + ratio(P[k], P[s]).toFixed(2));
+    }); });
+    assert.ok(ratio(P.accent, "#FFFFFF") >= 4.5, "white text on primary blue");
+  });
+});
+test("no neon glow or multicolour gradient helpers remain in the theme", function(){
+  var t = read("src/theme/tokens.js");
+  assert.ok(t.indexOf("gradient") < 0, "no gradients in tokens");
+  assert.equal(THEMES.light.id, "light");
 });

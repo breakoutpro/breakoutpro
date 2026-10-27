@@ -36,6 +36,7 @@ import LearnScreen  from "./screens/Learn";
 import NewsScreen   from "./screens/News";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { useDensity } from "./theme/density";
+import { setOpenIntent, parseOpenUrl } from "./alerts/openIntent";
 var OIChain = lazy(function(){ return import("./screens/OIChain"); });
 var PriceActionZones = lazy(function(){ return import("./screens/PriceActionZones"); });
 var RangeIntelligence = lazy(function(){ return import("./screens/home/RangeIntelligence"); });
@@ -43,7 +44,7 @@ var ChartPatternScanner = lazy(function(){ return import("./screens/ChartPattern
 var BreakoutTimeframe = lazy(function(){ return import("./screens/BreakoutTimeframe"); });
 var MarketMood = lazy(function(){ return import("./screens/MarketMood"); });
 var BreakoutScanner = lazy(function(){ return import("./screens/BreakoutScanner"); });
-var AlertsScreen = lazy(function(){ return import("./screens/Alerts"); });
+var AlertsScreen = lazy(function(){ return import("./screens/SmartAlertsPro"); });
 var ExpiryAlerts = lazy(function(){ return import("./screens/ExpiryAlerts"); });
 var SettingsScreen = lazy(function(){ return import("./screens/Settings"); });
 var AIBriefing = lazy(function(){ return import("./screens/AIBriefing"); });
@@ -540,7 +541,22 @@ function AppInner() {
     // Register service worker
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(function(){});
+      // Notification tap while the app is already open: the service worker asks us to open the alert.
+      try{
+        navigator.serviceWorker.addEventListener("message", function(ev){
+          var d = ev && ev.data;
+          if(d && d.type=="bp-open"){
+            var o = parseOpenUrl(d.url);
+            if(o){ setOpenIntent({ id:o.id, symbol:d.symbol||null }); setTab("alerts"); }
+          }
+        });
+      }catch(e){}
     }
+    // Notification tap that launched the app: /?tab=alerts&open=<id>
+    try{
+      var launch = parseOpenUrl(window.location.search);
+      if(launch){ setOpenIntent({ id:launch.id, symbol:null }); setTab("alerts"); }
+    }catch(e){}
     // Inject CSS animations
     if (!document.getElementById("bp-global-css")) {
       var el = document.createElement("style");
@@ -662,7 +678,7 @@ function AppInner() {
         {tab=="learn"    ? <LearnScreen/> : null}
         {tab=="ai"       ? <AIScreen/> : null}
         {tab=="briefing" ? <AIBriefing/> : null}
-        {tab=="alerts"   ? <AlertsScreen setTab={setTab}/> : null}
+        {tab=="alerts"   ? <AlertsScreen setTab={setTab} onOpenInstrument={function(st){ setSelectedStock(st); setTab("stockprofile"); }}/> : null}
         {tab=="settings"  ? <SettingsScreen user={user} isPrem={isPrem} isAdmin={isAdmin} setTab={setTab} onLogout={logout}/> : null}
         {tab=="studio"    ? <SocialStudio setTab={setTab}/> : null}
         {tab=="newsstudio"? <NewsStudio news={LIVE_NEWS} onBack={function(){setTab("more");}}/> : null}

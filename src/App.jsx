@@ -184,27 +184,20 @@ function AuthScreen(props) {
   var fieldIcon={position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",width:16,height:16,opacity:0.8,pointerEvents:"none",color:"var(--bp-text3,#64748B)"};
 
   return (
-    <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",background:"radial-gradient(circle at 30% 20%, #16202e 0%, #0a0f17 48%, #05080c 100%)"}}>
+    <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",background:"#0B1220"}}>
       <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"28px 16px",boxSizing:"border-box"}}>
         <div style={{maxWidth:380,width:"100%",background:"rgba(22,28,38,0.72)",backdropFilter:"blur(18px)",WebkitBackdropFilter:"blur(18px)",border:"1px solid rgba(255,255,255,0.09)",borderRadius:22,boxShadow:"0 20px 60px rgba(0,0,0,0.45)",overflow:"hidden",boxSizing:"border-box"}}>
           <div style={{padding:"34px 28px 18px",textAlign:"center"}}>
             <svg width="52" height="52" viewBox="0 0 100 100" style={{margin:"0 auto 14px",display:"block"}}>
-              <rect x="2" y="2" width="96" height="96" rx="22" fill="#0c1119" stroke="url(#bpBorder)" strokeWidth="2"/>
+              <rect x="2" y="2" width="96" height="96" rx="22" fill="#0c1119" stroke="#4D8DF8" strokeWidth="2"/>
               <line x1="24" y1="56" x2="24" y2="70" stroke="#ff8d8d" strokeWidth="4" strokeLinecap="round"/>
-              <rect x="18" y="60" width="12" height="12" rx="2" fill="#7C83F5"/>
+              <rect x="18" y="60" width="12" height="12" rx="2" fill="#4D8DF8"/>
               <line x1="42" y1="46" x2="42" y2="70" stroke="#9fffc0" strokeWidth="4" strokeLinecap="round"/>
               <rect x="36" y="50" width="12" height="18" rx="2" fill="#1fae4d"/>
               <line x1="60" y1="34" x2="60" y2="70" stroke="#9fffc0" strokeWidth="4" strokeLinecap="round"/>
               <rect x="54" y="40" width="12" height="26" rx="2" fill="#4D8DF8"/>
               <path d="M 16 72 C 32 66, 50 48, 76 26" fill="none" stroke="#4D8DF8" strokeWidth="5" strokeLinecap="round"/>
               <polygon points="70,22 84,24 76,36" fill="#4D8DF8"/>
-              <defs>
-                <linearGradient id="bpBorder" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#4D8DF8"/>
-                  <stop offset="50%" stopColor="#6366F1"/>
-                  <stop offset="100%" stopColor="#4D8DF8"/>
-                </linearGradient>
-              </defs>
             </svg>
             <div style={{fontSize:21,fontWeight:800,color:"#F3F4F6",letterSpacing:0.3}}>Breakout<span style={{color:"#6FA1FA"}}> Pro</span></div>
             <div style={{fontSize:13,color:"#9CA3AF",marginTop:6}}>{mode=="login"?"Log in to your account":"Create your account"}</div>
@@ -255,7 +248,7 @@ function AuthScreen(props) {
               </label>
             :<div style={{height:8}}/>}
 
-            <button style={{width:"100%",boxSizing:"border-box",background:"linear-gradient(135deg,#2563EB,#6366F1)",border:"none",borderRadius:12,padding:"15px",fontSize:14,fontWeight:700,color:"#fff",cursor:"pointer",fontFamily:"inherit",transition:"filter 0.15s",boxShadow:"0 4px 12px rgba(37,99,235,0.25)"}} onMouseOver={function(e){e.target.style.filter="brightness(1.08)";}} onMouseOut={function(e){e.target.style.filter="none";}} onClick={submit}>
+            <button style={{width:"100%",boxSizing:"border-box",background:"#2563EB",border:"none",borderRadius:12,padding:"15px",fontSize:14,fontWeight:700,color:"#fff",cursor:"pointer",fontFamily:"inherit",transition:"filter 0.15s",boxShadow:"none"}} onMouseOver={function(e){e.target.style.filter="brightness(1.08)";}} onMouseOut={function(e){e.target.style.filter="none";}} onClick={submit}>
               {mode=="login"?"Login":"Create Account"}
             </button>
 

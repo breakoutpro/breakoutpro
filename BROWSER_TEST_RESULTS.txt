@@ -1,0 +1,67 @@
+PASS light@390 directly below header  top=56 hdrBottom=56
+PASS light@390 height 32-38  37px
+PASS light@390 no page h-overflow  390/390
+PASS light@390 no clipped items
+PASS light@390 4 items, GIFT omitted, no status words  NIFTY 5024,500.35+0.52% | BANK NIFTY53,012.10-0.41% | SENSEX80,123.90+0.18% | INDIA VIX13.42-2.40%
+PASS light@390 colours: +green -red  rgb(18, 115, 54) / rgb(185, 28, 28) / rgb(18, 115, 54) / rgb(185, 28, 28)
+PASS light@390 half covers viewport  scrollW=1410 cw=390 groups=2
+PASS light@390 scrolls right-to-left ~45px/s  32 -> 78
+PASS light@390 wrap seamless (max per-frame step ~ speed)  {"maxStep":1,"wraps":1,"frames":301,"halfW":705}
+PASS light@390 second half starts exactly one half later  {"halfW":705,"g0":0,"secondHalfStart":705}
+PASS light@390 pauses on hover (mouse)  166 -> 166
+PASS light@390 resumes after hover  166 -> 202
+PASS light@390 keyboard focus reaches strip and pauses  bpTk 202->202
+PASS light@390 Enter on item routes via onNavigate  ["markets"]
+PASS light@390 no page errors
+PASS light@1366 directly below header  top=56 hdrBottom=56
+PASS light@1366 height 32-38  37px
+PASS light@1366 no page h-overflow  1366/1366
+PASS light@1366 no clipped items
+PASS light@1366 4 items, GIFT omitted, no status words  NIFTY 5024,500.35+0.52% | BANK NIFTY53,012.10-0.41% | SENSEX80,123.90+0.18% | INDIA VIX13.42-2.40%
+PASS light@1366 colours: +green -red  rgb(18, 115, 54) / rgb(185, 28, 28) / rgb(18, 115, 54) / rgb(185, 28, 28)
+PASS light@1366 half covers viewport  scrollW=2820 cw=1366 groups=4
+PASS light@1366 scrolls right-to-left ~45px/s  32 -> 78
+PASS light@1366 no page errors
+PASS light@1440 directly below header  top=56 hdrBottom=56
+PASS light@1440 height 32-38  37px
+PASS light@1440 no page h-overflow  1440/1440
+PASS light@1440 no clipped items
+PASS light@1440 4 items, GIFT omitted, no status words  NIFTY 5024,500.35+0.52% | BANK NIFTY53,012.10-0.41% | SENSEX80,123.90+0.18% | INDIA VIX13.42-2.40%
+PASS light@1440 colours: +green -red  rgb(18, 115, 54) / rgb(185, 28, 28) / rgb(18, 115, 54) / rgb(185, 28, 28)
+PASS light@1440 half covers viewport  scrollW=4230 cw=1440 groups=6
+PASS light@1440 scrolls right-to-left ~45px/s  32 -> 78
+PASS light@1440 no page errors
+PASS dark@390 directly below header  top=56 hdrBottom=56
+PASS dark@390 height 32-38  37px
+PASS dark@390 no page h-overflow  390/390
+PASS dark@390 no clipped items
+PASS dark@390 4 items, GIFT omitted, no status words  NIFTY 5024,500.35+0.52% | BANK NIFTY53,012.10-0.41% | SENSEX80,123.90+0.18% | INDIA VIX13.42-2.40%
+PASS dark@390 colours: +green -red  rgb(31, 174, 91) / rgb(242, 107, 107) / rgb(31, 174, 91) / rgb(242, 107, 107)
+PASS dark@390 half covers viewport  scrollW=1410 cw=390 groups=2
+PASS dark@390 scrolls right-to-left ~45px/s  32 -> 77
+PASS dark@390 no page errors
+PASS dark@1366 directly below header  top=56 hdrBottom=56
+PASS dark@1366 height 32-38  37px
+PASS dark@1366 no page h-overflow  1366/1366
+PASS dark@1366 no clipped items
+PASS dark@1366 4 items, GIFT omitted, no status words  NIFTY 5024,500.35+0.52% | BANK NIFTY53,012.10-0.41% | SENSEX80,123.90+0.18% | INDIA VIX13.42-2.40%
+PASS dark@1366 colours: +green -red  rgb(31, 174, 91) / rgb(242, 107, 107) / rgb(31, 174, 91) / rgb(242, 107, 107)
+PASS dark@1366 half covers viewport  scrollW=2820 cw=1366 groups=4
+PASS dark@1366 scrolls right-to-left ~45px/s  32 -> 78
+PASS dark@1366 no page errors
+PASS dark@1440 directly below header  top=56 hdrBottom=56
+PASS dark@1440 height 32-38  37px
+PASS dark@1440 no page h-overflow  1440/1440
+PASS dark@1440 no clipped items
+PASS dark@1440 4 items, GIFT omitted, no status words  NIFTY 5024,500.35+0.52% | BANK NIFTY53,012.10-0.41% | SENSEX80,123.90+0.18% | INDIA VIX13.42-2.40%
+PASS dark@1440 colours: +green -red  rgb(31, 174, 91) / rgb(242, 107, 107) / rgb(31, 174, 91) / rgb(242, 107, 107)
+PASS dark@1440 half covers viewport  scrollW=4230 cw=1440 groups=6
+PASS dark@1440 scrolls right-to-left ~45px/s  32 -> 78
+PASS dark@1440 no page errors
+PASS 390 touch swipe scrolls strip manually  22 -> 224
+PASS 390 stays paused ~2.5s after touch release  224 -> 224
+PASS 390 auto-scroll resumes after touch idle  224 -> 340
+PASS reduced motion: no animation, one group  {"s":0,"g":1} -> 0
+PASS partial data: only valid items, no fake values  NIFTY 5024,500.35+0.52% | BANK NIFTY53,012.10-0.41%
+PASS load failed, no data: strip not rendered
+TOTAL 66 checks, 0 failed

@@ -4,6 +4,7 @@ import { useHomeData } from "./hooks/useHomeData";
 import MarketBadge from "./MarketBadge";
 import { t, termHelp, useLang } from "../../i18n/translations";
 import NextMoveHomeCard from "../NextMoveHomeCard";
+import MarketTicker from "../../components/MarketTicker";
 
 // BreakoutPro - EquityHomeMobile.jsx
 // The Mobile Home layout - UI only. All data comes from useHomeData(), the
@@ -86,6 +87,7 @@ export default function EquityHomeMobile(props){
           </div>
         </div>
       </div>
+      <MarketTicker data={mm && mm.data} networkStatus={mm && mm.networkStatus} status={mm && mm.status} onNavigate={setTab}/>
 
       <div style={{width:"100%",boxSizing:"border-box",padding:"7px 9px 0"}}>
 

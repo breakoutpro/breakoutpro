@@ -6,6 +6,7 @@ import MarketBadge from "./MarketBadge";
 import { SkeletonCard } from "../../components/Skeleton";
 import { t, termHelp, useLang } from "../../i18n/translations";
 import NextMoveHomeCard from "../NextMoveHomeCard";
+import MarketTicker from "../../components/MarketTicker";
 
 // BreakoutPro - EquityHomeTablet.jsx
 // Tablet Home layout - independent from Mobile and from Laptop/Desktop.
@@ -57,6 +58,7 @@ export default function EquityHomeTablet(props){
           </button>
         </div>
       </div>
+      <MarketTicker data={mm && mm.data} networkStatus={mm && mm.networkStatus} status={mm && mm.status} onNavigate={function(r){ if(props.setTab) props.setTab(r); }}/>
 
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(300px, 1fr))",gap:16,padding:"16px 16px 0",minWidth:0,boxSizing:"border-box"}}>
 

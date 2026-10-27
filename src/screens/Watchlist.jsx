@@ -2,26 +2,22 @@ import { useState, useEffect } from "react";
 import { ALL_NSE_STOCKS } from "../data/marketsStocks";
 import { useWatchlist } from "../hooks/useWatchlist";
 import { useTheme } from "../theme/ThemeProvider";
-import { genSpark } from "../utils/genSpark";
+import { useQuotes } from "../market/useQuotes";
+import QuoteBadge from "../market/QuoteBadge";
+import { t } from "../i18n/translations";
 // SAFETY PATCH: useWatchlistAlerts removed - fabricated candle-based pattern
 // detection was firing real OS notifications on simulated data. See audit.
 
 var BG="#07111F",CARD="#101B2E",BD="#1E3A5F",BLUE="#3B82F6",BLUE2="#60A5FA",UP="#1B5E20",DOWN="#EF4444",T1="#FFFFFF",T2="#94A3B8",T3="#475569";
 
-var ALL_STOCKS = ALL_NSE_STOCKS.map(function(s){ return {sym:s.sym, ltp:s.ltp, sect:s.sect}; });
+// Only symbol and sector come from the static list; prices come from the live data layer (src/market).
+var ALL_STOCKS = ALL_NSE_STOCKS.map(function(s){ return {sym:s.sym, sect:s.sect}; });
 
 // Stable module-level reference - this screen's own historical first-run
 // seed, preserved exactly as before via the hook's optional customDefault.
 var LEGACY_DEFAULT_SEED = ["NIFTY 50","BANKNIFTY","RELIANCE","TCS","HDFCBANK"];
 
 
-function MiniSpark(props) {
-  var d=props.d||[], col=props.col||BLUE2, w=50, h=22;
-  if(d.length<2) return null;
-  var mn=Math.min.apply(null,d), mx=Math.max.apply(null,d), rng=mx-mn||1;
-  var pts=d.map(function(v,i){return(i/(d.length-1))*w+","+(h-((v-mn)/rng)*(h-4)+2);}).join(" ");
-  return <svg width={w} height={h}><polyline points={pts} fill="none" stroke={col} strokeWidth="1.5" strokeLinecap="round"/></svg>;
-}
 
 export default function Watchlist(props) {
 
@@ -35,26 +31,11 @@ export default function Watchlist(props) {
   var list = wl.list;
   var [search, setSearch] = useState("");
   var [showAdd, setShowAdd] = useState(false);
-  var [stocks, setStocks] = useState(function(){
-    return list.map(function(sym){
-      var base = ALL_STOCKS.find(function(s){return s.sym==sym;});
-      var ltp = base ? base.ltp : 1000;
-      return {sym:sym, sect: base?base.sect:"", ltp:ltp, base:ltp, spark:genSpark(ltp)};
-    });
+  var live = useQuotes(list);
+  var stocks = list.map(function(sym){
+    var base = ALL_STOCKS.find(function(s){return s.sym==sym;});
+    return { sym:sym, sect: base ? base.sect : "", q: live.quotes[sym] };
   });
-
-  useEffect(function(){
-    setStocks(function(prev){
-      var existing = {};
-      prev.forEach(function(s){existing[s.sym]=s;});
-      return list.map(function(sym){
-        if (existing[sym]) return existing[sym];
-        var base = ALL_STOCKS.find(function(s){return s.sym==sym;});
-        var ltp = base ? base.ltp : 1000;
-        return {sym:sym, sect: base?base.sect:"", ltp:ltp, base:ltp, spark:genSpark(ltp)};
-      });
-    });
-  },[list]);
 
   // SAFETY PATCH: continuous Math.random price-ticking removed - these
   // values are demo/simulated (ALL_NSE_STOCKS is a static local dataset,
@@ -132,23 +113,23 @@ export default function Watchlist(props) {
         ):(
           <div>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-              <span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 8px",borderRadius:5,letterSpacing:0.5}}>DEMO DATA</span>
-              <span style={{fontSize:12,color:T3}}>Simulated prices for preview. Not live market values.</span>
+              <span style={{fontSize:12,color:T3}}>{t("md.delay_note", "Prices come from Yahoo Finance and may be delayed.")}</span>
             </div>
             <div style={{background:CARD,border:"1px solid "+BD,borderRadius:16,overflow:"hidden"}}>
             {stocks.map(function(s){
-              var pct = s.base>0 ? ((s.ltp-s.base)/s.base*100) : 0;
-              var up = pct>=0;
+              var q = s.q, has = q && q.price != null;
+              var pct = has && q.changePct != null ? q.changePct : null;
+              var dirCol = pct == null ? T2 : (pct > 0 ? UP : (pct < 0 ? DOWN : T2));
               return (
                 <div key={s.sym} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderBottom:"1px solid "+BD}}>
                   <div style={{flex:1}}>
                     <div style={{fontSize:12,fontWeight:700,color:T1}}>{s.sym}</div>
                     <div style={{fontSize:12,color:T3}}>{s.sect}</div>
                   </div>
-                  <MiniSpark d={s.spark} col={up?UP:DOWN}/>
-                  <div style={{textAlign:"right",minWidth:70}}>
-                    <div style={{fontFamily:"monospace",fontSize:12,fontWeight:800,color:T1}}>{s.ltp>=1000?(s.ltp/1000).toFixed(1)+"K":s.ltp.toFixed(2)}</div>
-                    <div style={{fontSize:12,fontWeight:700,color:up?UP:DOWN}}>{up?"+":""}{pct.toFixed(2)}%</div>
+                  <div style={{textAlign:"right",minWidth:96}}>
+                    <div style={{fontFamily:"monospace",fontSize:12,fontWeight:800,color:has?T1:T3}}>{has ? q.price.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}) : "--"}</div>
+                    <div style={{fontSize:12,fontWeight:700,color:dirCol}}>{pct == null ? "" : (pct > 0 ? "+" : "") + pct.toFixed(2) + "%"}</div>
+                    <QuoteBadge quote={q} compact={true} size={10}/>
                   </div>
                   <button onClick={function(){removeStock(s.sym);}} style={{background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.2)",borderRadius:7,width:24,height:24,color:DOWN,fontSize:12,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>X</button>
                 </div>

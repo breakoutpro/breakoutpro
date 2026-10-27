@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { CandleChart, findZones } from "./IndexHelpers";
 
 import { useTheme } from "../theme/ThemeProvider";
+import QuoteBadge from "../market/QuoteBadge";
+import { classifyQuote } from "../market/marketData";
+import { t } from "../i18n/translations";
 import { useDensity } from "../theme/density";
 var DB="#050505",CB="#101318",BD="#20242D",G="#1B5E20",G2="#1B5E20",R="#EF4444",BLUE="#3B82F6",T1="#FFFFFF",T2="#8899BB",T3="#475569";
 
@@ -45,6 +48,7 @@ export default function StockProfile(props){
   var [candles,setCandles]=useState([]);
   var [loading,setLoading]=useState(true);
   var [dataSource,setDataSource]=useState("loading");
+  var [histQuote,setHistQuote]=useState(null);
   var [ipoInfo,setIpoInfo]=useState(null);
 
   var [quarters]=useState(genQuarters(s.sym));
@@ -60,6 +64,10 @@ export default function StockProfile(props){
         if(data && data.candles && data.candles.length>0){
           setCandles(data.candles);
           setDataSource("live");
+          // Label from the provider timestamp and reported delay (never a blanket "live").
+          var lastBar=data.candles[data.candles.length-1];
+          var fr=classifyQuote({asOf:data.asOf!=null?data.asOf:null,now:Date.now(),delayedBySec:data.delayedBySec});
+          setHistQuote({price:lastBar.close,asOf:data.asOf,status:fr.status,closed:fr.closed,delayKnown:fr.delayKnown,delayedBySec:fr.delayedBySec});
           if(data.meta && data.meta.firstTradeDate){
             var d=new Date(data.meta.firstTradeDate*1000);
             setIpoInfo(d.toLocaleDateString("en-IN",{year:"numeric",month:"short",day:"numeric"}));
@@ -67,6 +75,7 @@ export default function StockProfile(props){
         } else {
           setCandles([]);
           setDataSource("unavailable");
+          setHistQuote(null);
         }
         setLoading(false);
       })
@@ -119,8 +128,7 @@ export default function StockProfile(props){
             <div style={{background:CB,border:"1px solid "+BD,borderRadius:D.on?12:16,padding:D.on?12:16,marginBottom:12}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
                 <div style={{display:"flex",alignItems:"center",gap:4}}>
-                  <div style={{width:5,height:5,borderRadius:"50%",background:dataSource=="live"?G2:BLUE}}></div>
-                  <span style={{fontSize:12,color:T2,fontWeight:700}}>{dataSource=="live"?"LIVE DATA":loading?"LOADING...":"DEMO DATA"}</span>
+                  {loading ? <span style={{fontSize:12,color:T2,fontWeight:700}}>{t("mk.connecting")}</span> : <QuoteBadge quote={histQuote}/>}
                 </div>
                 <div style={{display:"flex",gap:4}}>
                   {[["5d","5D"],["1mo","1M"],["6mo","6M"],["1y","1Y"],["5y","5Y"],["max","All"]].map(function(p){

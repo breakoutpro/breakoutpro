@@ -8,6 +8,7 @@ import IndexFullPage from "./IndexFullPage";
 import MarketsTop from "./MarketsTop";
 import { t, useLang } from "../i18n/translations";
 import { useDensity } from "../theme/density";
+import { useQuotes } from "../market/useQuotes";
 
 // Colors come from the theme via useTheme() inside the component.
 
@@ -21,75 +22,23 @@ export default function MarketsScreen(props) {
   var T1=TH.text1,T2=TH.text2,T3=TH.text3;
   var stocks=(props.stocks&&props.stocks.length>0)?props.stocks:ALL_NSE_STOCKS;
   var [search,setSearch]=useState("");
-  var [liveData,setLiveData]=useState({});
-  var [liveStatus,setLiveStatus]=useState("connecting");
   var [sort,setSort]=useState("pct");
 
-  useEffect(function(){
-    fetchLive();
-    var pollTimer = setInterval(fetchLive, 30000);
-    return function(){clearInterval(pollTimer);};
-  },[]);
-
-  function fetchLive(){
-    var allSyms = ["^NSEI","^BSESN","^NSEBANK"].concat(
-      ALL_NSE_STOCKS.map(function(s){ return s.sym.replace("&","").replace(" ","") + ".NS"; })
-    );
-    var batchSize = 30;
-    var batches = [];
-    for (var i = 0; i < allSyms.length; i += batchSize) {
-      batches.push(allSyms.slice(i, i + batchSize));
-    }
-
-    var combinedMap = {};
-    var anyLive = false;
-    var completed = 0;
-    var anyMarketOpen = false;
-
-    batches.forEach(function(batch){
-      fetch("/api/yahoo?symbols=" + batch.join(","))
-        .then(function(r){return r.json();})
-        .then(function(data){
-          if(data && data.quoteResponse && data.quoteResponse.result){
-            data.quoteResponse.result.forEach(function(q){
-              if(!q.regularMarketPrice || q.regularMarketPrice==0) return;
-              var key = parseSym(q.symbol);
-              combinedMap[key] = {
-                ltp: q.regularMarketPrice,
-                chg: q.regularMarketChange||0,
-                chgPct: Math.abs(parseFloat(q.regularMarketChangePercent||0)).toFixed(2),
-                up: (q.regularMarketChange||0)>=0,
-                high: q.regularMarketDayHigh||0,
-                low: q.regularMarketDayLow||0,
-                vol: q.regularMarketVolume||0,
-                marketState: q.marketState||"CLOSED",
-              };
-              anyLive = true;
-              if(q.marketState=="REGULAR") anyMarketOpen = true;
-            });
-          }
-        })
-        .catch(function(e){
-          console.log("Batch fetch failed:", e.message);
-        })
-        .finally(function(){
-          completed++;
-          if(completed==batches.length){
-            if(anyLive){
-              setLiveData(Object.assign({},combinedMap));
-              setLiveStatus(anyMarketOpen?"live":"closed");
-            }
-            else{
-              setLiveStatus(function(prev){ return prev=="live"||prev=="closed" ? prev : "unavailable"; });
-            }
-          }
-        });
-    });
-  }
-
-  function parseSym(sym) {
-    return sym.replace(".NS","").replace("^NSEI","NIFTY").replace("^BSESN","SENSEX").replace("^NSEBANK","BANKNIFTY").replace("NIFTY_FIN_SERVICE","FINNIFTY").replace("^CRSLDX","MIDCAP");
-  }
+  // One shared quote store (src/market): a single cached request for every symbol on this screen,
+  // each quote labelled LIVE / DELAYED / STALE / UNAVAILABLE from the provider's own timestamp and delay.
+  var symList = ["NIFTY","SENSEX","BANKNIFTY","FINNIFTY","MIDCAP"].concat(stocks.map(function(x){ return x.sym; }));
+  var liveQ = useQuotes(symList);
+  var liveData = {}, anyLive = false, anyDelayed = false, anyClosed = false;
+  Object.keys(liveQ.quotes).forEach(function(k){
+    var q = liveQ.quotes[k];
+    if(!q || q.price == null) return;
+    var chg = q.change == null ? 0 : q.change;
+    liveData[k] = { ltp:q.price, chg:chg, chgPct:Math.abs(q.changePct == null ? 0 : q.changePct).toFixed(2), up:chg>=0,
+      high:q.high||0, low:q.low||0, vol:q.volume||0, marketState:q.closed?"CLOSED":"REGULAR", status:q.status, asOf:q.asOf };
+    if(q.status=="LIVE") anyLive=true; else if(q.status=="DELAYED"&&!q.closed) anyDelayed=true; else if(q.closed) anyClosed=true;
+  });
+  var haveAny = Object.keys(liveData).length>0;
+  var liveStatus = anyLive ? "live" : (anyDelayed ? "delayed" : (anyClosed ? "closed" : (haveAny ? "stale" : (liveQ.info.status=="unavailable" ? "unavailable" : "connecting"))));
   var [activeTab,setActiveTab]=useState("stocks");
   var [selStock,setSelStock]=useState(null);
   var [selSector,setSelSector]=useState(null);
@@ -118,7 +67,11 @@ export default function MarketsScreen(props) {
     return s;
   });
 
+  // Live data present: show only symbols the provider resolved (no demo price is mixed into a live list).
+  // No live data at all: the static preview list stays, under its explicit DEMO DATA banner.
+  var unresolved = haveAny ? mergedStocks.filter(function(s){ return !s.isLive; }).length : 0;
   var filtered=mergedStocks.filter(function(s){
+    if(haveAny && !s.isLive) return false;
     if(!search) return true;
     var q=search.toLowerCase();
     var sym=(s.sym||"").toLowerCase();
@@ -185,8 +138,14 @@ export default function MarketsScreen(props) {
       {activeTab=="stocks"?(
         <div style={{margin:D.on?"8px 16px 0":"12px 16px 0"}}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-            <span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 8px",borderRadius:5,letterSpacing:0.5}}>{t("c.demo_data")}</span>
-            <span style={{fontSize:12,color:T3}}>{t("mk.demo_note")}</span>
+            {haveAny ? (
+              <span style={{fontSize:12,color:T3}}>{t("md.delay_note","Prices come from Yahoo Finance and may be delayed.")}{unresolved>0 ? " " + unresolved + " " + t("md.unavail","Unavailable").toLowerCase() : ""}</span>
+            ) : (
+              <span>
+                <span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 8px",borderRadius:5,letterSpacing:0.5}}>{t("c.demo_data")}</span>
+                <span style={{fontSize:12,color:T3,marginLeft:8}}>{t("mk.demo_note")}</span>
+              </span>
+            )}
           </div>
           <div style={Object.assign({background:CB,borderRadius:D.on?12:16,border:"1px solid "+BD,overflow:"hidden"}, D.on ? {display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(min(100%, 440px), 1fr))"} : {})}>
             {filtered.length==0?(
@@ -203,7 +162,7 @@ export default function MarketsScreen(props) {
         <div style={{display:"flex",justifyContent:"flex-end",padding:"4px 16px 0"}}>
           <div style={{background:liveStatus=="live"?"rgba(37,99,235,0.12)":liveStatus=="closed"?"rgba(255,255,255,0.06)":"rgba(37,99,235,0.1)",border:"1px solid "+(liveStatus=="live"?"rgba(37,99,235,0.3)":liveStatus=="closed"?"rgba(255,255,255,0.1)":"rgba(37,99,235,0.25)"),borderRadius:20,padding:"4px 8px",display:"flex",alignItems:"center",gap:4}}>
             <div style={{width:5,height:5,borderRadius:"50%",background:liveStatus=="live"?BLUE:liveStatus=="closed"?T2:BLUE}}></div>
-            <span style={{fontSize:12,fontWeight:700,color:liveStatus=="live"?BLUE:liveStatus=="closed"?T2:BLUE}}>{liveStatus=="live"?t("mk.live"):liveStatus=="closed"?t("mk.closed"):t("mk.connecting")}</span>
+            <span style={{fontSize:12,fontWeight:700,color:liveStatus=="live"?BLUE:liveStatus=="closed"?T2:BLUE}}>{liveStatus=="live"?t("mk.live"):liveStatus=="delayed"?t("md.delayed","Delayed"):liveStatus=="stale"?t("md.stale","Stale"):liveStatus=="unavailable"?t("md.unavail","Unavailable"):liveStatus=="closed"?t("mk.closed"):t("mk.connecting")}</span>
           </div>
         </div>
       ):null}

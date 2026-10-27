@@ -207,7 +207,7 @@ export default function SettingsScreen(props) {
       <div style={D.on ? {breakInside:"avoid",marginBottom:12} : null}>
       {/* VOICE SMART ALERTS */}
       <SectionHeader title={t("set.voice_alerts")}/>
-      <VoiceAlertWidget flush={D.on}/>
+      <VoiceAlertWidget flush={D.on} setTab={props.setTab}/>
       </div>
       <div style={D.on ? {breakInside:"avoid",marginBottom:12} : null}>
       {/* ALERTS SECTION */}

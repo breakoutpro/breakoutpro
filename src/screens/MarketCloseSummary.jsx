@@ -95,7 +95,7 @@ export default function MarketCloseSummary(props){
         <div style={{background:theme.c.card,border:"1px solid rgba(124,58,237,0.25)",borderRadius:16,padding:"16px",marginBottom:16}}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
             <span style={{fontSize:14}}>&#129504;</span>
-            <span style={{fontSize:12,fontWeight:700,color:"#A78BFA"}}>Tomorrow's Watch</span>
+            <span style={{fontSize:12,fontWeight:700,color:theme.c.teal}}>Tomorrow's Watch</span>
           </div>
           <div style={{fontSize:12,color:T1,lineHeight:1.6}}>{summary.tomorrowWatch}</div>
         </div>

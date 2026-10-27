@@ -211,7 +211,7 @@ export function JournalScreen() {
                 <div style={{width:22,height:22,borderRadius:6,background:"#2563EB",display:"flex",alignItems:"center",justifyContent:"center"}}>
                   <span style={{fontSize:12,fontWeight:900,color:"#fff"}}>AI</span>
                 </div>
-                <span style={{fontSize:12,fontWeight:700,color:"#A78BFA"}}>AI Trading Pattern Analysis</span>
+                <span style={{fontSize:12,fontWeight:700,color:theme.c.violet}}>AI Trading Pattern Analysis</span>
               </div>
               <div style={{fontSize:12,color:T1,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{aiInsight}</div>
             </div>

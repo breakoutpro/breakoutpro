@@ -8,7 +8,6 @@ import MiniChart from "../components/MiniChart";
 import { useTheme } from "../theme/ThemeProvider";
 var BG="#07111F",CARD="#101B2E",BD="#1E3A5F";
 var BLUE="#3B82F6",BLUE2="#60A5FA";
-var BLUE="#7C3AED",BLUE="#A855F7";
 var UP="#1B5E20",DOWN="#EF4444",T1="#FFFFFF",T2="#94A3B8",T3="#475569";
 
 var COMM_BASE=[
@@ -108,7 +107,7 @@ export default function CommodityHome(props){
         </div>
         <div style={{background:"rgba(37,99,235,0.08)",border:"1px solid rgba(37,99,235,0.25)",borderRadius:12,padding:"8px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <div style={{width:6,height:6,borderRadius:"50%",background:BLUE,boxShadow:"0 0 6px "+BLUE}}></div>
+            <div style={{width:6,height:6,borderRadius:"50%",background:BLUE,boxShadow:"none"}}></div>
             <span style={{fontSize:12,fontWeight:700,color:BLUE}}>MCX Commodity Live</span>
           </div>
           <span style={{fontSize:12,color:T3}}>3:30 PM - 11:30 PM</span>

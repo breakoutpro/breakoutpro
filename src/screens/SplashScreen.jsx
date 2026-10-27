@@ -37,9 +37,9 @@ export default function SplashScreen(props){
   return (
     <div style={{position:"fixed",inset:0,background:BG,zIndex:9999,overflow:"hidden",fontFamily:"'Inter',Arial,sans-serif",display:"flex",flexDirection:"column"}}>
 
-      {/* SKYLINE GLOW BACKDROP */}
+      {/* SKYLINE BACKDROP (flat, no glow) */}
       <div style={{position:"absolute",top:0,left:0,right:0,height:"42%",overflow:"hidden"}}>
-        <div style={{position:"absolute",bottom:0,left:"50%",transform:"translateX(-50%)",width:340,height:200,background:"radial-gradient(ellipse at center bottom,rgba(59,130,246,0.35),transparent 70%)"}}></div>
+        <div style={{position:"absolute",bottom:0,left:"50%",transform:"translateX(-50%)",width:340,height:200,background:"transparent"}}></div>
         <div style={{position:"absolute",bottom:0,left:0,right:0,height:84,display:"flex",alignItems:"flex-end",justifyContent:"center",gap:4,opacity:0.5}}>
           {[40,65,50,80,55,95,60,75,45,85,58,70,48].map(function(h,i){
             return <div key={i} style={{width:16,height:h,background:"rgba(37,99,235,0.4)",borderRadius:"2px 2px 0 0"}}></div>;
@@ -93,7 +93,7 @@ export default function SplashScreen(props){
         </div>
         <div style={{fontSize:12,color:T2,textAlign:"center",marginBottom:8}}>Loading Breakout Opportunities...</div>
         <div style={{height:4,background:"rgba(255,255,255,0.08)",borderRadius:3,overflow:"hidden"}}>
-          <div style={{height:"100%",width:prog+"%",background:"#3B82F6",borderRadius:3,transition:"width 0.1s",boxShadow:"0 0 12px rgba(59,130,246,0.7)"}}></div>
+          <div style={{height:"100%",width:prog+"%",background:"#2563EB",borderRadius:3,transition:"width 0.1s"}}></div>
         </div>
       </div>
 

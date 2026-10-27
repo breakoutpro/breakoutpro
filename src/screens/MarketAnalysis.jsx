@@ -179,7 +179,7 @@ export default function MarketAnalysis() {
         <div style={{display:"flex",gap:8}}>
           {[["indices","Indices (6)"],["stocks","Stocks (20)"]].map(function(t){
             var act=activeTab==t[0];
-            return <button key={t[0]} onClick={function(){setActiveTab(t[0]);}} style={{background:act?G:"rgba(255,255,255,0.06)",border:"1px solid "+(act?G:BD),borderRadius:20,padding:"8px 16px",color:act?"#fff":T2,fontSize:12,fontWeight:act?700:500,cursor:"pointer",fontFamily:"inherit"}}>{t[1]}</button>;
+            return <button key={t[0]} onClick={function(){setActiveTab(t[0]);}} style={{background:act?theme.c.accent:"rgba(255,255,255,0.06)",border:"1px solid "+(act?theme.c.accent:BD),borderRadius:20,padding:"8px 16px",color:act?"#fff":T2,fontSize:12,fontWeight:act?700:500,cursor:"pointer",fontFamily:"inherit"}}>{t[1]}</button>;
           })}
         </div>
       </div>

@@ -275,7 +275,7 @@ function CandleChart(props) {
 
       {/* VWAP */}
       {showVWAP && vwap > 0 ? (
-        <line x1={0} y1={yP(vwap)} x2={W} y2={yP(vwap)} stroke="#8B5CF6" strokeWidth={1} strokeDasharray="4,3"/>
+        <line x1={0} y1={yP(vwap)} x2={W} y2={yP(vwap)} stroke="#0D9488" strokeWidth={1} strokeDasharray="4,3"/>
       ) : null}
 
       {/* Time axis - reserved bottom strip, genuine timestamps only */}
@@ -411,7 +411,7 @@ export default function ChartScreen() {
     {label:"RSI",   val: rsi==null ? "--" : rsi, color:rsiColor, sub:rsiLabel},
     {label:"EMA 9", val: (ema9.length? (ema9[ema9.length-1]==null?"--":ema9[ema9.length-1]) : "--"), color:BLUE, sub: (ema9.length && ema9[ema9.length-1]!=null) ? (lastC.close > ema9[ema9.length-1] ? "Bullish" : "Bearish") : "Insufficient data"},
     {label:"EMA 21",val: (ema21.length? (ema21[ema21.length-1]==null?"--":ema21[ema21.length-1]) : "--"), color:theme.c.blue, sub: (ema21.length && ema21[ema21.length-1]!=null) ? (lastC.close > ema21[ema21.length-1] ? "Bullish" : "Bearish") : "Insufficient data"},
-    {label:"VWAP",  val: hasData ? vwap : "--", color:"#8B5CF6", sub: hasData ? (lastC.close > vwap ? "Above" : "Below") : "Insufficient data"},
+    {label:"VWAP",  val: hasData ? vwap : "--", color:"#0D9488", sub: hasData ? (lastC.close > vwap ? "Above" : "Below") : "Insufficient data"},
   ];
 
   return (
@@ -484,7 +484,7 @@ export default function ChartScreen() {
 
         {/* Indicator toggles */}
         <div style={{display:"flex",gap:8,marginBottom:12}}>
-          {[["EMA 9/21",showEMA,function(){setShowEMA(!showEMA);},BLUE],["VWAP",showVWAP,function(){setShowVWAP(!showVWAP);},"#8B5CF6"],["RSI",showRSI,function(){setShowRSI(!showRSI);},rsiColor]].map(function(item){
+          {[["EMA 9/21",showEMA,function(){setShowEMA(!showEMA);},BLUE],["VWAP",showVWAP,function(){setShowVWAP(!showVWAP);},"#0D9488"],["RSI",showRSI,function(){setShowRSI(!showRSI);},rsiColor]].map(function(item){
             return (
               <button key={item[0]} onClick={item[2]} style={{background:item[1]?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.04)",border:"1px solid "+(item[1]?item[3]:BD),borderRadius:20,padding:"4px 12px",color:item[1]?item[3]:T2,fontSize:12,fontWeight:item[1]?700:400,cursor:"pointer",fontFamily:"inherit"}}>
                 {item[0]}
@@ -535,7 +535,7 @@ export default function ChartScreen() {
         <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,padding:12,marginBottom:12}}>
           <div style={{fontSize:12,fontWeight:700,color:T1,marginBottom:8}}>Chart Legend</div>
           <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
-            {[["Green candle","Bullish (Close > Open)",G],[" Red candle","Bearish (Close < Open)",R],["Yellow line","EMA 9",BLUE],["Blue line","EMA 21",theme.c.blue],["Purple dash","VWAP","#8B5CF6"]].map(function(l){
+            {[["Green candle","Bullish (Close > Open)",G],[" Red candle","Bearish (Close < Open)",R],["Yellow line","EMA 9",BLUE],["Blue line","EMA 21",theme.c.blue],["Teal dash","VWAP","#0D9488"]].map(function(l){
               return <div key={l[0]} style={{fontSize:12,color:T2}}><span style={{color:l[2],fontWeight:700}}>{l[0]}</span> = {l[1]}</div>;
             })}
           </div>

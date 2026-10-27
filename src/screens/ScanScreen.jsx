@@ -70,7 +70,7 @@ export default function ScanScreen(props){
                         <div style={{display:"flex",alignItems:"center",gap:8}}>
                           <span style={{fontSize:12,fontWeight:700,color:T1}}>{it.title}</span>
                           {it.pro?<span style={{fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.1)",padding:"4px 4px",borderRadius:3}}>{t("hub.pro")}</span>:null}
-                          {it.live?<span style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:12,fontWeight:800,color:UP,background:"rgba(34,197,94,0.1)",border:"1px solid rgba(34,197,94,0.3)",padding:"4px 4px",borderRadius:3}}><span style={{width:4,height:4,borderRadius:"50%",background:UP,display:"inline-block"}}></span>{t("hub.live")}</span>:null}
+                          {it.live?<span style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:12,fontWeight:800,color:BLUE,background:"rgba(37,99,235,0.1)",border:"1px solid rgba(37,99,235,0.3)",padding:"4px 4px",borderRadius:3}}><span style={{width:4,height:4,borderRadius:"50%",background:BLUE,display:"inline-block"}}></span>{t("hub.live")}</span>:null}
                         </div>
                         <div style={{fontSize:12,color:T2,marginTop:4,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{t("hub.item."+it.id+".d", it.desc)}</div>
                       </div>

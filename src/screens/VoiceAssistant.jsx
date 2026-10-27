@@ -3,7 +3,7 @@ import { nowT } from "../utils/helpers";
 
 import { useTheme } from "../theme/ThemeProvider";
 var DB="#0A0E1A",CB="#0F1629",BD="#1E2D4A";
-var BLUE="#3B82F6",BLUE2="#60A5FA",BLUE="#8B5CF6",BLUE="#A78BFA";
+var BLUE="#3B82F6",BLUE2="#60A5FA";
 var UP="#22C55E",DOWN="#EF4444";
 var T1="#FFFFFF",T2="#8899BB",T3="#475569";
 
@@ -143,7 +143,7 @@ export default function VoiceAssistant(props){
             )}
             <button
               onClick={listening?stopListening:startListening}
-              style={{width:90,height:90,borderRadius:"50%",background:listening?""+DOWN+"":""+BLUE+"",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,boxShadow:listening?"0 0 30px rgba(239,68,68,0.5)":"0 0 20px rgba(124,58,237,0.4)",transition:"all 0.3s"}}
+              style={{width:90,height:90,borderRadius:"50%",background:listening?"#2563EB":"#8B5CF6",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,boxShadow:"none",transition:"all 0.3s"}}
             >
               {listening?"&#9632;":"&#127908;"}
             </button>

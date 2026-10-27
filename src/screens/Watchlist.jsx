@@ -27,7 +27,7 @@ export default function Watchlist(props) {
 
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   var BG=theme.c.bg, CARD=theme.c.card, BD=theme.c.border;
-  var BLUE=theme.c.blue, BLUE2=theme.c.blue, BLUE="#7C3AED", BLUE="#A855F7", BLUE=theme.c.blue;
+  var BLUE=theme.c.blue, BLUE2=theme.c.blue;
   var UP=theme.c.up, DOWN=theme.c.down;
   var T1=theme.c.text1, T2=theme.c.text2, T3=theme.c.text3;
   var setTab = props.setTab || function(){};

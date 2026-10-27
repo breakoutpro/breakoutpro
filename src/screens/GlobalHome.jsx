@@ -78,7 +78,7 @@ export default function GlobalHome(props) {
         </div>
         <div style={{background:"rgba(59,130,246,0.08)",border:"1px solid rgba(59,130,246,0.2)",borderRadius:12,padding:"8px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <div style={{width:7,height:7,borderRadius:"50%",background:BLUE,boxShadow:"0 0 8px "+BLUE}}></div>
+            <div style={{width:7,height:7,borderRadius:"50%",background:BLUE,boxShadow:"none"}}></div>
             <span style={{fontSize:12,fontWeight:700,color:BLUE}}>Global Markets Active</span>
           </div>
           <span style={{fontSize:12,color:T2}}>US/EU/Asia Markets</span>

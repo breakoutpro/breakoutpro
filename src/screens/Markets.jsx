@@ -169,12 +169,12 @@ export default function MarketsScreen(props) {
         <div style={{display:"flex",gap:8,overflowX:"auto"}}>
           {TABS.map(function(tb){
             var act=activeTab==tb.id;
-            return <button key={tb.id} onClick={function(){setActiveTab(tb.id);}} style={{background:act?G:"rgba(255,255,255,0.06)",border:"1px solid "+(act?G:BD),borderRadius:20,padding:"4px 12px",color:act?"#fff":T2,fontSize:12,fontWeight:act?700:500,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{tb.label}</button>;
+            return <button key={tb.id} onClick={function(){setActiveTab(tb.id);}} style={{background:act?TH.accent:"rgba(255,255,255,0.06)",border:"1px solid "+(act?TH.accent:BD),borderRadius:20,padding:"4px 12px",color:act?"#fff":T2,fontSize:12,fontWeight:act?700:500,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{tb.label}</button>;
           })}
           <div style={{flex:1}}></div>
           {activeTab=="stocks"?[["pct",t("mk.sort.pct")],["ltp",t("mk.sort.ltp")]].map(function(s){
             var act=sort==s[0];
-            return <button key={s[0]} onClick={function(){setSort(s[0]);}} style={{background:act?"rgba(0,200,83,0.15)":"rgba(255,255,255,0.06)",border:"1px solid "+(act?G:BD),borderRadius:20,padding:"4px 12px",color:act?G:T2,fontSize:12,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{s[1]}</button>;
+            return <button key={s[0]} onClick={function(){setSort(s[0]);}} style={{background:act?TH.blueSoft:"rgba(255,255,255,0.06)",border:"1px solid "+(act?TH.accent:BD),borderRadius:20,padding:"4px 12px",color:act?BLUE:T2,fontSize:12,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{s[1]}</button>;
           }):null}
         </div>
       </div>
@@ -201,9 +201,9 @@ export default function MarketsScreen(props) {
       {/* INDICES */}
       {activeTab=="indices"?(
         <div style={{display:"flex",justifyContent:"flex-end",padding:"4px 16px 0"}}>
-          <div style={{background:liveStatus=="live"?"rgba(0,200,83,0.15)":liveStatus=="closed"?"rgba(255,255,255,0.06)":"rgba(37,99,235,0.1)",border:"1px solid "+(liveStatus=="live"?"rgba(0,200,83,0.3)":liveStatus=="closed"?"rgba(255,255,255,0.1)":"rgba(37,99,235,0.25)"),borderRadius:20,padding:"4px 8px",display:"flex",alignItems:"center",gap:4}}>
-            <div style={{width:5,height:5,borderRadius:"50%",background:liveStatus=="live"?G:liveStatus=="closed"?T2:BLUE}}></div>
-            <span style={{fontSize:12,fontWeight:700,color:liveStatus=="live"?G:liveStatus=="closed"?T2:BLUE}}>{liveStatus=="live"?t("mk.live"):liveStatus=="closed"?t("mk.closed"):t("mk.connecting")}</span>
+          <div style={{background:liveStatus=="live"?"rgba(37,99,235,0.12)":liveStatus=="closed"?"rgba(255,255,255,0.06)":"rgba(37,99,235,0.1)",border:"1px solid "+(liveStatus=="live"?"rgba(37,99,235,0.3)":liveStatus=="closed"?"rgba(255,255,255,0.1)":"rgba(37,99,235,0.25)"),borderRadius:20,padding:"4px 8px",display:"flex",alignItems:"center",gap:4}}>
+            <div style={{width:5,height:5,borderRadius:"50%",background:liveStatus=="live"?BLUE:liveStatus=="closed"?T2:BLUE}}></div>
+            <span style={{fontSize:12,fontWeight:700,color:liveStatus=="live"?BLUE:liveStatus=="closed"?T2:BLUE}}>{liveStatus=="live"?t("mk.live"):liveStatus=="closed"?t("mk.closed"):t("mk.connecting")}</span>
           </div>
         </div>
       ):null}

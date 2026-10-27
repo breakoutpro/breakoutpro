@@ -121,7 +121,7 @@ export default function Guardian(props){
             {/* UPTREND OBSERVATION */}
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <span style={{width:10,height:10,borderRadius:"50%",background:UP,display:"inline-block",boxShadow:"0 0 8px "+UP}}></span>
+                <span style={{width:10,height:10,borderRadius:"50%",background:UP,display:"inline-block",boxShadow:"none"}}></span>
                 <span style={{fontSize:14,fontWeight:900,color:T1}}>Uptrend Observation</span>
                 <span style={{fontSize:12,fontWeight:700,color:UP,background:"rgba(34,197,94,0.1)",padding:"4px 8px",borderRadius:10}}>{uptrend.length}</span>
               </div>
@@ -134,7 +134,7 @@ export default function Guardian(props){
             {/* DOWNTREND OBSERVATION */}
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,marginTop:24}}>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <span style={{width:10,height:10,borderRadius:"50%",background:DOWN,display:"inline-block",boxShadow:"0 0 8px "+DOWN}}></span>
+                <span style={{width:10,height:10,borderRadius:"50%",background:DOWN,display:"inline-block",boxShadow:"none"}}></span>
                 <span style={{fontSize:14,fontWeight:900,color:T1}}>Downtrend Observation</span>
                 <span style={{fontSize:12,fontWeight:700,color:DOWN,background:"rgba(239,68,68,0.1)",padding:"4px 8px",borderRadius:10}}>{downtrend.length}</span>
               </div>

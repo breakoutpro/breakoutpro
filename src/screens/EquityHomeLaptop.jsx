@@ -88,7 +88,7 @@ export default function EquityHomeLaptop(props){
               rather than building a second gauge implementation. Content-
               driven height throughout - no fixed height anywhere on this
               card, so it grows to fit the full information hierarchy. */}
-          <div onClick={function(){setTab("marketmood");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BLUE+"55",boxShadow:"0 0 24px "+BLUE+"22",borderRadius:14,padding:tierCfg.cardPadding+6,boxSizing:"border-box",cursor:"pointer",maxHeight:400,overflowY:"auto"}}>
+          <div onClick={function(){setTab("marketmood");}} style={{background:CARD2,border:"1px solid "+BD,boxShadow:"none",borderRadius:14,padding:tierCfg.cardPadding+6,boxSizing:"border-box",cursor:"pointer",maxHeight:400,overflowY:"auto"}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16}}>
               <span style={{fontSize:tierCfg.widgetTitle+1,fontWeight:800,color:T1}}>&#129504; Next Move Intelligence</span>
               <ProvenanceBadge type="calculated"/>
@@ -111,7 +111,7 @@ export default function EquityHomeLaptop(props){
           </div>
 
           {/* RANGE INTELLIGENCE - card 2 of 3 */}
-          <div onClick={function(){setTab("rangeintel");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BLUE+"55",boxShadow:"0 0 24px "+BLUE+"22",borderRadius:14,padding:tierCfg.cardPadding,boxSizing:"border-box",cursor:"pointer",maxHeight:400,overflowY:"auto"}}>
+          <div onClick={function(){setTab("rangeintel");}} style={{background:CARD2,border:"1px solid "+BD,boxShadow:"none",borderRadius:14,padding:tierCfg.cardPadding,boxSizing:"border-box",cursor:"pointer",maxHeight:400,overflowY:"auto"}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
               <span style={{fontSize:tierCfg.widgetTitle,fontWeight:800,color:T1}}>Range Intelligence</span>
               <ProvenanceBadge type="unavailable"/>
@@ -131,7 +131,7 @@ export default function EquityHomeLaptop(props){
           </div>
 
           {/* OPTIONS INTELLIGENCE - card 3 of 3 */}
-          <div onClick={function(){setTab("optionsintelpro");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BLUE+"55",boxShadow:"0 0 24px "+BLUE+"22",borderRadius:14,padding:tierCfg.cardPadding,boxSizing:"border-box",cursor:"pointer",maxHeight:400,overflowY:"auto"}}>
+          <div onClick={function(){setTab("optionsintelpro");}} style={{background:CARD2,border:"1px solid "+BD,boxShadow:"none",borderRadius:14,padding:tierCfg.cardPadding,boxSizing:"border-box",cursor:"pointer",maxHeight:400,overflowY:"auto"}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
               <span style={{fontSize:tierCfg.widgetTitle,fontWeight:800,color:T1}}>Options Intelligence</span>
               <ProvenanceBadge type="unavailable"/>
@@ -148,7 +148,7 @@ export default function EquityHomeLaptop(props){
           </div>
 
           {/* MARKET NEWS - compact, max 3 headlines, real JustIn data */}
-          <div onClick={function(){setTab("news");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BLUE+"55",boxShadow:"0 0 24px "+BLUE+"22",borderRadius:14,padding:tierCfg.cardPadding,boxSizing:"border-box",cursor:"pointer",maxHeight:400,overflowY:"auto"}}>
+          <div onClick={function(){setTab("news");}} style={{background:CARD2,border:"1px solid "+BD,boxShadow:"none",borderRadius:14,padding:tierCfg.cardPadding,boxSizing:"border-box",cursor:"pointer",maxHeight:400,overflowY:"auto"}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
                 <span style={{fontSize:tierCfg.widgetTitle,fontWeight:800,color:T1}}>Market News</span>

@@ -112,7 +112,7 @@ export default function SignalsPage(props){
               <div key={a.name} style={{display:"flex",alignItems:"center",padding:"12px 12px",borderBottom:i<alerts.length-1?"1px solid "+BD:"none"}}>
                 <span style={{fontSize:16,marginRight:12}} dangerouslySetInnerHTML={{__html:a.ic}}/>
                 <span style={{flex:1,fontSize:12,color:T1,fontWeight:600}}>{a.name}</span>
-                <button onClick={function(){toggle(i);}} style={{width:40,height:22,borderRadius:11,border:"none",background:a.on?UP:"rgba(255,255,255,0.12)",cursor:"pointer",position:"relative"}}>
+                <button onClick={function(){toggle(i);}} style={{width:40,height:22,borderRadius:11,border:"none",background:a.on?theme.c.accent:"rgba(255,255,255,0.12)",cursor:"pointer",position:"relative"}}>
                   <div style={{position:"absolute",top:2,left:a.on?20:2,width:18,height:18,borderRadius:"50%",background:"#fff",transition:"left 0.2s"}}></div>
                 </button>
               </div>

@@ -318,10 +318,10 @@ export default function OIChainScreen(){
       {/* AI Option Analysis */}
       <div style={{background:theme.c.card,borderBottom:"1px solid "+BD,padding:"8px 12px"}}>
         <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-          <div style={{width:20,height:20,borderRadius:6,background:"#2563EB",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+          <div style={{width:20,height:20,borderRadius:6,background:"#7C3AED",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
             <span style={{fontSize:12,fontWeight:900,color:"#fff"}}>AI</span>
           </div>
-          <span style={{fontSize:12,fontWeight:700,color:"#A78BFA"}}>AI OPTION ANALYSIS</span>
+          <span style={{fontSize:12,fontWeight:700,color:theme.c.violet}}>AI OPTION ANALYSIS</span>
         </div>
         <div style={{fontSize:12,color:T1,lineHeight:1.6}}>
           {pcr!=null ? ("OI PCR "+pcr.toFixed(2)+" - "+(pcr>1?"Bullish (Puts dominating, supports likely held)":"Bearish (Calls dominating, resistance likely)")+". ") : null}

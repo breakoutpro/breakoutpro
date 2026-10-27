@@ -110,7 +110,7 @@ export default function AIBriefing() {
       <div style={{background:theme.c.bg,padding:"16px 16px",borderBottom:"1px solid "+BD}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
           <div>
-            <div style={{fontSize:18,fontWeight:900,color:T1}}>AI Market <span style={{color:BLUE}}>Briefing</span></div>
+            <div style={{fontSize:18,fontWeight:900,color:T1}}>AI Market <span style={{color:theme.c.violet}}>Briefing</span></div>
             <div style={{fontSize:12,color:T2}}>{today}</div>
           </div>
           <div style={{textAlign:"right"}}>

@@ -50,7 +50,7 @@ export default function ExpiryAlerts(props){
             </div>
             <div style={{fontSize:12,color:T2,marginTop:4}}>Smart Alerts &#8226; Educational Observation Engine</div>
           </div>
-          <span style={{width:7,height:7,borderRadius:"50%",background:UP,boxShadow:"0 0 8px "+UP}}></span>
+          <span style={{width:7,height:7,borderRadius:"50%",background:UP,boxShadow:"none"}}></span>
         </div>
       </div>
 
@@ -107,7 +107,7 @@ export default function ExpiryAlerts(props){
                   <div style={{fontSize:12,fontWeight:800,color:T1}}>{at.name}</div>
                   <div style={{fontSize:12,color:T2,marginTop:4,lineHeight:1.4}}>{at.desc}</div>
                 </div>
-                <button onClick={function(){toggle(at.id);}} style={{width:44,height:25,borderRadius:13,background:on?UP:"#2A2E37",border:"none",position:"relative",cursor:"pointer",flexShrink:0,transition:"background 0.2s"}}>
+                <button onClick={function(){toggle(at.id);}} style={{width:44,height:25,borderRadius:13,background:on?theme.c.accent:"#2A2E37",border:"none",position:"relative",cursor:"pointer",flexShrink:0,transition:"background 0.2s"}}>
                   <span style={{position:"absolute",top:3,left:on?22:3,width:19,height:19,borderRadius:"50%",background:"#fff",transition:"left 0.2s"}}></span>
                 </button>
               </div>

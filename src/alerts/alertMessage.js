@@ -70,7 +70,8 @@ export function buildMessage(ev, lang){
   if(ev.event == "price_up_volume" || ev.event == "price_down_volume") reason = reason + " " + alertText(l, "rs.move", rv);
   var fresh = freshLabel(l, ev.freshness);
   var timeLabel = ev.eventTime ? istLabel(ev.eventTime) : "";
-  var body = reason + " " + fmtPrice(ev.price) + " | " + (ev.timeframe || "") + " | " + fresh + (timeLabel ? " | " + timeLabel : "");
+  var src = ev.freshness && ev.freshness.source == "yahoo" ? "Yahoo Finance" : "";
+  var body = reason + " " + fmtPrice(ev.price) + " | " + (ev.timeframe || "") + " | " + fresh + (src ? " | " + src : "") + (timeLabel ? " | " + timeLabel : "");
   var voice = alertText(l, "vo." + ev.event, tv, title);
   return {
     title: title, reason: reason, body: body, voice: voice,

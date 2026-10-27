@@ -51,9 +51,15 @@ export function sessionAt(now){
 }
 
 // ---- Freshness ---------------------------------------------------------------------
-export function quoteFreshness(asOf, now){
+// info (optional): the quote itself. A provider-reported delay is always "delayed" (and carried as lagMin);
+// a quote flagged delayUnreported can never be "live" because the provider did not say it is real time.
+export function quoteFreshness(asOf, now, info){
   if(!isNum(asOf)) return { state:"unknown", ageSec:null };
   var age = Math.max(0, Math.round((now - asOf) / 1000));
+  if(info && isNum(info.delayedBySec) && info.delayedBySec > 0){
+    return { state:(age <= info.delayedBySec + 900 ? "delayed" : "stale"), ageSec:age, lagMin:Math.max(1, Math.round(info.delayedBySec / 60)) };
+  }
+  if(info && info.delayUnreported == true && age <= LIMITS_T.LIVE_S) return { state:"delayed", ageSec:age };
   if(age <= LIMITS_T.LIVE_S) return { state:"live", ageSec:age };
   if(age <= LIMITS_T.DELAYED_S) return { state:"delayed", ageSec:age };
   return { state:"stale", ageSec:age };
@@ -190,8 +196,8 @@ function priceOf(snap){
 function evalLevel(rule, snap, st, now, session){
   var q = priceOf(snap);
   if(!q) return result("unavailable", "no_quote", { session:session }, [], st);
-  var fr = quoteFreshness(q.asOf, now);
-  var detail = { price:q.price, level:rule.params.value, freshness:freshOut(fr, { ageSec:fr.ageSec }), session:session };
+  var fr = quoteFreshness(q.asOf, now, q);
+  var detail = { price:q.price, level:rule.params.value, freshness:freshOut(fr, { ageSec:fr.ageSec, lagMin:fr.lagMin }), session:session };
   if(fr.state == "stale" || fr.state == "unknown") return result("stale", "quote_stale", detail, [], st);
   var level = rule.params.value, up = rule.type == "price_above";
   // real traded extremes since the last check (completed + forming 5m bars) catch a cross between checks
@@ -218,7 +224,7 @@ function evalLevel(rule, snap, st, now, session){
       var seen = up ? Math.max(q.price, hi) : Math.min(q.price, lo);
       next.side = "beyond";
       next.fires = (st.fires || 0) + 1;
-      events.push(makeEvent(rule, rule.type, up ? "up" : "down", "last_price", q.price, q.asOf, freshOut(fr, { ageSec:fr.ageSec }),
+      events.push(makeEvent(rule, rule.type, up ? "up" : "down", "last_price", q.price, q.asOf, freshOut(fr, { ageSec:fr.ageSec, lagMin:fr.lagMin }),
         { level:level, seen:seen, between:between }, rule.id + "|" + rule.type + "|" + level + "|" + dayOf(now) + "|" + next.fires, { pct:null }));
     } else if(cur != null){ next.side = cur; }
   } else {
@@ -231,10 +237,10 @@ function evalLevel(rule, snap, st, now, session){
 function evalPct(rule, snap, st, now, session){
   var q = priceOf(snap);
   if(!q) return result("unavailable", "no_quote", { session:session }, [], st);
-  var fr = quoteFreshness(q.asOf, now);
+  var fr = quoteFreshness(q.asOf, now, q);
   var f5 = snap.frames && snap.frames["5m"] ? prepareFrame("5m", snap.frames["5m"], now) : null;
   var prev = (f5 && f5.ok) ? previousClose(f5.bars, now) : null;
-  var detail = { price:q.price, freshness:freshOut(fr, { ageSec:fr.ageSec }), session:session, threshold:rule.params.pct };
+  var detail = { price:q.price, freshness:freshOut(fr, { ageSec:fr.ageSec, lagMin:fr.lagMin }), session:session, threshold:rule.params.pct };
   if(fr.state == "stale" || fr.state == "unknown") return result("stale", "quote_stale", detail, [], st);
   if(!prev || !(prev.price > 0)) return result("unavailable", "no_prev_close", detail, [], st);
   var pct = (q.price - prev.price) / prev.price * 100;
@@ -245,7 +251,7 @@ function evalPct(rule, snap, st, now, session){
   var dk = dayOf(now);
   if(hit && next.firedDay[rule.type] != dk){
     next.firedDay[rule.type] = dk;
-    events.push(makeEvent(rule, rule.type, up ? "up" : "down", "last_price", q.price, q.asOf, freshOut(fr, { ageSec:fr.ageSec }),
+    events.push(makeEvent(rule, rule.type, up ? "up" : "down", "last_price", q.price, q.asOf, freshOut(fr, { ageSec:fr.ageSec, lagMin:fr.lagMin }),
       { pct:detail.pct, threshold:th, prevClose:prev.price }, rule.id + "|" + rule.type + "|" + dk, { pct:detail.pct }));
   } else if(hit){ detail.waitReason = "already_fired_today"; }
   return result(events.length ? "triggered" : "waiting", detail.waitReason || null, detail, events, next);

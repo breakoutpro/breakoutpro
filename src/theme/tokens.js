@@ -31,7 +31,8 @@ var DARK = {
   bull:"#1FAE5B", bear:"#F26B6B", neutral:"#E0B84C", warning:"#F59E42", info:"#5B9DF9",
   bullSoft:"rgba(31,174,91,0.16)", bearSoft:"rgba(242,107,107,0.16)", neutralSoft:"rgba(224,184,76,0.16)",
   warningSoft:"rgba(245,158,66,0.16)", infoSoft:"rgba(91,157,249,0.16)",
-  onAccent:"#FFFFFF", onBrand:"#0B1220", accent:"#2563EB", danger:"#475569", accent2:"#7C83F5", accent2Soft:"rgba(124,131,245,0.16)",
+  onAccent:"#FFFFFF", onBrand:"#0B1220", accent:"#2563EB", danger:"#475569", accent2:"#A78BFA", accent2Soft:"rgba(139,92,246,0.16)",
+  teal:"#2DD4BF", tealSoft:"rgba(13,148,136,0.16)", tealBase:"#0D9488", violet:"#A78BFA", violetSoft:"rgba(139,92,246,0.16)", violetBase:"#8B5CF6", primary:"#2563EB",
   // chart
   chartGrid:"#222D40", chartAxis:"#8895AB", chartLine:"#5B9DF9", chartArea:"rgba(91,157,249,0.14)",
   chartUp:"#1FAE5B", chartDown:"#F26B6B"
@@ -51,7 +52,10 @@ var LIGHT = {
   bull:"#127336", bear:"#B91C1C", neutral:"#755800", warning:"#9A4405", info:"#215AD5",
   bullSoft:"rgba(18,115,54,0.10)", bearSoft:"rgba(185,28,28,0.10)", neutralSoft:"rgba(117,88,0,0.12)",
   warningSoft:"rgba(154,68,5,0.12)", infoSoft:"rgba(33,90,213,0.10)",
-  onAccent:"#FFFFFF", onBrand:"#FFFFFF", accent:"#2563EB", danger:"#334155", accent2:"#6366F1", accent2Soft:"rgba(99,102,241,0.12)",
+  onAccent:"#FFFFFF", onBrand:"#FFFFFF", accent:"#2563EB", danger:"#334155", accent2:"#7C3AED", accent2Soft:"rgba(139,92,246,0.12)",
+  // Primary Blue #2563EB is the fill for buttons and selection (accent / primary, white text = 5.2:1). In light mode the text/link blue stays #215AD5 so blue text on its own tint keeps AA contrast.
+  // teal = informational analytics; violet = AI identity. teal/violet are AA-safe as text; tealBase/violetBase are the brand #0D9488 / #8B5CF6 for fills, borders, icons and chart marks.
+  teal:"#0F766E", tealSoft:"rgba(13,148,136,0.10)", tealBase:"#0D9488", violet:"#7C3AED", violetSoft:"rgba(139,92,246,0.12)", violetBase:"#8B5CF6", primary:"#2563EB",
   chartGrid:"#E1E6EE", chartAxis:"#58657A", chartLine:"#215AD5", chartArea:"rgba(33,90,213,0.10)",
   chartUp:"#127336", chartDown:"#B91C1C"
 };
@@ -72,7 +76,8 @@ var AMOLED = {
   bull:"#22B862", bear:"#FF6B6B", neutral:"#E0B84C", warning:"#F59E42", info:"#5B9DF9",
   bullSoft:"rgba(34,184,98,0.18)", bearSoft:"rgba(255,107,107,0.18)", neutralSoft:"rgba(224,184,76,0.18)",
   warningSoft:"rgba(245,158,66,0.18)", infoSoft:"rgba(91,157,249,0.18)",
-  onAccent:"#FFFFFF", onBrand:"#000000", accent:"#2563EB", danger:"#475569", accent2:"#7C83F5", accent2Soft:"rgba(124,131,245,0.18)",
+  onAccent:"#FFFFFF", onBrand:"#000000", accent:"#2563EB", danger:"#475569", accent2:"#A78BFA", accent2Soft:"rgba(139,92,246,0.18)",
+  teal:"#2DD4BF", tealSoft:"rgba(13,148,136,0.18)", tealBase:"#0D9488", violet:"#A78BFA", violetSoft:"rgba(139,92,246,0.18)", violetBase:"#8B5CF6", primary:"#2563EB",
   chartGrid:"#1C222B", chartAxis:"#8A95A8", chartLine:"#5B9DF9", chartArea:"rgba(91,157,249,0.16)",
   chartUp:"#22B862", chartDown:"#FF6B6B"
 };
@@ -107,7 +112,7 @@ export var shadow = {
   sm:"0 2px 8px rgba(0,0,0,0.2)",
   md:"0 4px 16px rgba(0,0,0,0.3)",
   lg:"0 8px 40px rgba(0,0,0,0.5)",
-  glow:function(c){ return "0 0 8px "+c; }
+  glow:function(c){ return "none"; }   // neon glow retired by the colour system; kept so callers do not break
 };
 
 // ---- RESPONSIVE BREAKPOINTS ----

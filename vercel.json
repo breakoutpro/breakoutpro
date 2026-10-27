@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/yahoo", "destination": "/api/market?action=yahoo" },
+    { "source": "/api/history", "destination": "/api/market?action=history" }
+  ]
+}

@@ -24,7 +24,7 @@
 // disconnected entirely, every entry in "results" will be UNAVAILABLE with
 // the actual reason (login failure, network error, etc).
 
-import { getFuturesQuote } from "./providers/angelone.js";
+import { getFuturesQuote } from "./_lib/providers/angelone.js";
 
 var ALLOWED_SYMBOLS = ["NIFTY", "BANKNIFTY"];
 var MAX_SYMBOLS = 2;

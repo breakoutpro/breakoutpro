@@ -16,7 +16,7 @@
 // Variables): INDIANAPI_KEY
 // Rules: no backtick, no triple-equals, ASCII only.
 
-import * as indian from "./providers/indianapi.js";
+import * as indian from "./_lib/providers/indianapi.js";
 
 var TIMEOUT_MS = 8000;
 

@@ -10,15 +10,31 @@
 // To make Dhan primary for indices too later: point those actions at it.
 // App code (dataService.js, and everything above it) never changes.
 
-import * as yahoo from "./providers/yahoo.js";
-import * as indian from "./providers/indianapi.js";
-import * as dhan from "./providers/dhan.js";
+import * as indian from "./_lib/providers/indianapi.js";
+import * as dhan from "./_lib/providers/dhan.js";
+import * as feed from "./_lib/marketFeed.js";
+import { sessionAt } from "../src/alerts/alertEngine.js";
+import { toYahooSymbol, fromYahooSymbol } from "../src/market/marketData.js";
 
 export default async function handler(req, res){
   res.setHeader("Cache-Control", "s-maxage=15, stale-while-revalidate=60");
 
   var action = (req.query && req.query.action) || "";
   var q = req.query || {};
+
+  // ---- Unified live-data layer (see api/_lib/marketFeed.js and docs/DATA_PROVIDER_COVERAGE.md) ----
+  // snapshot : quotes for many symbols in one cached call, each with status LIVE/DELAYED/STALE/UNAVAILABLE.
+  // candles  : OHLCV for one symbol and frame (1m, 5m, 15m, 1H, 1D) with status and volumeAvailable.
+  // yahoo    : legacy /api/yahoo response shape (rewritten from the old route), plus bp* status fields.
+  // history  : legacy /api/history response shape (rewritten from the old route), plus status fields.
+  if(action == "snapshot" || action == "candles" || action == "yahoo" || action == "history"){
+    try{
+      return await unifiedAction(action, q, res);
+    }catch(e){
+      res.setHeader("Cache-Control", "no-store");
+      return res.status(200).json({ ok:false, reason:"error" });
+    }
+  }
 
   // Dhan historical OHLC (daily + intraday). Handled before the generic
   // path because it reports its own states (OK, EMPTY, INVALID_INPUT,
@@ -27,6 +43,12 @@ export default async function handler(req, res){
   // must never cache a failure. Params: symbol, timeframe (1D|1|5|10|15|25|60),
   // from, to, optional oi. Read-only; credentials stay inside providers/dhan.js.
   if(action == "historical"){
+    // This repo's providers/dhan.js does not define getHistoricalCandles, so the call below used to throw
+    // a TypeError (HTTP 500). Report an honest, typed failure instead; the client shows "Unavailable".
+    if(typeof dhan.getHistoricalCandles != "function"){
+      res.setHeader("Cache-Control", "no-store");
+      return res.status(501).json({ ok:false, reason:"PROVIDER_ERROR", code:"historical_not_implemented", message:"Dhan historical candles are not implemented in this deployment." });
+    }
     var hist = await dhan.getHistoricalCandles({ symbol:q.symbol, timeframe:q.timeframe, from:q.from, to:q.to, oi:q.oi });
     var histOk = (hist.state == "OK" || hist.state == "EMPTY");
     res.setHeader("Cache-Control", histOk ? "s-maxage=15, stale-while-revalidate=30" : "no-store");
@@ -38,11 +60,11 @@ export default async function handler(req, res){
     var data = null;
 
     if(action == "indices"){
-      data = await yahoo.getIndices();
+      data = await indicesViaFeed();
     } else if(action == "quote" || action == "index"){
-      data = await yahoo.getQuote(q.symbol);
+      data = await quoteViaFeed(q.symbol);
     } else if(action == "quotes"){
-      data = await yahoo.getQuotes(q.symbols);
+      data = await quotesViaFeed(q.symbols);
     } else if(action == "trending" || action == "gainers" || action == "losers"){
       data = await indian.getTrending();
     } else if(action == "week52"){
@@ -378,4 +400,83 @@ function numOrNull(v){
 function roundTo(v, decimals){
   var mul = Math.pow(10, decimals);
   return Math.round(v * mul) / mul;
+}
+
+
+// ---------------------------------------------------------------------
+// UNIFIED DATA LAYER ACTIONS
+// ---------------------------------------------------------------------
+function cacheHeader(res, ok, secs){
+  res.setHeader("Cache-Control", ok ? ("public, s-maxage=" + secs + ", stale-while-revalidate=" + (secs * 4)) : "no-store");
+}
+
+async function unifiedAction(action, q, res){
+  var now = Date.now();
+  if(action == "snapshot" || action == "yahoo"){
+    var raw = String(q.symbols || "").split(",").map(function(x){ return x.trim(); }).filter(Boolean);
+    if(!raw.length){ cacheHeader(res, false); return res.status(400).json({ ok:false, reason:"missing_symbols" }); }
+    var appSyms = raw.map(function(x){ return fromYahooSymbol(toYahooSymbol(x) || "") || x; });
+    var r = await feed.getQuotes(appSyms, { now:now });
+    var session = sessionAt(now);
+    var anyData = Object.keys(r.quotes).some(function(k){ return r.quotes[k].price != null; });
+    cacheHeader(res, anyData, session == "OPEN" ? 15 : 120);
+    if(action == "snapshot") return res.status(200).json({ ok:true, data:{ quotes:r.quotes, rejected:r.rejected, source:r.source, fetchedAt:r.fetchedAt, session:session, provider:r.provider } });
+    // legacy shape
+    var rows = [];
+    Object.keys(r.quotes).forEach(function(k){
+      var x = r.quotes[k];
+      if(x.price == null) return;
+      rows.push({ symbol:toYahooSymbol(k), regularMarketPrice:x.price, regularMarketChange:x.change == null ? 0 : x.change,
+        regularMarketChangePercent:x.changePct == null ? 0 : x.changePct, regularMarketPreviousClose:x.prevClose == null ? 0 : x.prevClose,
+        regularMarketDayHigh:x.high == null ? 0 : x.high, regularMarketDayLow:x.low == null ? 0 : x.low, regularMarketVolume:x.volume == null ? 0 : x.volume,
+        marketState:session == "OPEN" ? "REGULAR" : "CLOSED", bpStatus:x.status, bpAsOf:x.asOf, bpDelayedBySec:x.delayedBySec, bpSource:x.source });
+    });
+    return res.status(200).json({ quoteResponse:{ result:rows, error:rows.length ? null : "No symbols resolved" } });
+  }
+  if(action == "candles"){
+    var c = await feed.getCandles(String(q.symbol || "").toUpperCase(), q.frame || q.interval, { now:now });
+    var ok = c.candles.length > 0;
+    cacheHeader(res, ok, sessionAt(now) == "OPEN" ? 30 : 300);
+    if(!ok) return res.status(200).json({ ok:false, reason:c.reason || "no_data", data:{ symbol:c.symbol, frame:c.frame, status:"UNAVAILABLE" } });
+    return res.status(200).json({ ok:true, data:c });
+  }
+  // legacy history
+  var sym = fromYahooSymbol(toYahooSymbol(String(q.symbol || "")) || "") || "";
+  var h = await feed.getHistory(sym, q.range || "1y", q.interval || "1d", { now:now });
+  var hok = h.candles.length > 0;
+  cacheHeader(res, hok, 60);
+  if(!hok) return res.status(200).json({ symbol:q.symbol || "", candles:[], error:h.reason || "No data from Yahoo", status:"UNAVAILABLE" });
+  return res.status(200).json({ symbol:q.symbol, candles:h.candles, meta:h.meta, status:h.status, statusReason:h.reason, volumeAvailable:h.volumeAvailable,
+    asOf:h.quote ? h.quote.asOf : null, delayedBySec:h.quote ? h.quote.delayedBySec : null, source:h.source });
+}
+
+// Legacy dataService shapes, now served by the unified layer (the old providers/yahoo.js used the
+// unauthenticated v7 endpoint, which Yahoo rejects). Each row also carries status/asOf/source.
+async function indicesViaFeed(){
+  var keys = ["NIFTY", "SENSEX", "BANKNIFTY", "FINNIFTY", "MIDCAP", "VIX"];
+  var r = await feed.getQuotes(keys, { now:Date.now() });
+  var out = [];
+  keys.forEach(function(k){
+    var x = r.quotes[k];
+    if(!x || x.price == null) return;
+    out.push({ key:k, ltp:x.price, prevClose:x.prevClose, change:x.change, up:(x.change || 0) >= 0, chgPct:Math.abs(x.changePct || 0),
+      timestamp:x.asOf, marketStatus:x.closed ? "CLOSED" : "REGULAR", status:x.status, delayedBySec:x.delayedBySec, source:x.source });
+  });
+  return out.length ? out : null;
+}
+async function quoteViaFeed(symbol){
+  var sym = String(symbol || "").toUpperCase();
+  var r = await feed.getQuotes([sym], { now:Date.now() });
+  var x = r.quotes[sym];
+  if(!x || x.price == null) return null;
+  return { sym:sym, ltp:x.price, up:(x.change || 0) >= 0, chgPct:Math.abs(x.changePct || 0), open:x.open || 0, high:x.high || 0, low:x.low || 0,
+    prevClose:x.prevClose || 0, volume:x.volume || 0, high52:0, low52:0, status:x.status, asOf:x.asOf, delayedBySec:x.delayedBySec, source:x.source };
+}
+async function quotesViaFeed(symbols){
+  var list = String(symbols || "").split(",").map(function(s){ return s.trim().toUpperCase(); }).filter(Boolean);
+  var r = await feed.getQuotes(list, { now:Date.now() });
+  return Object.keys(r.quotes).filter(function(k){ return r.quotes[k].price != null; }).map(function(k){
+    var x = r.quotes[k];
+    return { sym:k, ltp:x.price, up:(x.change || 0) >= 0, chgPct:Math.abs(x.changePct || 0), status:x.status, asOf:x.asOf, source:x.source };
+  });
 }

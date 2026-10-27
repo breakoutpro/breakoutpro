@@ -89,3 +89,50 @@ export function stateLabel(state){
   if(state == "loading") return "LOADING";
   return "UNAVAILABLE";
 }
+
+// ---- Slim marquee helpers (pure) ---------------------------------------------------------
+// The ticker strip shows only name, value and signed percent. Items without a valid value
+// (loading, unavailable, GIFT NIFTY with no verified provider) are left out, never faked.
+
+export function pctDir(pct){
+  if(!isNum(pct)) return "neutral";
+  if(Math.abs(pct) < 0.005) return "neutral";   // rounds to 0.00: unchanged, not green or red
+  return pct > 0 ? "up" : "down";
+}
+
+export function formatTickerValue(v){
+  if(!isNum(v)) return null;
+  return v.toLocaleString("en-IN", { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+
+// "+0.52%", "-0.40%", "0.00%". Null when the provider sent no change.
+export function formatTickerPct(pct){
+  if(!isNum(pct)) return null;
+  if(Math.abs(pct) < 0.005) return "0.00%";
+  return (pct > 0 ? "+" : "") + pct.toFixed(2) + "%";
+}
+
+// Items the strip may show, in configured order, each with ready display text.
+export function visibleTickerItems(items){
+  var out = [];
+  (items || []).forEach(function(it){
+    if(!it || it.state == "unavailable" || it.state == "loading" || !isNum(it.value)) return;
+    out.push({ key:it.key, label:it.label, route:it.route, value:formatTickerValue(it.value),
+               pct:formatTickerPct(it.chgPct), dir:pctDir(it.chgPct), chgAbs:it.chgAbs });
+  });
+  return out;
+}
+
+// How many copies of one item group make one marquee half at least as wide as the viewport.
+// Two identical halves then loop with no gap: scrollLeft - half lands on identical pixels.
+export function loopCopies(containerW, groupW){
+  if(!isNum(containerW) || !isNum(groupW) || groupW <= 0) return 1;
+  return Math.max(1, Math.ceil(containerW / groupW));
+}
+
+// Keep a scroll position inside [0, half) so the two halves join without a jump.
+export function wrapOffset(pos, half){
+  if(!isNum(pos) || !isNum(half) || half <= 0) return 0;
+  var p = pos % half;
+  return p < 0 ? p + half : p;
+}

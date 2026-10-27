@@ -67,6 +67,9 @@ export function buildTickerItems(data, opts){
     out.value = q.ltp;
     out.asOf = istStamp(ts, now);
     out.state = (fr.status == "UNAVAILABLE") ? "unavailable" : stateOf(age, session, net);
+    // The server rule (src/market/marketData.js) wins: only a verified real-time quote may be "live".
+    if(out.state == "live" && fr.status && fr.status != "LIVE") out.state = "delayed";
+    out.delayedBySec = fr.delayedBySec != null ? fr.delayedBySec : null;
     if(out.state == "unavailable"){ out.value = null; out.asOf = null; return out; }
     out.route = def.route;
     if(isNum(q.chgPct)){

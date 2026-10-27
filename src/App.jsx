@@ -748,14 +748,14 @@ function AppInner() {
   var shellMax = isXxl?2200:(isTvClass?2200:1800);
   var shellPad = isXxl?24:(isTvClass?32:16);
   var shellGap = isXxl?20:(isTvClass?28:16);
-  var shellChromeH = 56 + 41 + shellPad; // header + market ticker + vertical shell padding
+  var shellChromeH = 56 + (tab=="home" ? 37 : 0) + shellPad; // header + market ticker (Home only, 36px + 1px border) + vertical shell padding
   var zoomLevel = isTvClass?1.5:1; // lg/xl/xxl: no zoom (locked contract). tv/tv4k: unchanged current value.
   var centerMaxW = isDesktop ? "none" : (isTablet ? 1000 : 430);
 
   // The mobile app column (unchanged on mobile).
   var appColumn = (
     <div style={{position:"relative",width:"100%",maxWidth:centerMaxW,margin:"0 auto",height:isDesktop?"100%":"100vh",boxSizing:"border-box",paddingBottom:(!isDesktop && tab=="home")?"calc(61px + env(safe-area-inset-bottom))":0,fontFamily:"Inter,Arial,sans-serif",background:theme.c.bg,filter:brightness!=100?"brightness("+(brightness/100)+")":"none",display:"flex",flexDirection:"column"}}>
-      {!isDesktop && tab!="rangeintel" ? <MarketTicker data={mm.data} networkStatus={mm.networkStatus} status={mm.status} onNavigate={goTo}/> : null}
+      {/* Market ticker: Home only. Mobile and tablet render it inside the Home header block (EquityHomeMobile / EquityHomeTablet). */}
       <div style={{flex:1,minHeight:0,overflowY:"auto",overflowX:"hidden"}}>
         {!isDesktop && tab!="home"&&tab!="alerts"&&tab!="scan"&&tab!="guardian"&&tab!="optsell"&&tab!="optsellhub"&&tab!="signals"&&tab!="settings"&&tab!="search"&&tab!="rangeintel" ? <TopBar isPrem={isPrem} trialDays={trialDays} setTab={setTab} onMenu={function(){setSidebar(true);}} onSub={function(){setTab("sub");}}/> : null}
         {/* SAFETY PATCH: PatternAlertBanner removed with its fake data source. */}
@@ -813,7 +813,7 @@ function AppInner() {
   return (
     <div style={{width:"100%",height:"100vh",background:theme.c.bg,display:"flex",flexDirection:"column",fontFamily:"Inter,Arial,sans-serif",overflow:"hidden"}}>
       {tab!="rangeintel" ? <GlobalHeader setTab={goTo} onSelectStock={onSelectStock} tab={tab} user={user} onLogout={logout}/> : null}
-      {tab!="rangeintel" ? <MarketTicker data={mm.data} networkStatus={mm.networkStatus} status={mm.status} onNavigate={goTo}/> : null}
+      {tab=="home" ? <MarketTicker data={mm.data} networkStatus={mm.networkStatus} status={mm.status} onNavigate={goTo}/> : null}
       <div style={{flex:1,width:"100%",maxWidth:noShellCap?"none":shellMax,margin:noShellCap?0:"0 auto",display:"grid",gridTemplateColumns:showRightPanel?"minmax(0, 1fr) "+rightW+"px":"minmax(0, 1fr)",gap:shellGap,padding:(shellPad/2)+"px "+shellPad+"px",boxSizing:"border-box",minHeight:0}}>
         <div style={{minWidth:0,height:"100%",overflowY:"auto",overflowX:"hidden",background:theme.c.bg}}>
           <div style={{zoom:isTvClass?zoomLevel:undefined,width:"100%",maxWidth:(tab=="home"||isTvClass)?"none":1440,margin:"0 auto"}}>

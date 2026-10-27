@@ -24,7 +24,7 @@ export function MarketBadge(){
   },[]);
   return (
     <span style={{display:"inline-flex",alignItems:"center",gap:4,background:CARD,border:"1px solid "+BD,borderRadius:16,padding:"4px 12px"}}>
-      <span style={{width:7,height:7,borderRadius:"50%",background:s.color,boxShadow:s.live?"0 0 6px "+s.color:"none"}}></span>
+      <span style={{width:7,height:7,borderRadius:"50%",background:s.color,boxShadow:"none"}}></span>
       <span style={{fontSize:12,fontWeight:800,color:s.color}}>{s.label}</span>
       <span style={{fontSize:12,color:T3}}>{s.note}</span>
     </span>

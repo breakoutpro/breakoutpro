@@ -4,6 +4,8 @@
 // performance and VIX history. NEVER falls back to hardcoded market values.
 // Rules: no backtick, no ===, ASCII.
 
+import { classifyQuote } from "../src/market/marketData.js";
+
 // In-memory cache (per warm serverless instance only - best effort, not
 // guaranteed across invocations). Different TTLs per data type: core
 // Indian indices refresh fast (matches the 10s client poll), global/sector
@@ -89,6 +91,18 @@ function classify(sourceTs, session){
     status = "STALE";
   }
   return { sourceTimestamp:sourceTs||null, fetchedAt:now, freshnessSeconds:freshnessSeconds, status:status };
+}
+
+// Core indices: the shared rule from src/market/marketData.js. LIVE needs the provider to report
+// exchangeDataDelayedBy == 0; a reported delay is DELAYED; an unreported delay can never be LIVE.
+function classifyIndexQuote(q, sourceTs, session){
+  var legacy = classify(sourceTs, session);
+  var fr = classifyQuote({ asOf:sourceTs, now:legacy.fetchedAt, delayedBySec:(q && typeof q.exchangeDataDelayedBy == "number") ? q.exchangeDataDelayedBy : null, session:session });
+  legacy.status = fr.status;
+  legacy.delayedBySec = fr.delayedBySec;
+  legacy.delayKnown = fr.delayKnown;
+  legacy.statusReason = fr.reason;
+  return legacy;
 }
 
 // Classify freshness for GLOBAL/SECTOR quotes - time-based only. No
@@ -220,7 +234,7 @@ export default async function handler(req, res){
           low:q.regularMarketDayLow!=null?q.regularMarketDayLow:null,
           chgPct:q.regularMarketChangePercent!=null?q.regularMarketChangePercent:null,
           volume:q.regularMarketVolume!=null?q.regularMarketVolume:null,
-          freshness:classify(ts, session)
+          freshness:classifyIndexQuote(q, ts, session)
         };
       } else {
         indices[k] = { ltp:null, freshness:{ status:"UNAVAILABLE", sourceTimestamp:null, fetchedAt:now, freshnessSeconds:null } };

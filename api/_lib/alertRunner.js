@@ -8,7 +8,8 @@ import crypto from "crypto";
 import { evaluateAll, sessionAt } from "../../src/alerts/alertEngine.js";
 import { allowedSymbols } from "../../src/alerts/alertRules.js";
 import { buildMessage } from "../../src/alerts/alertMessage.js";
-import { framesNeeded, fetchSnapshots as defaultFetch } from "./alertData.js";
+import { framesNeeded } from "./alertData.js";
+import { getSnapshots as defaultFetch } from "./marketFeed.js";
 import { sendPush as defaultSend } from "./webpush.js";
 import * as S from "./alertStore.js";
 

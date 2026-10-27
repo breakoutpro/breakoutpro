@@ -14,6 +14,8 @@
 //   { time (epoch seconds, candle START), open, high, low, close, volume }.
 // Rules: no backtick, no triple-equals, ASCII only.
 
+import { toYahooSymbol } from "../../src/market/marketData.js";
+
 var BASE = "https://query1.finance.yahoo.com/v8/finance/chart/";
 
 export var FRAME_SPEC = {
@@ -23,11 +25,16 @@ export var FRAME_SPEC = {
   "1D":  { interval:"1d",  range:"6mo" }
 };
 
+// The unified data layer also needs 1m candles; alert rules do not, so FRAME_SPEC stays at four frames.
+export var DATA_FRAME_SPEC = Object.assign({ "1m": { interval:"1m", range:"1d" } }, FRAME_SPEC);
+
+// Mapping now lives in src/market/marketData.js (one mapping for the whole app). This wrapper keeps the
+// strict alert-side input rule: an upper-case NSE ticker or an app index key, nothing else.
 export function yahooSymbol(sym){
-  if(sym == "NIFTY") return "%5ENSEI";
-  if(sym == "BANKNIFTY") return "%5ENSEBANK";
-  if(typeof sym != "string" || !/^[A-Z][A-Z0-9&-]{0,19}$/.test(sym)) return null;
-  return encodeURIComponent(sym) + ".NS";
+  if(typeof sym != "string" || sym != sym.toUpperCase() || sym != sym.trim()) return null;
+  if(sym.indexOf(".") >= 0 || sym.charAt(0) == "^") return null;
+  var y = toYahooSymbol(sym);
+  return y ? encodeURIComponent(y) : null;
 }
 
 function isNum(v){ return typeof v == "number" && isFinite(v); }
@@ -50,7 +57,17 @@ export function parseChart(json, nowMs){
   var quote = null;
   if(isNum(m.regularMarketPrice) && m.regularMarketPrice > 0 && isNum(m.regularMarketTime)){
     var asOf = m.regularMarketTime * 1000;
-    if(!isNum(nowMs) || asOf <= nowMs + 300000) quote = { price:m.regularMarketPrice, asOf:asOf };   // a timestamp in the future is not trusted
+    if(!isNum(nowMs) || asOf <= nowMs + 300000){   // a timestamp in the future is not trusted
+      quote = { price:m.regularMarketPrice, asOf:asOf };
+      // Yahoo's chart meta does not state whether the feed is delayed. When it does not, the quote is
+      // flagged so nothing downstream can call it LIVE; a reported delay is carried through.
+      if(isNum(m.exchangeDataDelayedBy) && m.exchangeDataDelayedBy >= 0) quote.delayedBySec = m.exchangeDataDelayedBy;
+      else quote.delayUnreported = true;
+      if(isNum(m.chartPreviousClose) && m.chartPreviousClose > 0) quote.prevClose = m.chartPreviousClose;
+      if(isNum(m.regularMarketDayHigh)) quote.dayHigh = m.regularMarketDayHigh;
+      if(isNum(m.regularMarketDayLow)) quote.dayLow = m.regularMarketDayLow;
+      if(isNum(m.regularMarketVolume)) quote.volume = m.regularMarketVolume;
+    }
   }
   return { ok:true, candles:out, quote:quote };
 }
@@ -58,7 +75,7 @@ export function parseChart(json, nowMs){
 // opts: { fetchImpl, timeoutMs, now }
 export function fetchFrame(sym, tfKey, opts){
   opts = opts || {};
-  var spec = FRAME_SPEC[tfKey], ys = yahooSymbol(sym);
+  var spec = (opts.allFrames ? DATA_FRAME_SPEC : FRAME_SPEC)[tfKey], ys = yahooSymbol(sym);
   if(!spec || !ys) return Promise.resolve({ ok:false, code:"invalid_input" });
   var f = opts.fetchImpl || (typeof fetch != "undefined" ? fetch : null);
   if(!f) return Promise.resolve({ ok:false, code:"provider_error" });

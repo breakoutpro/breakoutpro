@@ -1,0 +1,6 @@
+ticker test: # pass 24 # fail 0 
+full suite: # tests 590 # pass 590 # fail 0 
+esbuild whole-app bundle (src/main.jsx, all imports resolved, no missing exports): exit 0, no errors
+vite build / npm run build: NOT RUN - npm install fails here (registry unreachable), so vite is not installed
+581d6b91de28d29fb163112a8df24e45  src/state/marketTickerModel.js
+96ca368dc8143fcf3aa344c2651fdf5f  src/components/MarketTicker.jsx

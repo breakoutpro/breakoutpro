@@ -1,17 +1,26 @@
-# Vercel build fix: visibleTickerItems not exported
+# Gann 1x1 Angle Intelligence - manifest
 
-Diagnosis: in the verified source, src/state/marketTickerModel.js DOES export visibleTickerItems
-(plus pctDir, formatTickerValue, formatTickerPct, loopCopies, wrapOffset). The export list in the
-error (TICKER_ITEMS, istStamp, stateOf, buildTickerItems, stateLabel only) is the OLD model file, so the
-repo copy was not replaced. A second file, src/components/MarketTicker1.jsx, is a stray duplicate of the
-component (a re-upload under a new name). No source logic change was needed, and no test was edited.
+NEW: src/gann/gannMath.js, gannStore.js, gannView.js; src/screens/GannPanel.jsx; tests/gann-math.test.mjs, gann-alerts.test.mjs, gann-ui.test.mjs
+CHANGED: src/screens/Chart.jsx, SmartAlertsPro.jsx, src/App.jsx, src/alerts/alertRules.js, alertEngine.js, alertMessage.js, alertView.js, alertLang.js
 
-Do on GitHub:
-1. Replace src/state/marketTickerModel.js with files/src/state/marketTickerModel.js
-2. Replace src/components/MarketTicker.jsx with files/src/components/MarketTicker.jsx
-3. DELETE src/components/MarketTicker1.jsx (nothing imports it; App.jsx and the Home screens import MarketTicker)
-Also make sure these were uploaded from the earlier ticker zip: src/App.jsx, src/screens/home/EquityHomeMobile.jsx, src/screens/home/EquityHomeTablet.jsx.
+## Setup
+1. Upload every file to the SAME path in your GitHub repo (replace existing).
+2. No new dependencies, no new environment variables.
+3. Background push needs the existing Smart Alerts setup: device enrolled, VAPID keys, cron scheduler.
+4. Do not deploy until you have run `npm run build` and tested on a real device.
 
-visibleTickerItems contract: returns only items with a numeric value and state not unavailable/loading
-(GIFT NIFTY is always dropped); fields exactly key, label, route, value, pct, dir, chgAbs.
-Ticker still has no LIVE/CLOSED/timestamp labels and is Home only.
+## Line definition
+value(k) = anchorPrice + dir*scale*k. k = trading-calendar bars of the chosen timeframe since the anchor candle. dir +1 from swing low, -1 from swing high. Scale = fixed price per bar (ATR(14) suggestion, editable).
+
+## Verification (honest)
+- Full suite: 649/649 pass (node --test). All use fixtures/mocks.
+- Browser harness (Playwright, 67/67): real alert handlers with in-memory store, fixture candles, fixed clock. Not a real provider.
+- esbuild bundle of src/main.jsx OK. `vite build` / `npm run build` NOT run (npm install fails offline).
+- NOT verified: real Yahoo data, real scheduler run, real device push. Background delivery is NOT claimed production-ready.
+
+## Limitations
+- Holidays known for 2026 only.
+- Intraday Gann alerts are disabled when reliable intraday candles are missing; daily candles are never used as intraday.
+- Gann panel text is English only (like the Chart screen); alert messages are in 5 languages.
+- Gann rules are managed from the chart, not the Smart Alerts form.
+- Tiny unrelated fix: timeframe button row on Chart now wraps (Refresh button overflowed at 390px).

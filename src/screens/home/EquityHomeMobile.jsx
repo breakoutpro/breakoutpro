@@ -1,55 +1,33 @@
-import { useState, useEffect } from "react";
 import { useTheme } from "../../theme/ThemeProvider";
 import { useHomeData } from "./hooks/useHomeData";
 import MarketBadge from "./MarketBadge";
-import { t, termHelp, useLang } from "../../i18n/translations";
+import { t, useLang } from "../../i18n/translations";
 import NextMoveHomeCard from "../NextMoveHomeCard";
 import MarketTicker from "../../components/MarketTicker";
+import ProvenanceBadge from "../../components/ProvenanceBadge";
+import HomeCard from "./HomeCard";
+import HomeRange from "./HomeRange";
+import HomeBreakouts from "./HomeBreakouts";
+import HomeSmartAlerts from "./HomeSmartAlerts";
+import HomeMore from "./HomeMore";
 
 // BreakoutPro - EquityHomeMobile.jsx
 // The Mobile Home layout - UI only. All data comes from useHomeData(), the
-// single shared hook also used by Tablet/Laptop/Desktop. This file owns its
-// own presentational Card/Sparkline helpers so it can be edited
-// freely without ever affecting the other device layouts.
+// single shared hook also used by Tablet/Laptop/Desktop.
+// Order: Next Move Intelligence, Range Intelligence, Live Breakouts, Smart
+// Alerts entry, quick actions; secondary cards sit in one collapsed group.
 // Rules: no backtick, no triple-equals, ASCII.
 
 export default function EquityHomeMobile(props){
   useLang();
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
-  var BG=theme.c.bg, CARD=theme.c.card, BD=theme.c.border;
+  var BG=theme.c.bg, BD=theme.c.border;
   var BLUE=theme.c.blue, PROBLUE=theme.c.blue;
-  var UP=theme.c.up, DOWN=theme.c.down, WARN=theme.c.warn;
-  var SENT_GREEN=theme.c.bull, SENT_RED=theme.c.bear, SENT_YELLOW=theme.c.neutral;
+  var UP=theme.c.up, DOWN=theme.c.down;
   var T1=theme.c.text1, T2=theme.c.text2, T3=theme.c.text3;
   var setTab = props.setTab || function(){};
   var data = useHomeData();
   var mm = data.mm;
-
-  // LIVE BREAKOUTS - reuses the existing real /api/scanner-data endpoint,
-  // same one already used by EquityHomeDesktop.jsx/EquityHomeLaptop.jsx.
-  // No new polling system, no new provider.
-  var [scannerResults, setScannerResults] = useState(null);
-  useEffect(function(){
-    var cancelled = false;
-    fetch("/api/scanner-data").then(function(r){ return r.json(); }).then(function(j){
-      if(!cancelled && j && j.ok!==false && j.results) setScannerResults(j.results);
-    }).catch(function(){});
-    return function(){ cancelled = true; };
-  }, []);
-
-  function Card(p){
-    return (
-      <div onClick={p.onDetails||undefined} style={{width:"100%",boxSizing:"border-box",background:CARD,border:"1px solid "+(p.hero?BLUE:BD),borderRadius:14,padding:p.hero?11:9,marginBottom:7,cursor:p.onDetails?"pointer":"default",minHeight:p.minHeight||undefined}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:7}}>
-          <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0,flex:1}}>
-            {p.icon ? <span style={{fontSize:13,flexShrink:0,lineHeight:1}} dangerouslySetInnerHTML={{__html:p.icon}}/> : null}
-            <span style={{fontSize:12,fontWeight:800,color:T1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{p.title}</span>
-          </div>
-        </div>
-        {p.children}
-      </div>
-    );
-  }
 
   return (
     <div style={{background:BG,minHeight:"100vh",width:"100%",boxSizing:"border-box",overflowX:"hidden",fontFamily:"'Inter',Arial,sans-serif",paddingBottom:16,color:T1}}>
@@ -89,85 +67,55 @@ export default function EquityHomeMobile(props){
       </div>
       <MarketTicker data={mm && mm.data} networkStatus={mm && mm.networkStatus} status={mm && mm.status} onNavigate={setTab}/>
 
-      <div style={{width:"100%",boxSizing:"border-box",padding:"7px 9px 0"}}>
+      <div style={{width:"100%",boxSizing:"border-box",padding:"8px 10px 0",display:"flex",flexDirection:"column",gap:8}}>
 
-        {/* 4. AI MARKET MOOD */}
-        <Card title={t("home.mood_title")} onDetails={function(){setTab("marketmood");}}>
+        {/* 1. NEXT MOVE INTELLIGENCE */}
+        <HomeCard dense={true} testId="home-next-move" title={t("home.mood_title")} badge={<ProvenanceBadge type="calculated"/>} action={t("home.view")} onAction={function(){setTab("marketmood");}} onOpen={function(){setTab("marketmood");}}>
           {mm.status=="loading" && !mm.data ? (
             <div style={{fontSize:11,color:T2}}>{t("c.loading")}</div>
           ) : <NextMoveHomeCard mm={mm} fs={11}/>}
-        </Card>
+        </HomeCard>
 
-        {/* Range Intelligence (real data only). The demo Options block that used
-            to sit in this card was removed: it showed example values, not a
-            verified options chain. */}
-        {(function(){
-          var nifty = mm.data && mm.data.indices && mm.data.indices.NIFTY;
-          var hasRange = nifty && nifty.ltp!=null && nifty.high!=null && nifty.low!=null && nifty.high>nifty.low;
-          var rangeBlock;
-          if(!hasRange){
-            rangeBlock = (
-              <div style={{marginBottom:8}}>
-                <div style={{fontSize:11,color:T2}}>{t("home.range_none")}</div>
-              </div>
+        {/* 2. RANGE INTELLIGENCE */}
+        <HomeRange mm={mm} dense={true} onOpen={function(){setTab("rangeintel");}}/>
+
+        {/* 3. LIVE BREAKOUTS */}
+        <HomeBreakouts dense={true} max={3} onOpen={function(){setTab("breakoutscan");}}/>
+
+        {/* 4. SMART MARKET ALERTS entry */}
+        <HomeSmartAlerts dense={true} onOpen={function(){setTab("alerts");}}/>
+
+        {/* QUICK ACTIONS - connects to existing real routes only */}
+        <div style={{display:"flex",gap:8}}>
+          {[[t("home.qa.scan"),"breakoutscan"],[t("home.qa.learn"),"learn"],[t("home.qa.alert"),"alerts"]].map(function(a){
+            return (
+              <button key={a[1]} onClick={function(){setTab(a[1]);}} style={{flex:1,minHeight:40,background:"transparent",border:"1px solid "+BD,borderRadius:8,padding:"6px 8px",cursor:"pointer",fontSize:11,fontWeight:700,color:T1}}>{a[0]}</button>
             );
-          } else {
-            var width = nifty.high - nifty.low;
-            var rawPosPct = ((nifty.ltp - nifty.low) / width) * 100;
-            var posPct = Math.round(Math.max(0, Math.min(100, rawPosPct)));
-            var zone = posPct<=20?"Near Low":(posPct<=40?"Lower Range":(posPct<=60?"Mid Range":(posPct<=80?"Upper Range":"Near High")));
-            var state = posPct>=80?"Breakout Watch":(posPct<=20?"Breakdown Watch":"Balanced");
-            var stateColor = state==="Breakout Watch"?UP:(state==="Breakdown Watch"?DOWN:T1);
-            rangeBlock = (
-              <div style={{marginBottom:8}}>
-                <div style={{fontSize:11,color:T2,marginBottom:4}}>NIFTY: {nifty.low.toLocaleString("en-IN")}&ndash;{nifty.high.toLocaleString("en-IN")} &middot; <span title={termHelp("CMP")}>CMP</span> {nifty.ltp.toLocaleString("en-IN")}</div>
-                <div style={{position:"relative",height:14,marginBottom:4}}>
-                  <div style={{position:"absolute",top:6,left:0,right:0,height:2,background:BD}}></div>
-                  <div style={{position:"absolute",top:2,left:"calc("+posPct+"% - 5px)",width:10,height:10,borderRadius:"50%",background:BLUE,border:"2px solid "+CARD}}></div>
-                </div>
-                <div style={{fontSize:12,fontWeight:800,color:stateColor}}>{posPct}% &middot; {t("home.zone."+zone, zone)} &middot; {t("home.state."+state, state)}</div>
-              </div>
-            );
-          }
-          return (
-            <Card title={t("home.range_title")} onDetails={function(){setTab("rangeintel");}}>
-              {rangeBlock}
-            </Card>
-          );
-        })()}
+          })}
+        </div>
 
-        {/* MARKET ALERTS - no verified alert-generation source exists
-            anywhere in this codebase, matching Desktop/Laptop's honest
-            unavailable state. */}
-        <Card title={t("home.market_alerts")}>
-          <div style={{fontSize:11,color:T2}}>{t("home.alerts_none")}</div>
-        </Card>
-
-        {/* MARKET BREADTH / FII-DII / LATEST ALERTS - no real provider
-            exists anywhere in this codebase for any of these three, shown
-            honestly unavailable with structure intact (same pattern as
-            Desktop). GLOBAL MARKETS and KEY LEVELS use real data already
-            confirmed on Desktop, previously missing from Mobile. */}
-        <Card title={t("home.breadth_title")}>
+        {/* 5. OTHER MARKET TOOLS - collapsed. Breadth, FII/DII, Global and Key Levels keep their own data and honest unavailable states. */}
+        <HomeMore>
+        <HomeCard dense={true} title={t("home.breadth_title")}>
           <div style={{fontSize:11,color:T2}}>{t("home.breadth_none")}</div>
-        </Card>
+        </HomeCard>
 
-        <Card title={t("home.fiidii_title")}>
+        <HomeCard dense={true} title={t("home.fiidii_title")}>
           <div style={{fontSize:11,color:T2}}>{t("home.fiidii_none")}</div>
-        </Card>
+        </HomeCard>
 
         {(function(){
           var global = mm.data && mm.data.global;
           var hasGlobal = global && global.status!=="UNAVAILABLE" && global.items && global.items.length;
           if(!hasGlobal){
             return (
-              <Card title={t("home.global_title")}>
+              <HomeCard dense={true} title={t("home.global_title")}>
                 <div style={{fontSize:11,color:T2}}>{t("home.global_none")}</div>
-              </Card>
+              </HomeCard>
             );
           }
           return (
-            <Card title={t("home.global_title")}>
+            <HomeCard dense={true} title={t("home.global_title")}>
               {global.items.slice(0,4).map(function(g,i){
                 return (
                   <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderTop:i>0?"1px solid "+BD:"none"}}>
@@ -176,7 +124,7 @@ export default function EquityHomeMobile(props){
                   </div>
                 );
               })}
-            </Card>
+            </HomeCard>
           );
         })()}
 
@@ -189,41 +137,17 @@ export default function EquityHomeMobile(props){
           var s1 = Math.round(((2*pivot) - nifty.high)*100)/100;
           var pivotR = Math.round(pivot*100)/100;
           return (
-            <Card title={t("home.key_levels")}>
+            <HomeCard dense={true} title={t("home.key_levels")}>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
                 <div><div style={{fontSize:9,color:T3}}>{t("home.strong_res")}</div><div style={{fontSize:12,fontWeight:800,color:DOWN}}>{r1.toLocaleString("en-IN")}</div></div>
                 <div><div style={{fontSize:9,color:T3}}>{t("home.pivot")}</div><div style={{fontSize:12,fontWeight:800,color:T1}}>{pivotR.toLocaleString("en-IN")}</div></div>
                 <div><div style={{fontSize:9,color:T3}}>{t("home.strong_sup")}</div><div style={{fontSize:12,fontWeight:800,color:UP}}>{s1.toLocaleString("en-IN")}</div></div>
               </div>
-            </Card>
+            </HomeCard>
           );
         })()}
 
-        {/* LIVE BREAKOUTS - compact strip, real scanner data only */}
-        {scannerResults && scannerResults.length ? (
-          <div style={{padding:"8px 0",display:"flex",gap:10,overflowX:"auto",borderTop:"1px solid "+BD,marginTop:4}}>
-            <span style={{fontSize:10,fontWeight:800,color:T2,flexShrink:0}}>{t("home.live_breakouts_caps")}</span>
-            {scannerResults.slice(0,6).map(function(r){
-              var tagLabel = r.tags.indexOf("breakout")>=0?"Breakout":(r.tags.indexOf("breakdown")>=0?"Breakdown":"Vol Spike");
-              var tagColor = r.tags.indexOf("breakout")>=0?UP:(r.tags.indexOf("breakdown")>=0?DOWN:WARN);
-              return (
-                <div key={r.sym} onClick={function(){setTab("breakoutscan");}} style={{display:"flex",alignItems:"center",gap:5,cursor:"pointer",flexShrink:0}}>
-                  <span style={{fontSize:11,fontWeight:800,color:T1}}>{r.sym}</span>
-                  <span style={{fontSize:10,fontWeight:700,color:tagColor}}>{t("home.tag."+tagLabel, tagLabel)}</span>
-                </div>
-              );
-            })}
-          </div>
-        ) : null}
-
-        {/* QUICK ACTIONS - connects to existing real routes only */}
-        <div style={{padding:"8px 0",display:"flex",gap:6}}>
-          {[[t("home.qa.scan"),"breakoutscan"],[t("home.qa.learn"),"learn"],[t("home.qa.alert"),"alerts"]].map(function(a){
-            return (
-              <button key={a[1]} onClick={function(){setTab(a[1]);}} style={{flex:1,background:"transparent",border:"1px solid "+BD,borderRadius:6,padding:"6px 8px",cursor:"pointer",fontSize:10,fontWeight:700,color:T1}}>{a[0]}</button>
-            );
-          })}
-        </div>
+        </HomeMore>
 
       </div>
 

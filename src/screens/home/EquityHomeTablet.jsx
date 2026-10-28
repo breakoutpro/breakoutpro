@@ -6,6 +6,11 @@ import MarketBadge from "./MarketBadge";
 import { SkeletonCard } from "../../components/Skeleton";
 import { t, termHelp, useLang } from "../../i18n/translations";
 import NextMoveHomeCard from "../NextMoveHomeCard";
+import ProvenanceBadge from "../../components/ProvenanceBadge";
+import HomeCard from "./HomeCard";
+import HomeRange from "./HomeRange";
+import HomeBreakouts from "./HomeBreakouts";
+import HomeSmartAlerts from "./HomeSmartAlerts";
 import MarketTicker from "../../components/MarketTicker";
 
 // BreakoutPro - EquityHomeTablet.jsx
@@ -25,20 +30,6 @@ export default function EquityHomeTablet(props){
   var setTab = props.setTab || function(){};
   var data = useHomeData();
   var mm = data.mm;
-
-  function SummaryCard(p){
-    return (
-      <div onClick={p.onDetails||undefined} style={{background:CARD,border:"1px solid "+(p.hero?BLUE:BD),borderRadius:16,padding:p.hero?18:16,boxSizing:"border-box",minWidth:0,overflow:"hidden",height:"100%",minHeight:p.minHeight||undefined,gridColumn:p.span?"1 / -1":undefined,display:"flex",flexDirection:"column",cursor:p.onDetails?"pointer":"default"}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
-            {p.icon ? <span style={{fontSize:16}} dangerouslySetInnerHTML={{__html:p.icon}}/> : null}
-            <span style={{fontSize:p.hero?15:14,fontWeight:800,color:T1}}>{p.title}</span>
-          </div>
-        </div>
-        <div style={{flex:1}}>{p.children}</div>
-      </div>
-    );
-  }
 
   return (
     <div style={{background:BG,minHeight:"100vh",fontFamily:"'Inter',Arial,sans-serif",paddingBottom:16,color:T1,overflowX:"hidden"}}>
@@ -60,17 +51,21 @@ export default function EquityHomeTablet(props){
       </div>
       <MarketTicker data={mm && mm.data} networkStatus={mm && mm.networkStatus} status={mm && mm.status} onNavigate={function(r){ if(props.setTab) props.setTab(r); }}/>
 
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(300px, 1fr))",gap:16,padding:"16px 16px 0",minWidth:0,boxSizing:"border-box"}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(300px, 1fr))",gap:12,padding:"12px 16px 0",minWidth:0,boxSizing:"border-box",alignItems:"stretch"}}>
 
-
-
-        <SummaryCard title={t("home.mood_title")} onDetails={function(){setTab("marketmood");}}>
+        <HomeCard testId="home-next-move" title={t("home.mood_title")} badge={<ProvenanceBadge type="calculated"/>} action={t("home.view")} onAction={function(){setTab("marketmood");}} onOpen={function(){setTab("marketmood");}}>
           {mm.status=="loading" && !mm.data ? (
             <SkeletonCard height={90}/>
           ) : <NextMoveHomeCard mm={mm} fs={12} wide={true}/>}
-        </SummaryCard>
+        </HomeCard>
 
-        <SummaryCard title={t("home.snapshot")}>
+        <HomeRange mm={mm} onOpen={function(){setTab("rangeintel");}}/>
+
+        <HomeBreakouts onOpen={function(){setTab("breakoutscan");}}/>
+
+        <HomeSmartAlerts onOpen={function(){setTab("alerts");}}/>
+
+        <HomeCard title={t("home.snapshot")}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,width:"100%",boxSizing:"border-box"}}>
             {data.spineRows.map(function(r){
               var color = r.dir=="up"?UP:(r.dir=="down"?DOWN:T2);
@@ -87,39 +82,7 @@ export default function EquityHomeTablet(props){
               );
             })}
           </div>
-        </SummaryCard>
-
-        {(function(){
-          var nifty = mm.data && mm.data.indices && mm.data.indices.NIFTY;
-          var hasRange = nifty && nifty.ltp!=null && nifty.high!=null && nifty.low!=null && nifty.high>nifty.low;
-          if(!hasRange){
-            return (
-              <SummaryCard span={true} title={t("home.range_title")} onDetails={function(){setTab("rangeintel");}}>
-                <div style={{fontSize:12,color:T2}}>{t("home.range_none")}</div>
-              </SummaryCard>
-            );
-          }
-          var width = nifty.high - nifty.low;
-          var rawPosPct = ((nifty.ltp - nifty.low) / width) * 100;
-          var posPct = Math.round(Math.max(0, Math.min(100, rawPosPct)));
-          var zone = posPct<=20?"Near Low":(posPct<=40?"Lower Range":(posPct<=60?"Mid Range":(posPct<=80?"Upper Range":"Near High")));
-          var state = posPct>=80?"Breakout Watch":(posPct<=20?"Breakdown Watch":"Balanced");
-          var stateColor = state==="Breakout Watch"?UP:(state==="Breakdown Watch"?DOWN:T1);
-          return (
-            <SummaryCard span={true} title={t("home.range_title")} onDetails={function(){setTab("rangeintel");}}>
-              <div style={{fontSize:12,color:T2,marginBottom:6}}>NIFTY 50 &middot; <span title={termHelp("CMP")}>CMP:</span> <b style={{color:T1}}>{nifty.ltp.toLocaleString("en-IN")}</b></div>
-              <div style={{position:"relative",height:16,marginBottom:6}}>
-                <div style={{position:"absolute",top:7,left:0,right:0,height:2,background:BD}}></div>
-                <div style={{position:"absolute",top:2,left:"calc("+posPct+"% - 6px)",width:12,height:12,borderRadius:"50%",background:BLUE,border:"2px solid "+CARD}}></div>
-              </div>
-              <div style={{fontSize:13,fontWeight:800,color:stateColor,marginBottom:8}}>{posPct}% &middot; {t("home.zone."+zone, zone)} &middot; {t("home.state."+state, state)}</div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,textAlign:"center"}}>
-                <div><div style={{fontSize:10,color:T2}}>{t("home.support_bd")}</div><div style={{fontSize:12,color:UP,fontWeight:700}}>{nifty.low.toLocaleString("en-IN")}</div></div>
-                <div><div style={{fontSize:10,color:T2}}>{t("home.res_bo")}</div><div style={{fontSize:12,color:DOWN,fontWeight:700}}>{nifty.high.toLocaleString("en-IN")}</div></div>
-              </div>
-            </SummaryCard>
-          );
-        })()}
+        </HomeCard>
 
       </div>
       <div style={{height:8}}></div>

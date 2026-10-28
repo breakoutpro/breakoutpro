@@ -270,6 +270,7 @@ var strings = {
   "home.qa.alert":"Set Alert",
   "home.tagline":"Market Intelligence for Smarter Trading",
   "home.hub_alerts":"Smart Market Alerts",
+  "home.search_none":"No matching stocks",
   "home.snapshot":"Market Snapshot",
   "mood.Strong Bearish":"Strong Bearish",
   "mood.Bearish":"Bearish",

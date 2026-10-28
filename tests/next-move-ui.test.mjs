@@ -164,9 +164,9 @@ test("missingText lists names with reasons and skips unknown ids", function(){
 // ---- Home card -----------------------------------------------------------------
 var HOME = ["EquityHomeMobile", "EquityHomeTablet", "EquityHomeLaptop", "EquityHomeDesktop"];
 HOME.forEach(function(f){
-  test("Home layout " + f + " uses the shared Next Move block, not the missing AI text endpoint", function(){
+  test("Home layout " + f + " renders the Home hub and not the missing AI text endpoint", function(){
     var src = fs.readFileSync(new URL("../src/screens/home/" + f + ".jsx", import.meta.url), "utf8");
-    assert.ok(src.indexOf("<NextMoveHomeCard") >= 0, "no NextMoveHomeCard");
+    assert.ok(src.indexOf("<HomeHub") >= 0, "no HomeHub");
     assert.ok(src.indexOf("ai.watchNext") < 0 && src.indexOf("ai.now") < 0, "still reads ai.now / ai.watchNext");
   });
 });

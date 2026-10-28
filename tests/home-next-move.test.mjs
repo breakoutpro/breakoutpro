@@ -114,7 +114,7 @@ test("Home layouts: no brain icon, no duplicate mood block, one card, Home only"
   ["EquityHomeMobile", "EquityHomeTablet", "EquityHomeLaptop", "EquityHomeDesktop"].forEach(function(f){
     var src = read("screens/home/" + f + ".jsx");
     assert.ok(src.indexOf("129504") < 0, f + " still has the brain icon");
-    assert.ok(src.indexOf("<NextMoveHomeCard") >= 0, f + " does not use the compact card");
+    assert.ok(src.indexOf("<HomeHub") >= 0, f + " does not render the Home hub (the big Next Move panel was removed from Home on purpose)");
     assert.ok(src.indexOf("mood.seg.") < 0, f + " still renders a mood segment");
     assert.ok(src.indexOf("home.ai_conf_score") < 0, f + " still renders the score badge");
   });

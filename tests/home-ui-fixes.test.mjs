@@ -24,8 +24,9 @@ test("Next Move card opens on tap, no View Full Analysis link", function(){
   var root = c.slice(c.indexOf('data-testid="nm-home-card"'), c.indexOf('data-testid="nm-home-card"') + 200);
   assert.ok(root.indexOf("stopPropagation") < 0, "card root must let taps reach the card");
   assert.ok(/onClick=\{function\(e\)\{ e.stopPropagation\(\); \}\}>\s*<DetailedAnalysis/.test(c), "expandable section keeps its own taps");
+  assert.ok(read("src/screens/home/HomeHub.jsx").indexOf('tab:"marketmood"') >= 0, "hub Next Move card must open marketmood");
   ["Mobile","Tablet","Laptop","Desktop"].forEach(function(n){
-    assert.ok(read("src/screens/home/EquityHome" + n + ".jsx").indexOf('setTab("marketmood")') >= 0, n + " opens marketmood");
+    assert.ok(read("src/screens/home/EquityHome" + n + ".jsx").indexOf("<HomeHub") >= 0, n + " renders the hub whose Next Move card opens marketmood");
   });
 });
 test("back navigation is history aware", function(){

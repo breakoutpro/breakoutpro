@@ -253,20 +253,26 @@ test("files in the Phase 1 scope contain no hardcoded hex colours (except docume
     assert.ok(src.indexOf("JUSTIN") < 0, "fake JustIn news still used on Home");
     assert.ok(src.indexOf('t("home.market_news")') < 0, "Market News card remains");
     assert.ok(src.indexOf('t("home.options_title")') < 0 && src.indexOf("home.options_example") < 0, "options card remains");
-    assert.equal((src.match(/<NextMoveHomeCard/g) || []).length, 1, "Next Move card count");
+    assert.equal((src.match(/<NextMoveHomeCard/g) || []).length, 0, "the big Next Move panel is no longer on Home");
     assert.ok(src.indexOf("129504") < 0, "brain icon");
   });
 });
 
-test("Home still reaches Range Intelligence, Live Breakouts and Market Alerts", function(){
-  // these cards now live in shared Home components; every layout must render them
-  var shared = { HomeRange:"home.range_title", HomeBreakouts:"home.live_breakouts", HomeSmartAlerts:"home.market_alerts" };
-  Object.keys(shared).forEach(function(c){
-    assert.ok(read("src/screens/home/" + c + ".jsx").indexOf(shared[c]) >= 0, c + " lost its heading key");
+test("Home still reaches Next Move, Range, Live Breakouts, Smart Alerts, Scan and Learn through the hub cards", function(){
+  var hub = read("src/screens/home/HomeHub.jsx");
+  var dest = { "home.mood_title":"marketmood", "home.range_title":"rangeintel", "home.live_breakouts":"breakoutscan", "home.hub_alerts":"alerts", "home.qa.scan":"scanner", "home.qa.learn":"learn" };
+  var app = read("src/App.jsx");
+  Object.keys(dest).forEach(function(k){
+    assert.ok(hub.indexOf('key:"' + k + '"') >= 0, "hub lost card " + k);
+    assert.ok(hub.indexOf('tab:"' + dest[k] + '"') >= 0, "hub card " + k + " does not open " + dest[k]);
+    assert.ok(app.indexOf('tab=="' + dest[k] + '"') >= 0, "App has no screen for " + dest[k]);
+    assert.ok(app.indexOf('"' + dest[k] + '"') >= 0);
   });
+  // every destination must be a known tab, or App renders the More screen on top of it
+  var known = app.slice(app.indexOf("var KNOWN_TABS"), app.indexOf("];", app.indexOf("var KNOWN_TABS")));
+  Object.keys(dest).forEach(function(k){ assert.ok(known.indexOf('"' + dest[k] + '"') >= 0, dest[k] + " missing from KNOWN_TABS"); });
   ["EquityHomeMobile", "EquityHomeTablet", "EquityHomeLaptop", "EquityHomeDesktop"].forEach(function(f){
-    var src = read("src/screens/home/" + f + ".jsx");
-    Object.keys(shared).forEach(function(c){ assert.ok(src.indexOf("<" + c) >= 0, f + " does not render " + c); });
+    assert.ok(read("src/screens/home/" + f + ".jsx").indexOf("<HomeHub") >= 0, f + " does not render HomeHub");
   });
   // Market News and Options remain reachable from their own screens
   var app = read("src/App.jsx");

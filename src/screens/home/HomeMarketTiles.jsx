@@ -27,7 +27,7 @@ export default function HomeMarketTiles(props){
   var items = buildTickerItems(mm.data, { now:now, networkStatus:mm.networkStatus, loadFailed:(mm.status=="error" || mm.status=="offline") });
   var go = props.setTab || function(){};
   return (
-    <div data-testid="home-tiles" style={{display:"grid",gridTemplateColumns:"repeat(5, minmax(0, 1fr))",gap:14}}>
+    <div data-testid="home-tiles" style={{display:"grid",gridTemplateColumns:"repeat(5, minmax(0, 1fr))",gap:12}}>
       {items.map(function(it){
         var has = typeof it.value=="number" && isFinite(it.value) && it.state!="unavailable" && it.state!="loading";
         var dir = has ? pctDir(it.chgPct) : "neutral";
@@ -39,20 +39,20 @@ export default function HomeMarketTiles(props){
         var body = (
           <div style={{minWidth:0}}>
             <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:6}}>
-              <span style={{fontSize:13,fontWeight:700,color:c.text1,letterSpacing:0.2,minWidth:0,overflowWrap:"anywhere"}}>{it.label}</span>
-              {tag ? <span style={{fontSize:9,fontWeight:800,color:c.text3,whiteSpace:"nowrap"}}>{tag}</span> : null}
+              <span style={{fontSize:11,fontWeight:700,color:c.text1,letterSpacing:0.2,minWidth:0,overflowWrap:"anywhere"}}>{it.label}</span>
+              {tag ? <span style={{fontSize:8,fontWeight:800,color:c.text3,whiteSpace:"nowrap"}}>{tag}</span> : null}
             </div>
             {has ? (
-              <div style={{display:"flex",alignItems:"baseline",flexWrap:"wrap",gap:"0 10px",marginTop:4}}>
-                <span style={{fontSize:22,fontWeight:800,color:c.text1,fontVariantNumeric:"tabular-nums"}}>{formatTickerValue(it.value)}</span>
-                {pct ? <span style={{fontSize:14,fontWeight:700,color:col,fontVariantNumeric:"tabular-nums"}}>{pct}{arrow ? " " + arrow : ""}</span> : null}
+              <div style={{display:"flex",alignItems:"baseline",flexWrap:"wrap",gap:"0 8px",marginTop:3}}>
+                <span style={{fontSize:19,fontWeight:800,color:c.text1,fontVariantNumeric:"tabular-nums"}}>{formatTickerValue(it.value)}</span>
+                {pct ? <span style={{fontSize:12,fontWeight:700,color:col,fontVariantNumeric:"tabular-nums"}}>{pct}{arrow ? " " + arrow : ""}</span> : null}
               </div>
             ) : (
-              <div style={{marginTop:6,fontSize:15,fontWeight:600,color:c.text3}}>{it.state=="loading" ? "--" : t("c.unavailable")}</div>
+              <div style={{marginTop:5,fontSize:13,fontWeight:600,color:c.text3}}>{it.state=="loading" ? "--" : t("c.unavailable")}</div>
             )}
           </div>
         );
-        var box = { textAlign:"left",width:"100%",boxSizing:"border-box",minWidth:0,padding:"12px 16px",minHeight:78,background:light ? "rgba(255,255,255,0.92)" : c.card,border:"1px solid " + (light ? "rgba(255,255,255,0.95)" : c.border),borderRadius:14,boxShadow:light ? "0 4px 14px rgba(37,99,235,0.08), 0 1px 2px rgba(15,23,42,0.05)" : "0 3px 10px rgba(0,0,0,0.22)",fontFamily:"inherit",color:c.text1 };
+        var box = { textAlign:"left",width:"100%",boxSizing:"border-box",minWidth:0,padding:"10px 14px",minHeight:66,background:light ? "rgba(255,255,255,0.92)" : c.card,border:"1px solid " + (light ? "rgba(255,255,255,0.95)" : c.border),borderRadius:12,boxShadow:light ? "0 4px 14px rgba(37,99,235,0.08), 0 1px 2px rgba(15,23,42,0.05)" : "0 3px 10px rgba(0,0,0,0.22)",fontFamily:"inherit",color:c.text1 };
         if(route) return <button key={it.key} type="button" data-testid={"home-tile-" + it.key} onClick={function(){ go(route); }} style={Object.assign({cursor:"pointer"}, box)}>{body}</button>;
         return <div key={it.key} data-testid={"home-tile-" + it.key} style={box}>{body}</div>;
       })}

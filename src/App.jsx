@@ -10,7 +10,6 @@ import ProvenanceBadge from "./components/ProvenanceBadge";
 import { ThemeProvider, useTheme } from "./theme/ThemeProvider";
 import { t, useLang } from "./i18n/translations";
 import DisclaimerTicker from "./components/DisclaimerTicker";
-import MarketTicker from "./components/MarketTicker";
 // SAFETY PATCH: useWatchlistAlerts import removed - fabricated candle-based
 // pattern detection was firing real OS notifications on simulated data.
 // See audit findings. PatternAlertBanner import removed with it (no other
@@ -647,7 +646,7 @@ function AppInner() {
       <ErrorBoundary key={tab}>
       <Suspense fallback={<Loader/>}>
         <AlertBanner/>
-        {tab=="home"     ? <HomeScreen mm={mm} nifty={hp.nifty} sensex={hp.sensex} bankNifty={hp.bankNifty} midcap={hp.midcap} stocks={hp.stocks} news={hp.news} briefing={hp.briefing} briefingLoading={hp.briefingLoading} onBriefing={hp.onBriefing} user={hp.user} setTab={hp.setTab} glTab={hp.glTab} setGlTab={hp.setGlTab} isPrem={isPrem} onMenu={function(){setSidebar(true);}} onOpenAcademy={function(moduleId){ setAcademyDeepLink(moduleId); setTab("academy"); }} initialLearnTopic={learnTopicDeepLink} onLearnTopicConsumed={function(){setLearnTopicDeepLink(null);}}/> : null}
+        {tab=="home"     ? <HomeScreen mm={mm} nifty={hp.nifty} sensex={hp.sensex} bankNifty={hp.bankNifty} midcap={hp.midcap} stocks={hp.stocks} news={hp.news} briefing={hp.briefing} briefingLoading={hp.briefingLoading} onBriefing={hp.onBriefing} user={hp.user} setTab={hp.setTab} onSelectStock={function(st){ setSelectedStock(st); goTo("stockprofile"); }} glTab={hp.glTab} setGlTab={hp.setGlTab} isPrem={isPrem} onMenu={function(){setSidebar(true);}} onOpenAcademy={function(moduleId){ setAcademyDeepLink(moduleId); setTab("academy"); }} initialLearnTopic={learnTopicDeepLink} onLearnTopicConsumed={function(){setLearnTopicDeepLink(null);}}/> : null}
         {tab=="markets"  ? <MarketsScreen stocks={STOCKS}/> : null}
         {tab=="scan"     ? <ScannerScreen stocks={STOCKS}/> : null}
         {tab=="portfolio"? <PortfolioAnalyticsHome onBack={function(){setTab("home");}} /> : null}
@@ -813,7 +812,7 @@ function AppInner() {
   return (
     <div style={{width:"100%",height:"100vh",background:theme.c.bg,display:"flex",flexDirection:"column",fontFamily:"Inter,Arial,sans-serif",overflow:"hidden"}}>
       {tab!="rangeintel" ? <GlobalHeader setTab={goTo} onSelectStock={onSelectStock} tab={tab} user={user} onLogout={logout}/> : null}
-      {tab=="home" ? <MarketTicker data={mm.data} networkStatus={mm.networkStatus} status={mm.status} onNavigate={goTo}/> : null}
+      {/* Desktop Home shows market boxes (HomeMarketTiles) instead of the slim strip; mobile and tablet render the strip inside their Home header block. */}
       <div style={{flex:1,width:"100%",maxWidth:noShellCap?"none":shellMax,margin:noShellCap?0:"0 auto",display:"grid",gridTemplateColumns:showRightPanel?"minmax(0, 1fr) "+rightW+"px":"minmax(0, 1fr)",gap:shellGap,padding:(shellPad/2)+"px "+shellPad+"px",boxSizing:"border-box",minHeight:0}}>
         <div style={{minWidth:0,height:"100%",overflowY:"auto",overflowX:"hidden",background:theme.c.bg}}>
           <div style={{zoom:isTvClass?zoomLevel:undefined,width:"100%",maxWidth:(tab=="home"||isTvClass)?"none":1440,margin:"0 auto"}}>

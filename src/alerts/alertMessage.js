@@ -35,6 +35,8 @@ function reasonKey(ev){
   if(c == "breakout") return "rs.break_up";
   if(c == "breakdown") return "rs.break_down";
   if(c == "candle") return "rs.candle";
+  if(c == "gann_near") return "rs.gann_near";
+  if(c == "gann_close" || c == "gann_any") return rs.crossDir == "down" ? "rs.gann_close_down" : "rs.gann_close_up";
   return "rs.volume";
 }
 
@@ -64,7 +66,9 @@ export function buildMessage(ev, lang){
     volume: rs.volume != undefined ? String(Math.round(rs.volume)) : "-",
     baseline: rs.baseline != undefined ? String(Math.round(rs.baseline)) : "-",
     ratio: r(rs.ratio, 1), sessions: rs.sessions != undefined ? String(rs.sessions) : "-",
-    move: r(Math.abs(rs.movePct || 0), 2)
+    move: r(Math.abs(rs.movePct || 0), 2),
+    anchorPrice: fmtPrice(rs.anchorPrice), anchorTime: rs.anchorT ? istLabel(rs.anchorT * 1000) : "-",
+    scale: fmtPrice(rs.scale), near: r(rs.near, 2), bars: rs.bars != undefined ? String(rs.bars) : "-"
   };
   var reason = alertText(l, reasonKey(ev), rv);
   if(ev.event == "price_up_volume" || ev.event == "price_down_volume") reason = reason + " " + alertText(l, "rs.move", rv);

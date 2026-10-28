@@ -62,6 +62,8 @@ export function ruleParamText(rule){
   if(rule.type == "pct_down") return p.pct + "%";
   if(rule.type == "volume_spike") return p.mult + "x";
   if(rule.type == "price_up_volume" || rule.type == "price_down_volume") return p.mult + "x, " + p.minMovePct + "%";
+  if(rule.type == "gann_near") return p.anchorPrice + " / " + p.scale + " / " + p.nearPct + "%";
+  if(rule.type == "gann_close" || rule.type == "gann_any") return (p.kind == "high" ? "v " : "^ ") + p.anchorPrice + " / " + p.scale;
   if(rule.type == "candle") return (p.patterns || []).length + "";
   return "";
 }

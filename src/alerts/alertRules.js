@@ -4,6 +4,8 @@
 // buy/sell recommendation.
 // Rules: no backtick, no triple-equals, ASCII only.
 
+import { validateLine, GANN } from "../gann/gannMath.js";
+
 export var INDEX_SYMBOLS = ["NIFTY", "BANKNIFTY"];       // monitored only when the user enables them
 export var MAX_RULES = 30;
 export var MAX_WATCHLIST = 25;
@@ -27,8 +29,14 @@ export var RULE_TYPES = {
   candle:            { group:"candle",   param:"patterns", dir:"any" },
   volume_spike:      { group:"volume",   param:"mult",  dir:"any"  },
   price_up_volume:   { group:"volume",   param:"mult",  dir:"up"   },
-  price_down_volume: { group:"volume",   param:"mult",  dir:"down" }
+  price_down_volume: { group:"volume",   param:"mult",  dir:"down" },
+  // Gann 1x1 line alerts (the line is built on the chart screen; see src/gann/gannMath.js)
+  gann_near:         { group:"level",    param:"gann",  dir:"any"  },
+  gann_close:        { group:"level",    param:"gann",  dir:"any"  },
+  gann_any:          { group:"level",    param:"gann",  dir:"any"  }
 };
+export var GANN_TYPES = ["gann_near", "gann_close", "gann_any"];
+export function isGannType(t){ return GANN_TYPES.indexOf(t) >= 0; }
 export var GROUPS = ["candle", "action", "volume", "level"];
 
 export var PATTERN_IDS = [
@@ -115,6 +123,19 @@ export function validateRuleInput(input, ctx){
       if(input.type != "volume_spike"){
         var mv = blank(p.minMovePct) ? 0.3 : num(p.minMovePct);
         if(mv == null || mv < 0.05 || mv > 10) errors.push("invalid_move"); else params.minMovePct = round4(mv);
+      }
+    } else if(def.param == "gann"){
+      var gl = { kind:p.kind, anchorT:num(p.anchorT), anchorPrice:num(p.anchorPrice), scale:num(p.scale), tf:tf };
+      var gv = validateLine(gl, null);
+      if(!gv.ok) errors.push("invalid_gann"); else {
+        params.kind = gl.kind; params.anchorT = gl.anchorT; params.anchorPrice = round4(gl.anchorPrice); params.scale = round4(gl.scale);
+      }
+      if(input.type == "gann_near"){
+        var np = blank(p.nearPct) ? GANN.NEAR_DEFAULT : num(p.nearPct);
+        if(np == null || np < GANN.NEAR_MIN || np > GANN.NEAR_MAX) errors.push("invalid_near"); else params.nearPct = round4(np);
+      }
+      if(!blank(p.lineId)){
+        if(typeof p.lineId == "string" && /^[a-z0-9]{6,24}$/.test(p.lineId)) params.lineId = p.lineId; else errors.push("invalid_gann");
       }
     } else if(def.param == "patterns"){
       var list = Array.isArray(p.patterns) ? p.patterns : [];

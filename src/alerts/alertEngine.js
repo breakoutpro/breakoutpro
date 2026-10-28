@@ -19,6 +19,7 @@ import { istParts, RULES } from "../screens/DirectionEngine.js";
 import { isTradingDayIndex } from "../screens/BreakoutTfEngine.js";
 import { TIMEFRAMES, RULE_TYPES } from "./alertRules.js";
 import { detectPatterns, MIN_CANDLES } from "./alertCandles.js";
+import { GANN, lineValueAt, bar as gannBar, barStartAt, intradayCheck, anchorMatches, scanCloses, nearCheck } from "../gann/gannMath.js";
 
 var IST_MS = 19800000, DAY_MS = 86400000;
 export var LIMITS_T = {
@@ -34,7 +35,7 @@ export var LIMITS_T = {
   MIN_DAILY_BASE: 10,
   MAX_DAILY_BASE: 20
 };
-var COOLDOWN_MS = { price_above:900000, price_below:900000, pct_up:0, pct_down:0, breakout:0, breakdown:0, candle:0, volume_spike:0, price_up_volume:0, price_down_volume:0 };
+var COOLDOWN_MS = { price_above:900000, price_below:900000, pct_up:0, pct_down:0, breakout:0, breakdown:0, candle:0, volume_spike:0, price_up_volume:0, price_down_volume:0, gann_near:900000, gann_close:0, gann_any:0 };
 
 function isNum(v){ return typeof v == "number" && isFinite(v); }
 function dayOf(ms){ return istParts(ms).day; }
@@ -158,7 +159,7 @@ export function evaluateRule(rule, snap, state, now){
   if(rule.enabled == false) return result("disabled", null, {}, [], st);
 
   var session = sessionAt(now);
-  var needsCompleted = def.group == "candle" || def.group == "volume" || rule.type == "breakout" || rule.type == "breakdown";
+  var needsCompleted = def.group == "candle" || def.group == "volume" || rule.type == "breakout" || rule.type == "breakdown" || rule.type == "gann_close" || rule.type == "gann_any";
   var sessionOk = session == "OPEN" || (needsCompleted && session == "POST_CLOSE");
   if(!sessionOk) return result("market_closed", session, { session:session }, [], Object.assign(st, { lastCheckAt:now }));
 
@@ -169,6 +170,8 @@ export function evaluateRule(rule, snap, state, now){
   else if(rule.type == "pct_up" || rule.type == "pct_down") out = evalPct(rule, snap, st, now, session);
   else if(rule.type == "breakout" || rule.type == "breakdown") out = evalBreak(rule, snap, st, now, session);
   else if(rule.type == "candle") out = evalCandle(rule, snap, st, now, session);
+  else if(rule.type == "gann_near") out = evalGannNear(rule, snap, st, now, session);
+  else if(rule.type == "gann_close" || rule.type == "gann_any") out = evalGannClose(rule, snap, st, now, session);
   else out = evalVolume(rule, snap, st, now, session);
 
   // cooldown / duplicate gate applied to every event
@@ -307,6 +310,81 @@ function evalCandle(rule, snap, st, now, session){
   }
   detail.patternsFound = d.found.map(function(x){ return x.id; });
   return result(events.length ? "triggered" : "waiting", null, detail, events, Object.assign({}, st));
+}
+
+
+// ---- Gann 1x1 line alerts -------------------------------------------------------------------
+// The line is anchor + scale * bars (see src/gann/gannMath.js). Only validated, completed candles
+// of the rule's own timeframe are used; an intraday rule never reads daily data, and a series
+// that is not really intraday disables the rule instead of producing a signal.
+function gannLine(rule){
+  var p = rule.params || {};
+  return { kind:p.kind, anchorT:p.anchorT, anchorPrice:p.anchorPrice, scale:p.scale, tf:rule.timeframe };
+}
+function gannBase(rule, snap, now, session){
+  var p = barsFor(rule, snap, now);
+  if(!p.ok) return { out:result("unavailable", p.code, { session:session }, [], null) };
+  var detail = { freshness:freshOut(p.freshness, { lagMin:p.freshness.lagMin }), session:session, timeframe:rule.timeframe };
+  var ic = intradayCheck(p.bars, rule.timeframe);
+  if(!ic.ok) return { out:result("unavailable", "intraday_unavailable", detail, [], null) };
+  if(p.freshness.state == "stale") return { out:result("stale", "bars_stale", detail, [], null) };
+  var line = gannLine(rule);
+  if(!anchorMatches(p.bars, line)) return { out:result("unavailable", "anchor_mismatch", detail, [], null) };
+  return { p:p, detail:detail, line:line };
+}
+
+function evalGannClose(rule, snap, st, now, session){
+  var b = gannBase(rule, snap, now, session);
+  if(b.out){ b.out.state = st; return b.out; }
+  var mode = rule.type == "gann_any" ? "any" : "close";
+  var sc = scanCloses(b.p.bars, b.line, st.gann, mode);
+  var next = Object.assign({}, st, { gann:sc.state });
+  var detail = b.detail;
+  detail.line = sc.level; detail.side = sc.state.side;
+  if(sc.beforeAnchor) return result("waiting", "before_anchor", detail, [], next);
+  if(sc.suppressed) next.suppressed = (next.suppressed || 0) + sc.suppressed;
+  var events = [];
+  for(var i = 0; i < sc.events.length; i++){
+    var e = sc.events[i], last = e.bar;
+    events.push(makeEvent(rule, rule.type, e.dir, "completed_candle", last.close, last.endMs, freshOut(b.p.freshness, { lagMin:b.p.freshness.lagMin }),
+      { level:e.level, close:last.close, confirmed:true, kind:rule.params.kind, anchorT:rule.params.anchorT, anchorPrice:rule.params.anchorPrice,
+        scale:rule.params.scale, bars:e.bars, crossDir:e.dir, mode:mode, lineId:rule.params.lineId || null },
+      rule.id + "|" + rule.type + "|" + rule.timeframe + "|" + last.t + "|" + e.dir, { pct:null }));
+  }
+  var wait = null;
+  if(!events.length) wait = sc.suppressed ? "gann_cooldown" : (sc.firstLook ? "gann_watching" : null);
+  return result(events.length ? "triggered" : "waiting", wait, detail, events, next);
+}
+
+function evalGannNear(rule, snap, st, now, session){
+  var b = gannBase(rule, snap, now, session);
+  if(b.out){ b.out.state = st; return b.out; }
+  var q = priceOf(snap);
+  if(!q) return result("unavailable", "no_quote", b.detail, [], st);
+  var fr = quoteFreshness(q.asOf, now, q);
+  var detail = b.detail;
+  detail.price = q.price; detail.quoteFreshness = freshOut(fr, { ageSec:fr.ageSec, lagMin:fr.lagMin });
+  if(fr.state == "stale" || fr.state == "unknown") return result("stale", "quote_stale", detail, [], st);
+  var bs = barStartAt(now, rule.timeframe);
+  var level = bs != null ? lineValueAt(b.line, bs) : null;
+  if(level == null) return result("waiting", "before_anchor", detail, [], st);
+  var near = rule.params.nearPct || GANN.NEAR_DEFAULT;
+  var mode = "close";
+  var nc = nearCheck(q.price, level, rule.params.kind, mode, near);
+  if(!nc.ok) return result("unavailable", "no_quote", detail, [], st);
+  detail.line = level; detail.distPct = Math.round(nc.distPct * 100) / 100;
+  var next = Object.assign({}, st, { gannNear:Object.assign({ armed:true, fires:0 }, st.gannNear || {}) });
+  var gs = next.gannNear, events = [];
+  if(!gs.armed && Math.abs(nc.distPct) > near * 2) gs.armed = true;          // moved clearly away: re-armed
+  if(nc.beyond){ detail.waitReason = "gann_beyond"; }
+  else if(nc.within && gs.armed){
+    gs.armed = false; gs.fires = (gs.fires || 0) + 1;
+    events.push(makeEvent(rule, "gann_near", "neutral", "last_price", q.price, q.asOf, freshOut(fr, { ageSec:fr.ageSec, lagMin:fr.lagMin }),
+      { level:level, close:null, confirmed:false, kind:rule.params.kind, anchorT:rule.params.anchorT, anchorPrice:rule.params.anchorPrice,
+        scale:rule.params.scale, bars:gannBar(b.line, bs), near:near, distPct:detail.distPct, lineId:rule.params.lineId || null },
+      rule.id + "|gann_near|" + dayOf(now) + "|" + gs.fires, { pct:null }));
+  } else if(nc.within) detail.waitReason = "beyond_wait_rearm";
+  return result(events.length ? "triggered" : "waiting", detail.waitReason || null, detail, events, next);
 }
 
 function evalVolume(rule, snap, st, now, session){

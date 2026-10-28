@@ -259,13 +259,14 @@ test("files in the Phase 1 scope contain no hardcoded hex colours (except docume
 });
 
 test("Home still reaches Range Intelligence, Live Breakouts and Market Alerts", function(){
+  // these cards now live in shared Home components; every layout must render them
+  var shared = { HomeRange:"home.range_title", HomeBreakouts:"home.live_breakouts", HomeSmartAlerts:"home.market_alerts" };
+  Object.keys(shared).forEach(function(c){
+    assert.ok(read("src/screens/home/" + c + ".jsx").indexOf(shared[c]) >= 0, c + " lost its heading key");
+  });
   ["EquityHomeMobile", "EquityHomeTablet", "EquityHomeLaptop", "EquityHomeDesktop"].forEach(function(f){
     var src = read("src/screens/home/" + f + ".jsx");
-    assert.ok(src.indexOf("home.range_title") >= 0, f + " lost Range Intelligence");
-  });
-  ["EquityHomeLaptop", "EquityHomeDesktop"].forEach(function(f){
-    var src = read("src/screens/home/" + f + ".jsx");
-    assert.ok(src.indexOf("home.live_breakouts") >= 0 && src.indexOf("home.market_alerts") >= 0);
+    Object.keys(shared).forEach(function(c){ assert.ok(src.indexOf("<" + c) >= 0, f + " does not render " + c); });
   });
   // Market News and Options remain reachable from their own screens
   var app = read("src/App.jsx");

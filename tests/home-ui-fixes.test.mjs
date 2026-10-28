@@ -4,12 +4,20 @@ import fs from "node:fs";
 function read(f){ return fs.readFileSync(new URL("../" + f, import.meta.url), "utf8"); }
 var app = read("src/App.jsx");
 
-test("password eye toggle: hidden by default, toggles type, accessible", function(){
-  assert.ok(/useState\(false\)/.test(app.slice(app.indexOf("showPass"), app.indexOf("showPass") + 120)) || /\[showPass,\s*setShowPass\]\s*=\s*useState\(false\)/.test(app), "password starts hidden");
-  assert.ok(app.indexOf('type={showPass?"text":"password"}') >= 0, "input type follows state");
-  assert.ok(app.indexOf("setShowPass(!showPass)") >= 0, "button toggles");
-  assert.ok(app.indexOf("aria-pressed={showPass}") >= 0, "aria-pressed");
-  assert.equal((app.match(/type=\{showPass/g) || []).length, 1, "single password input shared by Login and Register");
+var auth = read("src/screens/AuthScreen.jsx");
+test("password eye toggle (now in the new AuthScreen): hidden by default, toggles type, accessible", function(){
+  assert.ok(/useState\(false\)/.test(auth.slice(auth.indexOf("showPass"), auth.indexOf("showPass") + 120)) || /\[showPass,\s*setShowPass\]\s*=\s*useState\(false\)/.test(auth), "password starts hidden");
+  assert.ok(auth.indexOf('type={showPass?"text":"password"}') >= 0, "input type follows state");
+  assert.ok(auth.indexOf("setShowPass(!showPass)") >= 0, "button toggles");
+  assert.ok(auth.indexOf("aria-pressed={showPass}") >= 0, "aria-pressed");
+  assert.equal((auth.match(/type=\{showPass/g) || []).length, 1, "single password input shared by Login and Register");
+});
+test("the old dark login page is gone from App.jsx and the new one is the only auth screen", function(){
+  assert.ok(app.indexOf("function AuthScreen") < 0, "old inline AuthScreen still in App.jsx");
+  assert.ok(app.indexOf('import AuthScreen from "./screens/AuthScreen"') >= 0);
+  assert.ok(app.indexOf("#0B1220") < 0 && auth.indexOf("rgba(22,28,38") < 0, "dark login colours remain");
+  assert.ok(app.indexOf("if(!user) return <AuthScreen") < 0, "login wall still blocks public Home");
+  assert.ok(app.indexOf("if(!user && authMode)") >= 0);
 });
 test("welcome modal does not open on startup", function(){
   assert.ok(/\[showTutorial,setShowTutorial\]\s*=\s*useState\(false\)/.test(app));

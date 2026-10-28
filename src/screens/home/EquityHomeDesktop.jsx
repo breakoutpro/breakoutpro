@@ -67,8 +67,8 @@ export default function EquityHomeDesktop(props){
           <div style={{display:"grid",gridTemplateColumns:"minmax(0, 1.25fr) minmax(0, 1fr)",gridAutoRows:"auto",gap:16,alignItems:"start"}}>
 
           {/* NEXT MOVE INTELLIGENCE - Compact trader-first card (direction, price, key levels, data status) with one collapsed Detailed Analysis. Content-driven height: the first grid row grows to fit it. */}
-          <div onClick={function(){setTab("marketmood");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:12,padding:"14px 16px",boxSizing:"border-box",cursor:"pointer",overflowY:"auto",display:"flex",flexDirection:"column",alignSelf:"start"}}>
-            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+          <div onClick={function(){setTab("marketmood");}} style={{background:CARD2+"cc",backdropFilter:"blur(12px)",border:"1px solid "+BD,borderRadius:12,padding:"10px 14px",boxSizing:"border-box",cursor:"pointer",overflowY:"auto",display:"flex",flexDirection:"column",alignSelf:"start"}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:7}}>
               <span style={{fontSize:tierCfg.widgetTitle+1,fontWeight:800,color:T1}}>{t("home.mood_title")}</span>
               <ProvenanceBadge type="calculated"/>
             </div>

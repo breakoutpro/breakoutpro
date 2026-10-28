@@ -1,26 +1,26 @@
-# Gann 1x1 Angle Intelligence - manifest
+# Compact Next Move Intelligence card - manifest
 
-NEW: src/gann/gannMath.js, gannStore.js, gannView.js; src/screens/GannPanel.jsx; tests/gann-math.test.mjs, gann-alerts.test.mjs, gann-ui.test.mjs
-CHANGED: src/screens/Chart.jsx, SmartAlertsPro.jsx, src/App.jsx, src/alerts/alertRules.js, alertEngine.js, alertMessage.js, alertView.js, alertLang.js
+CHANGED (layout only):
+- src/screens/NextMoveHomeCard.jsx
+- src/screens/home/EquityHomeDesktop.jsx  (card shell padding 14/16 -> 10/14, heading gap 12 -> 7)
+- src/screens/home/EquityHomeLaptop.jsx   (same)
+No change to NextMoveEngine, NextMoveHomeView, hooks, translations, data sources. No new files, dependencies or env vars.
 
-## Setup
-1. Upload every file to the SAME path in your GitHub repo (replace existing).
-2. No new dependencies, no new environment variables.
-3. Background push needs the existing Smart Alerts setup: device enrolled, VAPID keys, cron scheduler.
-4. Do not deploy until you have run `npm run build` and tested on a real device.
+## What changed
+- Bias smaller (24px -> 17/18px), headline on the same row.
+- Price + % change + source/as-of on one row.
+- Support/Resistance boxes: less padding, smaller values (still 16-17px).
+- ONE status row: data status (LIVE/DELAYED...), setup confirmation, confidence.
+- Basis + disclaimer merged into one small line; stale-data warning kept as is.
+- Detailed Analysis stays collapsed, button 44px high.
 
-## Line definition
-value(k) = anchorPrice + dir*scale*k. k = trading-calendar bars of the chosen timeframe since the anchor candle. dir +1 from swing low, -1 from swing high. Scale = fixed price per bar (ATR(14) suggestion, editable).
-
-## Verification (honest)
-- Full suite: 649/649 pass (node --test). All use fixtures/mocks.
-- Browser harness (Playwright, 67/67): real alert handlers with in-memory store, fixture candles, fixed clock. Not a real provider.
-- esbuild bundle of src/main.jsx OK. `vite build` / `npm run build` NOT run (npm install fails offline).
-- NOT verified: real Yahoo data, real scheduler run, real device push. Background delivery is NOT claimed production-ready.
-
-## Limitations
-- Holidays known for 2026 only.
-- Intraday Gann alerts are disabled when reliable intraday candles are missing; daily candles are never used as intraday.
-- Gann panel text is English only (like the Chart screen); alert messages are in 5 languages.
-- Gann rules are managed from the chart, not the Smart Alerts form.
-- Tiny unrelated fix: timeframe button row on Chart now wraps (Refresh button overflowed at 390px).
+## Measured (Playwright, fixture data, card incl. heading)
+Mobile 390 (card 366 wide): 302px -> 231px (-23.5%)
+Desktop 1366/1440: 322px -> 223px (-31%)
+Stale-data case: 321 -> 248 (mobile), 342 -> 241 (desktop)
+Overflow/clipping checks: 60 combos (5 languages x 390/1366/1440 x light/dark x 2 states) 0 problems.
+## Tests
+node --test tests/*.test.mjs : 649/649 pass. esbuild bundle of src/main.jsx OK.
+`npm run build` / vite build NOT run (npm install fails offline). Run it before deploying.
+## Not verified
+Real phone, real provider data (fixtures only). Mobile heading shell (shared Card) untouched, so mobile saving is a bit under 25%.

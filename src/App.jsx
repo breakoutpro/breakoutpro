@@ -640,7 +640,7 @@ function AppInner() {
     stocks:STOCKS,news:LIVE_NEWS,briefing:briefing,briefingLoading:briefingLoading,
     onBriefing:loadBriefing,user:user,setTab:goTo,glTab:glTab,setGlTab:setGlTab};
 
-  var KNOWN_TABS = ["home","markets","scan","scanner","learn","ai","briefing","alerts","settings","share","morning","commodity","watchlist","patterns","paper","news","candle","chart","detector","analysis","scalper","more","quiz","global","heatmap","fiidii","journal","challenges","sub","oi","tools","breakdown","volspike","gap","rsiscan","macdscan","supertrend","orb","mf","portfolio","voice","backtest","strategy","profile","referral","datahub","marketclose","search","stockprofile","ipo","signals","optsell","optsellhub","guardian","expiryalerts","alerthistory","studio","newsstudio","academy","aimentor","optionsintelpro","stockresearchpro","marketreplay","econcalendar","fiidiipro","marketheatmap","dividendtracker","globalmarketspro","alertcenterpro","rangeintel","marketmood","chartscanner","breakouttf"];
+  var KNOWN_TABS = ["home","markets","scan","scanner","learn","ai","briefing","alerts","settings","share","morning","commodity","watchlist","patterns","paper","news","candle","chart","detector","analysis","scalper","more","quiz","global","heatmap","fiidii","journal","challenges","sub","oi","tools","breakdown","volspike","gap","rsiscan","macdscan","supertrend","orb","mf","portfolio","voice","backtest","strategy","profile","referral","datahub","marketclose","search","stockprofile","ipo","signals","optsell","optsellhub","guardian","expiryalerts","alerthistory","studio","newsstudio","academy","aimentor","optionsintelpro","stockresearchpro","marketreplay","econcalendar","fiidiipro","marketheatmap","dividendtracker","globalmarketspro","alertcenterpro","rangeintel","marketmood","chartscanner","breakouttf","breakoutscan"];
 
   function renderScreen(){
     return (
@@ -694,7 +694,7 @@ function AppInner() {
         {tab=="paper"     ? <PaperTrading isPrem={isPrem} setTab={setTab}/> : null}
         {tab=="news"     ? <NewsScreen news={LIVE_NEWS} newsStatus={liveNewsData.status} overnightNews={liveNewsData.overnightNews} isAdmin={isAdmin} setTab={setTab}/> : null}
         {tab=="candle"   ? <CandleScreen setTab={setTab}/> : null}
-        {tab=="chart"    ? <ChartEngine/> : null}
+        {tab=="chart"    ? <ChartEngine setTab={setTab}/> : null}
         {tab=="detector" ? <CandleDetector setTab={setTab}/> : null}
         {tab=="analysis" ? <MarketAnalysis/> : null}
         {tab=="scalper"  ? <ScalperMode setTab={setTab}/> : null}

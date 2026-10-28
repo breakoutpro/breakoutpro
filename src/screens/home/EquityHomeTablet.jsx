@@ -46,7 +46,7 @@ export default function EquityHomeTablet(props){
       </div>
       <MarketTicker data={mm && mm.data} networkStatus={mm && mm.networkStatus} status={mm && mm.status} onNavigate={function(r){ if(props.setTab) props.setTab(r); }}/>
 
-      <HomeHub cols={3} size="lg" setTab={setTab}/>
+      <HomeHub cols={3} size="lg" onSelectStock={props.onSelectStock} setTab={setTab}/>
       <div style={{height:8}}></div>
       <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}"}</style>
     </div>

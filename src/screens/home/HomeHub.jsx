@@ -1,14 +1,18 @@
 import { useTheme } from "../../theme/ThemeProvider";
 import { t, useLang } from "../../i18n/translations";
+import HomeSearch from "./HomeSearch";
+import HomeMarketTiles from "./HomeMarketTiles";
 
 // BreakoutPro - HomeHub.jsx
 // The Home page body for every layout: a calm hero (brand + tagline) and six
 // feature cards. Each card is a real button that opens its existing screen.
-// Home shows NO market value, signal or status of its own: prices live in the
-// ticker (with its own freshness handling) and every analysis, level and
+// Home shows no signal or analysis of its own. Prices come only from the
+// ticker or the market boxes (same model, same freshness rules) and every analysis, level and
 // warning lives on the feature's detail page, so nothing here can be stale
 // or invented.
 //   cols  2 (mobile) or 3 (tablet / desktop)
+//   tiles true on desktop tiers: market boxes above the hero (mobile / tablet keep the slim ticker)
+//   mm, onSelectStock  shared market payload and the stock-open handler from App
 //   size  "sm" (mobile) or "lg"
 // Colours: navy text, one blue accent; no green or red on Home cards.
 // Rules: no backtick, no triple-equals, ASCII only.
@@ -73,10 +77,18 @@ export default function HomeHub(props){
   return (
     <div data-testid="home-hub" style={{position:"relative",width:"100%",boxSizing:"border-box",background:bg,overflow:"hidden",paddingBottom:big ? 36 : 20,minHeight:big ? "64vh" : undefined}}>
       <Wave light={light} h={big ? 420 : 240}/>
-      <div style={{position:"relative",maxWidth:big ? 1120 : 560,margin:"0 auto",padding:big ? "56px 24px 0" : "26px 14px 0",boxSizing:"border-box"}}>
-        <div style={{textAlign:"center",marginBottom:big ? 44 : 22}}>
+      {props.tiles ? (
+        <div style={{position:"relative",maxWidth:1400,margin:"0 auto",padding:"22px 24px 0",boxSizing:"border-box"}}>
+          <HomeMarketTiles mm={props.mm} setTab={go}/>
+        </div>
+      ) : null}
+      <div style={{position:"relative",maxWidth:big ? 1120 : 560,margin:"0 auto",padding:big ? (props.tiles ? "40px 24px 0" : "56px 24px 0") : "26px 14px 0",boxSizing:"border-box"}}>
+        <div style={{textAlign:"center",marginBottom:big ? 30 : 18}}>
           <h1 data-testid="home-hub-title" style={{margin:0,fontSize:big ? 60 : 34,fontWeight:900,letterSpacing:-1,lineHeight:1.1,color:c.text1}}>Breakout <span style={{color:c.blue}}>Pro</span></h1>
           <p data-testid="home-hub-tagline" style={{margin:big ? "10px 0 0" : "8px 0 0",fontSize:big ? 22 : 14,fontWeight:500,color:c.text2,lineHeight:1.35,overflowWrap:"anywhere"}}>{t("home.tagline")}</p>
+        </div>
+        <div style={{marginBottom:big ? 34 : 18}}>
+          <HomeSearch size={big ? "lg" : "sm"} setTab={go} onSelectStock={props.onSelectStock}/>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(" + cols + ", minmax(0, 1fr))",gap:big ? 18 : 10}}>
           {HOME_CARDS.map(function(cd){

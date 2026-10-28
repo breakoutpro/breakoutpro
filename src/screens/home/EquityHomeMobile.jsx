@@ -59,7 +59,7 @@ export default function EquityHomeMobile(props){
       </div>
       <MarketTicker data={mm && mm.data} networkStatus={mm && mm.networkStatus} status={mm && mm.status} onNavigate={setTab}/>
 
-      <HomeHub cols={2} size="sm" setTab={setTab}/>
+      <HomeHub cols={2} size="sm" onSelectStock={props.onSelectStock} setTab={setTab}/>
 
       <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}@keyframes ticker-fade{from{opacity:0}to{opacity:1}}"}</style>
     </div>

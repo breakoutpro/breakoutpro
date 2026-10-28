@@ -5,12 +5,7 @@ import { DEMO_MOOD, DEMO_AI } from "../MarketMoodDemoData";
 import MarketBadge from "./MarketBadge";
 import { SkeletonCard } from "../../components/Skeleton";
 import { t, termHelp, useLang } from "../../i18n/translations";
-import NextMoveHomeCard from "../NextMoveHomeCard";
-import ProvenanceBadge from "../../components/ProvenanceBadge";
-import HomeCard from "./HomeCard";
-import HomeRange from "./HomeRange";
-import HomeBreakouts from "./HomeBreakouts";
-import HomeSmartAlerts from "./HomeSmartAlerts";
+import HomeHub from "./HomeHub";
 import MarketTicker from "../../components/MarketTicker";
 
 // BreakoutPro - EquityHomeTablet.jsx
@@ -51,40 +46,7 @@ export default function EquityHomeTablet(props){
       </div>
       <MarketTicker data={mm && mm.data} networkStatus={mm && mm.networkStatus} status={mm && mm.status} onNavigate={function(r){ if(props.setTab) props.setTab(r); }}/>
 
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(300px, 1fr))",gap:12,padding:"12px 16px 0",minWidth:0,boxSizing:"border-box",alignItems:"stretch"}}>
-
-        <HomeCard testId="home-next-move" title={t("home.mood_title")} badge={<ProvenanceBadge type="calculated"/>} action={t("home.view")} onAction={function(){setTab("marketmood");}} onOpen={function(){setTab("marketmood");}}>
-          {mm.status=="loading" && !mm.data ? (
-            <SkeletonCard height={90}/>
-          ) : <NextMoveHomeCard mm={mm} fs={12} wide={true}/>}
-        </HomeCard>
-
-        <HomeRange mm={mm} onOpen={function(){setTab("rangeintel");}}/>
-
-        <HomeBreakouts onOpen={function(){setTab("breakoutscan");}}/>
-
-        <HomeSmartAlerts onOpen={function(){setTab("alerts");}}/>
-
-        <HomeCard title={t("home.snapshot")}>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,width:"100%",boxSizing:"border-box"}}>
-            {data.spineRows.map(function(r){
-              var color = r.dir=="up"?UP:(r.dir=="down"?DOWN:T2);
-              return (
-                <div key={r.key} style={{minWidth:0,background:theme.c.card2,border:"1px solid "+BD,borderRadius:8,padding:8}}>
-                  <div style={{fontSize:10,color:T2,fontWeight:600}}>{r.label}</div>
-                  {r.live ? (
-                    <div>
-                      <div style={{fontSize:13,fontWeight:800,color:T1,fontFamily:"monospace"}}>{formatMarketPrice(r.ltp)}</div>
-                      <div style={{fontSize:11,fontWeight:700,color:color}}>{r.dir=="up"?"+":""}{r.chgPct}%</div>
-                    </div>
-                  ) : <div style={{fontSize:11,color:T2}}>{t("c.data_unavailable")}</div>}
-                </div>
-              );
-            })}
-          </div>
-        </HomeCard>
-
-      </div>
+      <HomeHub cols={3} size="lg" setTab={setTab}/>
       <div style={{height:8}}></div>
       <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}"}</style>
     </div>

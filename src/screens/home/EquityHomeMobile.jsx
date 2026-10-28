@@ -2,29 +2,21 @@ import { useTheme } from "../../theme/ThemeProvider";
 import { useHomeData } from "./hooks/useHomeData";
 import MarketBadge from "./MarketBadge";
 import { t, useLang } from "../../i18n/translations";
-import NextMoveHomeCard from "../NextMoveHomeCard";
 import MarketTicker from "../../components/MarketTicker";
-import ProvenanceBadge from "../../components/ProvenanceBadge";
-import HomeCard from "./HomeCard";
-import HomeRange from "./HomeRange";
-import HomeBreakouts from "./HomeBreakouts";
-import HomeSmartAlerts from "./HomeSmartAlerts";
-import HomeMore from "./HomeMore";
+import HomeHub from "./HomeHub";
 
 // BreakoutPro - EquityHomeMobile.jsx
-// The Mobile Home layout - UI only. All data comes from useHomeData(), the
-// single shared hook also used by Tablet/Laptop/Desktop.
-// Order: Next Move Intelligence, Range Intelligence, Live Breakouts, Smart
-// Alerts entry, quick actions; secondary cards sit in one collapsed group.
+// Mobile Home: existing header, the slim market ticker, then the shared HomeHub
+// (hero + six feature cards in 2 columns). useHomeData() stays only to feed the
+// ticker with the shared market payload.
 // Rules: no backtick, no triple-equals, ASCII.
 
 export default function EquityHomeMobile(props){
   useLang();
-  var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
+  var theme = useTheme();
   var BG=theme.c.bg, BD=theme.c.border;
   var BLUE=theme.c.blue, PROBLUE=theme.c.blue;
-  var UP=theme.c.up, DOWN=theme.c.down;
-  var T1=theme.c.text1, T2=theme.c.text2, T3=theme.c.text3;
+  var T1=theme.c.text1, T2=theme.c.text2;
   var setTab = props.setTab || function(){};
   var data = useHomeData();
   var mm = data.mm;
@@ -67,89 +59,7 @@ export default function EquityHomeMobile(props){
       </div>
       <MarketTicker data={mm && mm.data} networkStatus={mm && mm.networkStatus} status={mm && mm.status} onNavigate={setTab}/>
 
-      <div style={{width:"100%",boxSizing:"border-box",padding:"8px 10px 0",display:"flex",flexDirection:"column",gap:8}}>
-
-        {/* 1. NEXT MOVE INTELLIGENCE */}
-        <HomeCard dense={true} testId="home-next-move" title={t("home.mood_title")} badge={<ProvenanceBadge type="calculated"/>} action={t("home.view")} onAction={function(){setTab("marketmood");}} onOpen={function(){setTab("marketmood");}}>
-          {mm.status=="loading" && !mm.data ? (
-            <div style={{fontSize:11,color:T2}}>{t("c.loading")}</div>
-          ) : <NextMoveHomeCard mm={mm} fs={11}/>}
-        </HomeCard>
-
-        {/* 2. RANGE INTELLIGENCE */}
-        <HomeRange mm={mm} dense={true} onOpen={function(){setTab("rangeintel");}}/>
-
-        {/* 3. LIVE BREAKOUTS */}
-        <HomeBreakouts dense={true} max={3} onOpen={function(){setTab("breakoutscan");}}/>
-
-        {/* 4. SMART MARKET ALERTS entry */}
-        <HomeSmartAlerts dense={true} onOpen={function(){setTab("alerts");}}/>
-
-        {/* QUICK ACTIONS - connects to existing real routes only */}
-        <div style={{display:"flex",gap:8}}>
-          {[[t("home.qa.scan"),"breakoutscan"],[t("home.qa.learn"),"learn"],[t("home.qa.alert"),"alerts"]].map(function(a){
-            return (
-              <button key={a[1]} onClick={function(){setTab(a[1]);}} style={{flex:1,minHeight:40,background:"transparent",border:"1px solid "+BD,borderRadius:8,padding:"6px 8px",cursor:"pointer",fontSize:11,fontWeight:700,color:T1}}>{a[0]}</button>
-            );
-          })}
-        </div>
-
-        {/* 5. OTHER MARKET TOOLS - collapsed. Breadth, FII/DII, Global and Key Levels keep their own data and honest unavailable states. */}
-        <HomeMore>
-        <HomeCard dense={true} title={t("home.breadth_title")}>
-          <div style={{fontSize:11,color:T2}}>{t("home.breadth_none")}</div>
-        </HomeCard>
-
-        <HomeCard dense={true} title={t("home.fiidii_title")}>
-          <div style={{fontSize:11,color:T2}}>{t("home.fiidii_none")}</div>
-        </HomeCard>
-
-        {(function(){
-          var global = mm.data && mm.data.global;
-          var hasGlobal = global && global.status!=="UNAVAILABLE" && global.items && global.items.length;
-          if(!hasGlobal){
-            return (
-              <HomeCard dense={true} title={t("home.global_title")}>
-                <div style={{fontSize:11,color:T2}}>{t("home.global_none")}</div>
-              </HomeCard>
-            );
-          }
-          return (
-            <HomeCard dense={true} title={t("home.global_title")}>
-              {global.items.slice(0,4).map(function(g,i){
-                return (
-                  <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderTop:i>0?"1px solid "+BD:"none"}}>
-                    <span style={{fontSize:11,color:T2}}>{g.name}</span>
-                    <span style={{fontSize:11,fontWeight:700,color:g.up==null?T2:(g.up?UP:DOWN)}}>{g.chgPct!=null?(g.chgPct>=0?"+":"")+g.chgPct+"%":"--"}</span>
-                  </div>
-                );
-              })}
-            </HomeCard>
-          );
-        })()}
-
-        {(function(){
-          var nifty = mm.data && mm.data.indices && mm.data.indices.NIFTY;
-          var hasLevels = nifty && nifty.ltp!=null && nifty.high!=null && nifty.low!=null;
-          if(!hasLevels) return null;
-          var pivot = (nifty.high + nifty.low + nifty.ltp) / 3;
-          var r1 = Math.round(((2*pivot) - nifty.low)*100)/100;
-          var s1 = Math.round(((2*pivot) - nifty.high)*100)/100;
-          var pivotR = Math.round(pivot*100)/100;
-          return (
-            <HomeCard dense={true} title={t("home.key_levels")}>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
-                <div><div style={{fontSize:9,color:T3}}>{t("home.strong_res")}</div><div style={{fontSize:12,fontWeight:800,color:DOWN}}>{r1.toLocaleString("en-IN")}</div></div>
-                <div><div style={{fontSize:9,color:T3}}>{t("home.pivot")}</div><div style={{fontSize:12,fontWeight:800,color:T1}}>{pivotR.toLocaleString("en-IN")}</div></div>
-                <div><div style={{fontSize:9,color:T3}}>{t("home.strong_sup")}</div><div style={{fontSize:12,fontWeight:800,color:UP}}>{s1.toLocaleString("en-IN")}</div></div>
-              </div>
-            </HomeCard>
-          );
-        })()}
-
-        </HomeMore>
-
-      </div>
+      <HomeHub cols={2} size="sm" setTab={setTab}/>
 
       <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}@keyframes ticker-fade{from{opacity:0}to{opacity:1}}"}</style>
     </div>

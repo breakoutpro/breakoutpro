@@ -6,6 +6,7 @@ import MarketBadge from "./MarketBadge";
 import { SkeletonCard } from "../../components/Skeleton";
 import { t, termHelp, useLang } from "../../i18n/translations";
 import HomeHub from "./HomeHub";
+import HeaderAuth from "../../components/HeaderAuth";
 import MarketTicker from "../../components/MarketTicker";
 
 // BreakoutPro - EquityHomeTablet.jsx
@@ -42,6 +43,7 @@ export default function EquityHomeTablet(props){
           <button onClick={function(){setTab("alerts");}} style={{background:"none",border:"none",cursor:"pointer"}}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T1} strokeWidth="2" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           </button>
+          <HeaderAuth user={props.user} onAuth={props.onAuth} onLogout={props.onLogout} setTab={setTab}/>
         </div>
       </div>
       <MarketTicker data={mm && mm.data} networkStatus={mm && mm.networkStatus} status={mm && mm.status} onNavigate={function(r){ if(props.setTab) props.setTab(r); }}/>

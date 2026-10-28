@@ -4,6 +4,7 @@ import MarketBadge from "./MarketBadge";
 import { t, useLang } from "../../i18n/translations";
 import MarketTicker from "../../components/MarketTicker";
 import HomeHub from "./HomeHub";
+import HeaderAuth from "../../components/HeaderAuth";
 
 // BreakoutPro - EquityHomeMobile.jsx
 // Mobile Home: existing header, the slim market ticker, then the shared HomeHub
@@ -28,19 +29,21 @@ export default function EquityHomeMobile(props){
       <div style={{width:"100%",boxSizing:"border-box",background:BG,borderBottom:"1px solid "+BD,padding:"10px 12px"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",minWidth:0}}>
           <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0,flex:1}}>
-            <button aria-label={t("aria.menu")} onClick={function(){ if(props.onMenu){props.onMenu();} else {setTab("more");} }} style={{background:"none",border:"none",padding:2,cursor:"pointer",flexShrink:0,minWidth:36,minHeight:36}}>
+            {props.user ? (<button aria-label={t("aria.menu")} onClick={function(){ if(props.onMenu){props.onMenu();} else {setTab("more");} }} style={{background:"none",border:"none",padding:2,cursor:"pointer",flexShrink:0,minWidth:36,minHeight:36}}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T1} strokeWidth="2.2" strokeLinecap="round">
                 <line x1="3" y1="6" x2="21" y2="6"/>
                 <line x1="3" y1="12" x2="21" y2="12"/>
                 <line x1="3" y1="18" x2="21" y2="18"/>
               </svg>
-            </button>
+            </button>) : null}
             <div style={{fontSize:18,fontWeight:900,letterSpacing:-0.5,whiteSpace:"nowrap",flexShrink:0}}>
               <span style={{color:T1}}>Breakout</span><span style={{color:PROBLUE}}>Pro</span>
             </div>
             <div style={{minWidth:0,overflow:"hidden"}}><MarketBadge/></div>
           </div>
-          <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
+          {props.user ? (
+          <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
             <button aria-label={t("aria.search")} onClick={function(){setTab("search");}} style={{background:"none",border:"none",padding:2,cursor:"pointer",minWidth:36,minHeight:36}}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T2} strokeWidth="2.2" strokeLinecap="round">
                 <circle cx="11" cy="11" r="8"/>
@@ -54,6 +57,9 @@ export default function EquityHomeMobile(props){
               </svg>
               <div style={{position:"absolute",top:0,right:0,width:5,height:5,borderRadius:"50%",background:BLUE,border:"1px solid "+BG}}/>
             </button>
+          </div>
+          ) : null}
+          <HeaderAuth compact={true} user={props.user} onAuth={props.onAuth} onLogout={props.onLogout} setTab={setTab}/>
           </div>
         </div>
       </div>

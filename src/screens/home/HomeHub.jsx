@@ -4,8 +4,8 @@ import HomeSearch from "./HomeSearch";
 import HomeMarketTiles from "./HomeMarketTiles";
 
 // BreakoutPro - HomeHub.jsx
-// The Home page body for every layout: a calm hero (brand + tagline) and six
-// feature cards. Each card is a real button that opens its existing screen.
+// The Home page body for every layout: market boxes (desktop), a large search bar and
+// six feature cards. The brand name is an h1 for assistive tech only (the header carries the visible logo). Each card is a real button that opens its existing screen.
 // Home shows no signal or analysis of its own. Prices come only from the
 // ticker or the market boxes (same model, same freshness rules) and every analysis, level and
 // warning lives on the feature's detail page, so nothing here can be stale
@@ -44,7 +44,7 @@ function Chevron(props){
 }
 
 // Decorative sky-blue wave behind the hero. Hidden from assistive tech.
-function Wave(props){
+export function Wave(props){
   var light = props.light;
   var a1 = light ? "255,255,255" : "77,141,248", a2 = light ? "147,197,253" : "77,141,248";
   var o1 = light ? 0.55 : 0.09, o2 = light ? 0.35 : 0.07;
@@ -82,12 +82,9 @@ export default function HomeHub(props){
           <HomeMarketTiles mm={props.mm} setTab={go}/>
         </div>
       ) : null}
-      <div style={{position:"relative",maxWidth:big ? 1120 : 560,margin:"0 auto",padding:big ? (props.tiles ? "40px 24px 0" : "56px 24px 0") : "26px 14px 0",boxSizing:"border-box"}}>
-        <div style={{textAlign:"center",marginBottom:big ? 30 : 18}}>
-          <h1 data-testid="home-hub-title" style={{margin:0,fontSize:big ? 60 : 34,fontWeight:900,letterSpacing:-1,lineHeight:1.1,color:c.text1}}>Breakout <span style={{color:c.blue}}>Pro</span></h1>
-          <p data-testid="home-hub-tagline" style={{margin:big ? "10px 0 0" : "8px 0 0",fontSize:big ? 22 : 14,fontWeight:500,color:c.text2,lineHeight:1.35,overflowWrap:"anywhere"}}>{t("home.tagline")}</p>
-        </div>
-        <div style={{marginBottom:big ? 34 : 18}}>
+      <div style={{position:"relative",maxWidth:big ? 1120 : 560,margin:"0 auto",padding:big ? (props.tiles ? "36px 24px 0" : "44px 24px 0") : "16px 12px 0",boxSizing:"border-box"}}>
+        <h1 data-testid="home-hub-title" style={{position:"absolute",width:1,height:1,margin:-1,padding:0,overflow:"hidden",clip:"rect(0 0 0 0)",whiteSpace:"nowrap",border:0}}>Breakout Pro</h1>
+        <div style={{marginBottom:big ? 36 : 16}}>
           <HomeSearch size={big ? "lg" : "sm"} setTab={go} onSelectStock={props.onSelectStock}/>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(" + cols + ", minmax(0, 1fr))",gap:big ? 18 : 10}}>

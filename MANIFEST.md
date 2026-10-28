@@ -1,15 +1,7 @@
-# Home Final Redesign - manifest
-NEW: src/screens/AuthScreen.jsx (light login/register, old dark page removed from App.jsx), src/components/HeaderAuth.jsx (Login/Register or avatar+name+Logout), src/screens/home/HomeHub.jsx, HomeSearch.jsx, HomeMarketTiles.jsx (if not already in repo)
-EDITED: src/App.jsx, src/screens/home/EquityHomeDesktop.jsx, EquityHomeLaptop.jsx, EquityHomeMobile.jsx, EquityHomeTablet.jsx, src/i18n/lang/{en,te,hi,kn,ta}.js
-TESTS: tests/home-ui-fixes.test.mjs, market-ticker.test.mjs, theme.test.mjs, home-next-move.test.mjs, next-move-ui.test.mjs
-
-## Test report
-- node --test: 651/651 pass
-- esbuild bundle of src/main.jsx: OK
-- Real App in Chromium (Playwright, mocked /api) at 1366x768, 390x844, 768x1024: 60/60 checks pass
-  logged-out Home with Login+Register, light auth screen, validation, bad invite rejected, register -> name shown + buttons hidden,
-  dropdown + Escape, Logout restores buttons, login again, close button, no overflow, no page errors
-## Not verified
-- npm run build (vite) - npm install offline
-- Live /api/auth backend and live market data (mocked)
-- Auth text is English only
+# Desktop market tiles -15%
+CHANGED: src/screens/home/HomeMarketTiles.jsx only (tiles are rendered on desktop/laptop only; mobile and tablet do not use this component).
+Tile height 78 -> 66px; padding 12x16 -> 10x14; gap 14 -> 12; label 13 -> 11, price 22 -> 19, change 14 -> 12, Unavailable 15 -> 13. Plain CSS values, no zoom/transform.
+Unchanged vs approved version: HomeHub.jsx, HomeSearch.jsx (six cards, search bar, header, wave, footer, spacing), all mobile code.
+## Test results
+- node --test: 651/651 pass; real App in Chromium: all 5 tiles 66px tall, same top, aligned at 1440 and 1366; six cards 345x104 unchanged; mobile 390 and tablet 768 have no tiles, card sizes unchanged; no overflow.
+- Not run: vite build (offline).

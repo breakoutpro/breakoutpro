@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useResponsive } from "../hooks/useResponsive";
 import { useTheme } from "../theme/ThemeProvider";
+import { useWatchlist } from "../hooks/useWatchlist";
+import { normalizeSymbol } from "../alerts/alertRules";
+import { toYahooSymbol } from "../market/marketData";
+import { lineSeries } from "../gann/gannMath";
+import GannPanel from "./GannPanel";
 
 var DB = "#0A0E1A";
 var CB = "#0F1629";
@@ -238,9 +243,29 @@ function CandleChart(props) {
     emaPath21 += cmd + xC(i) + "," + yP(v) + " ";
   });
 
+  // Gann 1x1 overlay geometry. Values come from src/gann/gannMath.js (calendar bars x scale);
+  // a point exists only where the line is defined, so nothing is invented before the anchor.
+  var gann = props.gann && props.gann.line ? props.gann : null;
+  var gannPath = "", gannAnchor = null, gannLabel = null;
+  if(gann){
+    var gs = lineSeries(visible, gann.line), lastDef = -1;
+    gs.forEach(function(v, i){
+      if(v == null) return;
+      gannPath += (gannPath == "" ? "M" : "L") + xC(i) + "," + yP(v) + " ";
+      lastDef = i;
+      if(visible[i].time == gann.line.anchorT) gannAnchor = { x:xC(i), y:yP(v) };
+    });
+    if(lastDef >= 0){
+      var lv = gs[lastDef], ly = Math.min(plotH - 6, Math.max(10, yP(lv) - 5));
+      gannLabel = { y:ly, text:"1x1 " + (gann.line.kind == "low" ? "up " : "down ") + lv.toLocaleString("en-IN",{maximumFractionDigits:2}) + (gann.preview ? " (preview)" : "") };
+    }
+    a11yText = a11yText + " A Gann 1x1 " + (gann.line.kind == "low" ? "upward" : "downward") + " line is drawn from the anchor candle.";
+  }
+
   return (
     <svg width={W} height={H} viewBox={"0 0 "+W+" "+H} style={{display:"block",width:"100%"}} aria-label={a11yText}>
       <title>{a11yText}</title>
+      <defs><clipPath id="bpGannClip"><rect x={0} y={0} width={W} height={plotH}/></clipPath></defs>
       {/* Grid lines */}
       {[0,0.25,0.5,0.75,1].map(function(t) {
         var y = t * plotH;
@@ -278,6 +303,17 @@ function CandleChart(props) {
         <line x1={0} y1={yP(vwap)} x2={W} y2={yP(vwap)} stroke="#0D9488" strokeWidth={1} strokeDasharray="4,3"/>
       ) : null}
 
+      {/* Gann 1x1 line: blue (a tool line, not a market direction), drawn from the anchor candle */}
+      {gannPath ? (
+        <g clipPath="url(#bpGannClip)">
+          <path d={gannPath} fill="none" stroke={theme.c.blue} strokeWidth={1.6} strokeDasharray={gann.preview ? "5,4" : undefined}/>
+          {gannAnchor ? <circle cx={gannAnchor.x} cy={gannAnchor.y} r={4} fill={CB} stroke={theme.c.blue} strokeWidth={2}/> : null}
+        </g>
+      ) : null}
+      {gannLabel ? (
+        <text x={W-4} y={gannLabel.y} fill={theme.c.blue} fontSize={9} fontWeight={700} textAnchor="end" stroke={CB} strokeWidth={3} paintOrder="stroke">{gannLabel.text}</text>
+      ) : null}
+
       {/* Time axis - reserved bottom strip, genuine timestamps only */}
       <line x1={0} y1={plotH} x2={W} y2={plotH} stroke={BD} strokeWidth={0.5}/>
       {labelIdx.map(function(idx){
@@ -295,7 +331,7 @@ function CandleChart(props) {
   );
 }
 
-export default function ChartScreen() {
+export default function ChartScreen(props) {
   var responsive = useResponsive(); // single call, canonical breakpoint only, no raw width checks
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   // Reassign (not re-declare) the existing module-level color bindings so
@@ -332,7 +368,20 @@ export default function ChartScreen() {
   var [showVWAP, setShowVWAP] = useState(true);
   var [showRSI, setShowRSI] = useState(false);
 
-  var sym = SYMBOLS[symIdx];
+  // The symbol chips include the saved watchlist (the Gann tool and its alerts work from it).
+  var wl = useWatchlist();
+  var symbols = SYMBOLS.slice();
+  (wl.list || []).forEach(function(w){
+    var raw = (w && typeof w == "object") ? w.sym : w;
+    var n = normalizeSymbol(raw);
+    if(!n) return;
+    for(var si = 0; si < symbols.length; si++){ if(normalizeSymbol(symbols[si].sym) == n) return; }
+    var y = toYahooSymbol(n);
+    if(y) symbols.push({ sym:n, api:y });
+  });
+  var sym = symbols[symIdx] || symbols[0];
+  var [gann, setGann] = useState(null);
+  var [gannOpen, setGannOpen] = useState(false);
   var abortRef = useRef(null);
   var mountedRef = useRef(true);
 
@@ -434,14 +483,14 @@ export default function ChartScreen() {
 
         {/* Symbol selector */}
         <div style={{display:"flex",gap:8,overflowX:"auto",marginBottom:8}}>
-          {SYMBOLS.map(function(s,i){
+          {symbols.map(function(s,i){
             var act=symIdx==i;
             return <button key={s.sym} onClick={function(){setSymIdx(i);}} style={{background:act?BLUE:"rgba(255,255,255,0.06)",border:"1px solid "+(act?BLUE:BD),borderRadius:20,padding:"4px 12px",color:act?"#fff":T2,fontSize:12,fontWeight:act?700:500,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>{s.sym}</button>;
           })}
         </div>
 
         {/* Timeframe */}
-        <div style={{display:"flex",gap:8}}>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
           {TIMEFRAMES.map(function(t){
             var act=tf==t;
             return <button key={t} onClick={function(){setTf(t);}} style={{background:act?"rgba(37,99,235,0.15)":"rgba(255,255,255,0.04)",border:"1px solid "+(act?BLUE:BD),borderRadius:8,padding:"4px 12px",color:act?BLUE:T2,fontSize:12,fontWeight:act?700:400,cursor:"pointer",fontFamily:"inherit"}}>{t}</button>;
@@ -479,7 +528,7 @@ export default function ChartScreen() {
 
         {/* Chart */}
         <div style={{background:CB,border:"1px solid "+BD,borderRadius:16,padding:12,marginBottom:12,overflow:"hidden"}}>
-          <CandleChart candles={candles} ema9={ema9} ema21={ema21} vwap={vwap} showEMA={showEMA} showVWAP={showVWAP} w={geom.w} h={geom.h} tf={tf} symLabel={sym.sym} maxLabels={labelMax}/>
+          <CandleChart candles={candles} ema9={ema9} ema21={ema21} vwap={vwap} showEMA={showEMA} showVWAP={showVWAP} gann={gann} w={geom.w} h={geom.h} tf={tf} symLabel={sym.sym} maxLabels={labelMax}/>
         </div>
 
         {/* Indicator toggles */}
@@ -492,6 +541,9 @@ export default function ChartScreen() {
             );
           })}
         </div>
+
+        {/* Gann 1x1 angle tool */}
+        <GannPanel candles={candles} tf={tf} symLabel={sym.sym} onLine={setGann} setTab={props.setTab} open={gannOpen} onOpenChange={setGannOpen}/>
 
         {/* RSI Panel */}
         {showRSI ? (

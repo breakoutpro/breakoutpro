@@ -3,7 +3,7 @@ import { useTheme } from "../theme/ThemeProvider";
 import { useDensity } from "../theme/density";
 import { t, useLang } from "../i18n/translations";
 import { useSmartAlertsPro } from "../alerts/useSmartAlertsPro";
-import { RULE_TYPES, TIMEFRAMES, PATTERN_IDS, MAX_RULES } from "../alerts/alertRules";
+import { RULE_TYPES, TIMEFRAMES, PATTERN_IDS, MAX_RULES, isGannType } from "../alerts/alertRules";
 import { buildMessage, symbolLabel, fmtPrice } from "../alerts/alertMessage";
 import { istLabel } from "../alerts/alertEngine";
 import { FILTERS, FILTER_KEYS, filterRules, filterHistory, ruleDirection, eventDirection, statusKey, statusChipKey, ruleParamText, ageLabel, formSymbols, groupOfEvent } from "../alerts/alertView";
@@ -316,10 +316,11 @@ export default function SmartAlertsPro(props){
               </div>
               <div style={{fontSize:12, color:c.text1, marginTop:4, overflowWrap:"anywhere"}}>{t("sa.type." + r.type)} {ruleParamText(r)}{usesTf ? " | " + tfName(r.timeframe) : ""}</div>
               {r.type == "candle" ? <div style={muted}>{(r.params.patterns || []).map(function(p){ return t("pat." + p); }).join(", ")}</div> : null}
+              {isGannType(r.type) ? <div style={Object.assign({}, muted, {marginTop:2})}>{t("sa.gann.managed")}</div> : null}
               {why ? <div style={Object.assign({}, muted, {marginTop:2})}>{why}</div> : null}
               <div style={{display:"flex", gap:6, flexWrap:"wrap", marginTop:6}}>
                 <button onClick={function(){ sa.toggleRule(r.id, !r.enabled); }} role="switch" aria-checked={r.enabled ? "true" : "false"} style={Object.assign(btn("ghost"), {minWidth:64})}>{r.enabled ? t("sa.st.enrolled") : t("sa.status.disabled")}</button>
-                <button onClick={function(){ setFormErr([]); setForm(formFromRule(r)); }} style={btn("ghost")}>{t("sa.form.edit")}</button>
+                {isGannType(r.type) ? null : <button onClick={function(){ setFormErr([]); setForm(formFromRule(r)); }} style={btn("ghost")}>{t("sa.form.edit")}</button>}
                 {delId == r.id ? (
                   <span style={{display:"flex", gap:6, alignItems:"center", flexWrap:"wrap"}}>
                     <span style={muted}>{t("sa.form.confirm_delete")}</span>

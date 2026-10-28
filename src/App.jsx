@@ -1,5 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { DISCLAIMER } from "./utils/helpers";
+import AuthScreen from "./screens/AuthScreen";
+import HeaderAuth from "./components/HeaderAuth";
 import { STOCKS } from "./data/stocks";
 import { useLiveNews } from "./hooks/useLiveNews";
 import { useMarketMood } from "./hooks/useMarketMood";
@@ -94,174 +96,6 @@ function Loader() {
   return (
     <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:200,color:"var(--bp-text2,#64748B)",fontSize:14,fontWeight:700}}>
       Loading...
-    </div>
-  );
-}
-
-function AuthScreen(props) {
-  var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
-
-  var [mode,setMode] = useState("login");
-  var [name,setName] = useState("");
-  var [phone,setPhone] = useState("");
-  var [pass,setPass] = useState("");
-  var [invite,setInvite] = useState("");
-  var [err,setErr] = useState("");
-  var [showPass,setShowPass] = useState(false); // UI-only: toggles input type, no auth impact
-  var [remember,setRemember] = useState(false); // UI-only: local convenience, no auth impact
-
-  useEffect(function(){
-    try{
-      var saved = localStorage.getItem("bp_remember_phone");
-      if(saved){ setPhone(saved); setRemember(true); }
-    }catch(e){}
-  },[]);
-
-  function onPhoneChange(e){
-    var v = e.target.value;
-    setPhone(v);
-    try{
-      if(remember){ localStorage.setItem("bp_remember_phone", v); }
-    }catch(e2){}
-  }
-
-  function onRememberToggle(){
-    var next = !remember;
-    setRemember(next);
-    try{
-      if(next){ localStorage.setItem("bp_remember_phone", phone||""); }
-      else{ localStorage.removeItem("bp_remember_phone"); }
-    }catch(e){}
-  }
-
-  function submit() {
-    setErr("");
-    if(!phone||phone.length<10){setErr("Enter valid 10-digit phone");return;}
-    if(!pass||pass.length<6){setErr("Password min 6 chars");return;}
-    setErr("Checking...");
-
-    if(mode=="register"){
-      // Verify invite code on the SERVER (code list never ships to the browser).
-      fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"verifyCode",code:(invite||"").trim()})})
-        .then(function(r){return r.json();})
-        .then(function(d){
-          if(!d||!d.ok){ setErr("Valid invite code required for private beta"); return; }
-          if(!name){ setErr("Enter your name"); return; }
-          // Beta access granted by server. Store session token only (no password persisted).
-          try{ sessionStorage.setItem("bp_session", d.token||""); }catch(e){}
-          try{
-            var reg=JSON.parse(localStorage.getItem("bp_users")||"{}");
-            reg[phone]={name:name,phone:phone}; // no plaintext password stored
-            localStorage.setItem("bp_users",JSON.stringify(reg));
-          }catch(e){}
-          props.onLogin({name:name,phone:phone,trialStart:Date.now()});
-        })
-        .catch(function(){ setErr("Network error. Try again."); });
-      return;
-    }
-
-    // LOGIN: try admin (server-verified) first, then known beta user.
-    fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"admin",phone:phone,pass:pass})})
-      .then(function(r){return r.json();})
-      .then(function(d){
-        if(d&&d.ok&&d.role=="admin"){
-          try{ sessionStorage.setItem("bp_session", d.token||""); }catch(e){}
-          props.onLogin({name:"Admin",phone:phone,isAdmin:true,isPrem:true,trialStart:Date.now()});
-          return;
-        }
-        // Not admin: check locally-registered beta user (registered earlier via server code check).
-        var users={};
-        try{users=JSON.parse(localStorage.getItem("bp_users")||"{}");}catch(e){}
-        if(!users[phone]){ setErr("No account found. Register with your invite code."); return; }
-        props.onLogin({name:users[phone].name||"Trader",phone:phone,trialStart:Date.now()});
-      })
-      .catch(function(){ setErr("Network error. Try again."); });
-  }
-
-  var inp={width:"100%",background:"rgba(255,255,255,0.06)",border:"1.5px solid rgba(255,255,255,0.14)",borderRadius:12,padding:"13px 14px 13px 42px",color:"#F3F4F6",fontSize:14,fontFamily:"inherit",outline:"none",boxSizing:"border-box"};
-  var iconWrap={position:"relative",marginBottom:14};
-  var fieldIcon={position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",width:16,height:16,opacity:0.8,pointerEvents:"none",color:"var(--bp-text3,#64748B)"};
-
-  return (
-    <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",background:"#0B1220"}}>
-      <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"28px 16px",boxSizing:"border-box"}}>
-        <div style={{maxWidth:380,width:"100%",background:"rgba(22,28,38,0.72)",backdropFilter:"blur(18px)",WebkitBackdropFilter:"blur(18px)",border:"1px solid rgba(255,255,255,0.09)",borderRadius:22,boxShadow:"0 20px 60px rgba(0,0,0,0.45)",overflow:"hidden",boxSizing:"border-box"}}>
-          <div style={{padding:"34px 28px 18px",textAlign:"center"}}>
-            <svg width="52" height="52" viewBox="0 0 100 100" style={{margin:"0 auto 14px",display:"block"}}>
-              <rect x="2" y="2" width="96" height="96" rx="22" fill="#0c1119" stroke="#4D8DF8" strokeWidth="2"/>
-              <line x1="24" y1="56" x2="24" y2="70" stroke="#ff8d8d" strokeWidth="4" strokeLinecap="round"/>
-              <rect x="18" y="60" width="12" height="12" rx="2" fill="#4D8DF8"/>
-              <line x1="42" y1="46" x2="42" y2="70" stroke="#9fffc0" strokeWidth="4" strokeLinecap="round"/>
-              <rect x="36" y="50" width="12" height="18" rx="2" fill="#1fae4d"/>
-              <line x1="60" y1="34" x2="60" y2="70" stroke="#9fffc0" strokeWidth="4" strokeLinecap="round"/>
-              <rect x="54" y="40" width="12" height="26" rx="2" fill="#4D8DF8"/>
-              <path d="M 16 72 C 32 66, 50 48, 76 26" fill="none" stroke="#4D8DF8" strokeWidth="5" strokeLinecap="round"/>
-              <polygon points="70,22 84,24 76,36" fill="#4D8DF8"/>
-            </svg>
-            <div style={{fontSize:21,fontWeight:800,color:"#F3F4F6",letterSpacing:0.3}}>Breakout<span style={{color:"#6FA1FA"}}> Pro</span></div>
-            <div style={{fontSize:13,color:"#9CA3AF",marginTop:6}}>{mode=="login"?"Log in to your account":"Create your account"}</div>
-          </div>
-          <div style={{padding:"8px 28px 28px"}}>
-            <div style={{display:"flex",background:"rgba(255,255,255,0.06)",borderRadius:12,padding:4,marginBottom:22}}>
-              {[["login","Login"],["register","Register"]].map(function(kv){
-                var act=mode==kv[0];
-                return <button key={kv[0]} onClick={function(){setMode(kv[0]);setErr("");}} style={{flex:1,padding:"11px",borderRadius:9,border:"none",background:act?theme.c.blue:"transparent",color:act?"#fff":"#9CA3AF",fontWeight:act?700:500,fontSize:12,cursor:"pointer",fontFamily:"inherit",transition:"background 0.15s"}}>{kv[1]}</button>;
-              })}
-            </div>
-            {err?<div role="alert" style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.22)",borderRadius:10,padding:"11px 12px",marginBottom:14,fontSize:12,color:"#E8EDF6"}}>! {err}</div>:null}
-
-            {mode=="register"?
-              <div style={iconWrap}>
-                <svg style={fieldIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <input style={inp} placeholder="Full Name" value={name} onChange={function(e){setName(e.target.value);}}/>
-              </div>
-            :null}
-            {mode=="register"?
-              <div style={iconWrap}>
-                <svg style={fieldIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 15a4 4 0 0 0 4-4V7a4 4 0 0 0-8 0v4a4 4 0 0 0 4 4z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v3"/></svg>
-                <input style={inp} placeholder="Invite Code (private beta)" value={invite} onChange={function(e){setInvite(e.target.value);}}/>
-              </div>
-            :null}
-
-            <div style={iconWrap}>
-              <svg style={fieldIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.97.36 1.93.68 2.85a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.23-1.25a2 2 0 0 1 2.11-.45c.92.32 1.88.55 2.85.68A2 2 0 0 1 22 16.92z"/></svg>
-              <input style={inp} placeholder="Phone (10 digits)" type="tel" maxLength={10} value={phone} onChange={onPhoneChange}/>
-            </div>
-
-            <div style={iconWrap}>
-              <svg style={fieldIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              <input style={Object.assign({},inp,{paddingRight:42})} placeholder="Password (min 6 chars)" type={showPass?"text":"password"} value={pass} onChange={function(e){setPass(e.target.value);}}/>
-              <button type="button" onClick={function(){setShowPass(!showPass);}} aria-label={showPass?"Hide password":"Show password"} aria-pressed={showPass} style={{position:"absolute",right:2,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",padding:12,minWidth:44,minHeight:44,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--bp-text2,#475569)"}}>
-                {showPass?
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.6 18.6 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                :
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                }
-              </button>
-            </div>
-
-            {mode=="login"?
-              <label style={{display:"flex",alignItems:"center",gap:8,marginTop:2,marginBottom:18,cursor:"pointer",userSelect:"none"}}>
-                <input type="checkbox" checked={remember} onChange={onRememberToggle} style={{width:15,height:15,accentColor:theme.c.blue,cursor:"pointer"}}/>
-                <span style={{fontSize:12,color:"#9CA3AF"}}>Remember my phone number</span>
-              </label>
-            :<div style={{height:8}}/>}
-
-            <button style={{width:"100%",boxSizing:"border-box",background:"#2563EB",border:"none",borderRadius:12,padding:"15px",fontSize:14,fontWeight:700,color:"#fff",cursor:"pointer",fontFamily:"inherit",transition:"filter 0.15s",boxShadow:"none"}} onMouseOver={function(e){e.target.style.filter="brightness(1.08)";}} onMouseOut={function(e){e.target.style.filter="none";}} onClick={submit}>
-              {mode=="login"?"Login":"Create Account"}
-            </button>
-
-            <div style={{textAlign:"center",marginTop:16,fontSize:12,color:"#9CA3AF"}}>
-              {mode=="login"?"New to Breakout Pro? ":"Already have an account? "}
-              <span onClick={function(){setMode(mode=="login"?"register":"login");setErr("");}} style={{color:theme.c.blue,fontWeight:700,cursor:"pointer"}}>
-                {mode=="login"?"Sign up":"Log in"}
-              </span>
-            </div>
-
-            <div style={{marginTop:18,background:"rgba(251,191,36,0.08)",border:"1px solid rgba(251,191,36,0.25)",borderRadius:10,padding:"10px 12px",fontSize:11,color:"#FCD34D",textAlign:"center"}}>! {DISCLAIMER}</div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
@@ -502,6 +336,13 @@ function AppInner() {
   var [showTutorial,setShowTutorial] = useState(false); // first-run welcome modal removed
   var [user,setUser] = useState(saved);
   var [tab,setTab] = useState("home");
+  // Logged-out visitors see the public Home page only. Anything else asks them to sign in first
+  // (authMode picks the Login / Register tab) and returns to the page they wanted afterwards.
+  var [authMode,setAuthMode] = useState(null);
+  var [afterLogin,setAfterLogin] = useState(null);
+  useEffect(function(){
+    if(!user && tab!="home"){ setAfterLogin(tab); setAuthMode("login"); setTab("home"); }
+  },[user,tab]);
   var [notifAsked,setNotifAsked] = useState(false);
   var [selectedStock,setSelectedStock] = useState(null);
   var [academyDeepLink,setAcademyDeepLink] = useState(null);
@@ -611,6 +452,7 @@ function AppInner() {
     setUser(null);setIsPrem(false);
     try{localStorage.removeItem("bp_sess");}catch(e){}
     setSidebar(false);
+    setTab("home");setAuthMode(null);setAfterLogin(null);
   }
   function upgrade(plan){
     var nu=Object.assign({},user,{isPrem:true,plan:plan.id});
@@ -646,7 +488,7 @@ function AppInner() {
       <ErrorBoundary key={tab}>
       <Suspense fallback={<Loader/>}>
         <AlertBanner/>
-        {tab=="home"     ? <HomeScreen mm={mm} nifty={hp.nifty} sensex={hp.sensex} bankNifty={hp.bankNifty} midcap={hp.midcap} stocks={hp.stocks} news={hp.news} briefing={hp.briefing} briefingLoading={hp.briefingLoading} onBriefing={hp.onBriefing} user={hp.user} setTab={hp.setTab} onSelectStock={function(st){ setSelectedStock(st); goTo("stockprofile"); }} glTab={hp.glTab} setGlTab={hp.setGlTab} isPrem={isPrem} onMenu={function(){setSidebar(true);}} onOpenAcademy={function(moduleId){ setAcademyDeepLink(moduleId); setTab("academy"); }} initialLearnTopic={learnTopicDeepLink} onLearnTopicConsumed={function(){setLearnTopicDeepLink(null);}}/> : null}
+        {tab=="home"     ? <HomeScreen mm={mm} nifty={hp.nifty} sensex={hp.sensex} bankNifty={hp.bankNifty} midcap={hp.midcap} stocks={hp.stocks} news={hp.news} briefing={hp.briefing} briefingLoading={hp.briefingLoading} onBriefing={hp.onBriefing} user={hp.user} setTab={hp.setTab} onAuth={function(m){ setAuthMode(m); }} onLogout={logout} onSelectStock={function(st){ setSelectedStock(st); goTo("stockprofile"); }} glTab={hp.glTab} setGlTab={hp.setGlTab} isPrem={isPrem} onMenu={function(){setSidebar(true);}} onOpenAcademy={function(moduleId){ setAcademyDeepLink(moduleId); setTab("academy"); }} initialLearnTopic={learnTopicDeepLink} onLearnTopicConsumed={function(){setLearnTopicDeepLink(null);}}/> : null}
         {tab=="markets"  ? <MarketsScreen stocks={STOCKS}/> : null}
         {tab=="scan"     ? <ScannerScreen stocks={STOCKS}/> : null}
         {tab=="portfolio"? <PortfolioAnalyticsHome onBack={function(){setTab("home");}} /> : null}
@@ -721,7 +563,12 @@ function AppInner() {
 
   if(splash) return <SplashScreen onDone={function(){setSplash(false);}}/>;
 
-  if(!user) return <AuthScreen onLogin={login}/>;
+  if(!user && authMode) return (
+    <AuthScreen mode={authMode} disclaimer={DISCLAIMER}
+      onClose={function(){ setAuthMode(null); setAfterLogin(null); }}
+      onLogin={function(u){ login(u); setAuthMode(null); if(afterLogin){ setTab(afterLogin); } setAfterLogin(null); }}/>
+  );
+
 
   var tutorialOverlay = showTutorial ? <FirstRunTutorial onClose={function(){setShowTutorial(false);}}/> : null;
 
@@ -764,7 +611,7 @@ function AppInner() {
       {/* BUILD FIX: ExpiryAlertPopup render removed with its import above. */}
       <DisclaimerTicker/>
       {!isDesktop ? <TabBar tab={tab} setTab={goTo}/> : null}
-      {sidebar?(
+      {sidebar && user ?(
         <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,zIndex:200,display:"flex"}}>
           <div style={{width:260,background:theme.c.card,borderRight:"1px solid "+theme.c.border,display:"flex",flexDirection:"column",boxShadow:"4px 0 24px rgba(0,0,0,0.1)"}}>
             <div style={{padding:"24px 16px",borderBottom:"1px solid "+theme.c.border2}}>
@@ -811,7 +658,7 @@ function AppInner() {
   function onSelectStock(s){ setSelectedStock(s); setTab("stockprofile"); }
   return (
     <div style={{width:"100%",height:"100vh",background:theme.c.bg,display:"flex",flexDirection:"column",fontFamily:"Inter,Arial,sans-serif",overflow:"hidden"}}>
-      {tab!="rangeintel" ? <GlobalHeader setTab={goTo} onSelectStock={onSelectStock} tab={tab} user={user} onLogout={logout}/> : null}
+      {tab!="rangeintel" ? <GlobalHeader setTab={goTo} onSelectStock={onSelectStock} tab={tab} user={user} onLogout={logout} onAuth={function(m){ setAuthMode(m); }}/> : null}
       {/* Desktop Home shows market boxes (HomeMarketTiles) instead of the slim strip; mobile and tablet render the strip inside their Home header block. */}
       <div style={{flex:1,width:"100%",maxWidth:noShellCap?"none":shellMax,margin:noShellCap?0:"0 auto",display:"grid",gridTemplateColumns:showRightPanel?"minmax(0, 1fr) "+rightW+"px":"minmax(0, 1fr)",gap:shellGap,padding:(shellPad/2)+"px "+shellPad+"px",boxSizing:"border-box",minHeight:0}}>
         <div style={{minWidth:0,height:"100%",overflowY:"auto",overflowX:"hidden",background:theme.c.bg}}>
@@ -845,17 +692,18 @@ function GlobalHeader(props){
   }
   return (
     <div style={{height:56,flexShrink:0,display:"flex",alignItems:"center",padding:"0 16px",borderBottom:"1px solid "+BD,gap:12,background:BG}}>
-      <div onClick={function(){props.setTab("home");}} style={{fontSize:16,fontWeight:900,letterSpacing:-0.5,flexShrink:0,cursor:"pointer"}}>
-        <span style={{color:T1}}>Breakout</span><span style={{color:theme.c.brand}}>Pro</span>
+      <div onClick={function(){props.setTab("home");}} style={{display:"flex",alignItems:"center",gap:8,fontSize:20,fontWeight:900,letterSpacing:-0.5,flexShrink:0,cursor:"pointer"}}>
+        <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke={theme.c.blue} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="M3 26l7-8 6 5 12-15"/><path d="M20 8h8v8"/></svg>
+        <span><span style={{color:T1}}>Breakout</span><span style={{color:theme.c.brand}}>Pro</span></span>
       </div>
-      <div style={{position:"relative",flex:1,maxWidth:220}}>
+      <div style={{position:"relative",flex:1,maxWidth:300}}>
         <input
           value={query}
           onChange={function(e){setQuery(e.target.value);}}
           onFocus={function(){setOpen(true);}}
           onBlur={function(){setTimeout(function(){setOpen(false);},150);}}
           placeholder={t("gh.search")}
-          style={{width:"100%",boxSizing:"border-box",background:CARD2,border:"1px solid "+BD,borderRadius:11,padding:"8px 14px",color:T1,fontSize:13,fontFamily:"inherit"}}
+          style={{width:"100%",boxSizing:"border-box",background:theme.c.card,border:"1px solid "+BD,borderRadius:999,padding:"9px 18px",color:T1,fontSize:13,fontFamily:"inherit"}}
         />
         {open && results.length>0 ? (
           <div style={{position:"absolute",top:"110%",left:0,right:0,background:theme.c.card,border:"1px solid "+BD,borderRadius:10,overflow:"hidden",zIndex:30,boxShadow:"0 8px 24px rgba(0,0,0,0.4)"}}>
@@ -904,26 +752,10 @@ function GlobalHeader(props){
       </div>
       <div style={{flex:1}}></div>
       <button onClick={function(){props.setTab("home");}} title={t("nav.home")} style={{background:props.tab=="home"?theme.c.blueSoft:"none",border:"1px solid "+(props.tab=="home"?BLUE+"4D":"transparent"),borderRadius:9,padding:"7px 10px",cursor:"pointer",color:props.tab=="home"?BLUE:T2,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:15}}>&#127968;</span>{t("side.home","Home")}</button>
-      <button onClick={function(){props.setTab("alerts");}} title={t("aria.alerts")} style={{background:"none",border:"none",cursor:"pointer",color:T2,fontSize:18}}>&#128276;</button>
-      <div style={{position:"relative"}}>
-        <button
-          onClick={function(){setProfileOpen(function(p){return !p;});}}
-          onBlur={function(){setTimeout(function(){setProfileOpen(false);},150);}}
-          title={t("aria.profile")} style={{background:"none",border:"none",cursor:"pointer",color:T2,fontSize:18}}>&#128100;</button>
-        {profileOpen ? (
-          <div style={{position:"absolute",top:"130%",right:0,minWidth:200,background:theme.c.card,border:"1px solid "+BD,borderRadius:10,overflow:"hidden",zIndex:30,boxShadow:"0 8px 24px rgba(0,0,0,0.4)"}}>
-            <div style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",borderBottom:"1px solid "+BD2}}>
-              <div style={{width:32,height:32,borderRadius:"50%",background:BLUE,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:"#fff",flexShrink:0}}>{props.user.name[0].toUpperCase()}</div>
-              <div style={{minWidth:0}}>
-                <div style={{fontSize:12,fontWeight:800,color:T1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{props.user.name}</div>
-                <div style={{fontSize:11,color:T3}}>{props.user.phone}</div>
-              </div>
-            </div>
-            <button onMouseDown={function(){props.setTab("profile");}} style={{width:"100%",boxSizing:"border-box",background:"none",border:"none",textAlign:"left",padding:"10px 14px",color:T2,fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>{t("gh.view_profile")}</button>
-            <button onMouseDown={props.onLogout} style={{width:"100%",boxSizing:"border-box",background:"none",border:"none",textAlign:"left",padding:"10px 14px",color:T1,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{t("side.logout")}</button>
-          </div>
-        ) : null}
-      </div>
+      <button onClick={function(){props.setTab("alerts");}} title={t("aria.alerts")} aria-label={t("aria.alerts")} style={{background:"none",border:"none",cursor:"pointer",color:T2,minWidth:40,minHeight:40,display:"flex",alignItems:"center",justifyContent:"center"}}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </button>
+      <HeaderAuth user={props.user} onAuth={props.onAuth} onLogout={props.onLogout} setTab={props.setTab}/>
     </div>
   );
 }

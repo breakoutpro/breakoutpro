@@ -43,7 +43,10 @@ export default function MarketsScreen(props) {
   var [selStock,setSelStock]=useState(null);
   var [selSector,setSelSector]=useState(null);
   var [selIdx,setSelIdx]=useState(null);
+  var [deepIdx,setDeepIdx]=useState(props.openIndex||null); // set when a Home index card opened this screen
   var [selCom,setSelCom]=useState(null);
+
+  useEffect(function(){ if(props.openIndex && props.onIndexOpened) props.onIndexOpened(); },[]);
 
   useEffect(function(){
     if(!document.getElementById("mkt-css")){
@@ -56,6 +59,7 @@ export default function MarketsScreen(props) {
 
   if(selStock)  return <StockProfile stock={selStock} onBack={function(){setSelStock(null);}}/>;
   if(selSector) return <SectorDetail s={selSector} onBack={function(){setSelSector(null);}}/>;
+  if(deepIdx)   return <IndexFullPage idx={deepIdx} onBack={function(){setDeepIdx(null);}}/>;
   if(selIdx)    return <IndexFullPage idx={{label:selIdx}} onBack={function(){setSelIdx(null);}}/>;
   if(selCom)    return <CommodityDetail s={selCom} onBack={function(){setSelCom(null);}}/>;
 

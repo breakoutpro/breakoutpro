@@ -2,12 +2,11 @@ import { useTheme } from "../../theme/ThemeProvider";
 import { useHomeData } from "./hooks/useHomeData";
 import MarketBadge from "./MarketBadge";
 import { t, useLang } from "../../i18n/translations";
-import MarketTicker from "../../components/MarketTicker";
 import HomeHub from "./HomeHub";
 import HeaderAuth from "../../components/HeaderAuth";
 
 // BreakoutPro - EquityHomeMobile.jsx
-// Mobile Home: existing header, the slim market ticker, then the shared HomeHub
+// Mobile Home: existing header, then the shared HomeHub dashboard (it carries the index cards and strips)
 // (hero + six feature cards in 2 columns). useHomeData() stays only to feed the
 // ticker with the shared market payload.
 // Rules: no backtick, no triple-equals, ASCII.
@@ -63,9 +62,8 @@ export default function EquityHomeMobile(props){
           </div>
         </div>
       </div>
-      <MarketTicker data={mm && mm.data} networkStatus={mm && mm.networkStatus} status={mm && mm.status} onNavigate={setTab}/>
 
-      <HomeHub cols={2} size="sm" onSelectStock={props.onSelectStock} setTab={setTab}/>
+      <HomeHub size="sm" mm={mm} setTab={setTab}/>
 
       <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}@keyframes ticker-fade{from{opacity:0}to{opacity:1}}"}</style>
     </div>

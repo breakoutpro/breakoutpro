@@ -7,7 +7,6 @@ import { SkeletonCard } from "../../components/Skeleton";
 import { t, termHelp, useLang } from "../../i18n/translations";
 import HomeHub from "./HomeHub";
 import HeaderAuth from "../../components/HeaderAuth";
-import MarketTicker from "../../components/MarketTicker";
 
 // BreakoutPro - EquityHomeTablet.jsx
 // Tablet Home layout - independent from Mobile and from Laptop/Desktop.
@@ -46,9 +45,8 @@ export default function EquityHomeTablet(props){
           <HeaderAuth user={props.user} onAuth={props.onAuth} onLogout={props.onLogout} setTab={setTab}/>
         </div>
       </div>
-      <MarketTicker data={mm && mm.data} networkStatus={mm && mm.networkStatus} status={mm && mm.status} onNavigate={function(r){ if(props.setTab) props.setTab(r); }}/>
 
-      <HomeHub cols={3} size="lg" onSelectStock={props.onSelectStock} setTab={setTab}/>
+      <HomeHub size="lg" mm={mm} setTab={setTab}/>
       <div style={{height:8}}></div>
       <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}"}</style>
     </div>

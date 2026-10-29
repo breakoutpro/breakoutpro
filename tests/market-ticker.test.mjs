@@ -99,15 +99,10 @@ test("source hygiene: ASCII, no backtick, no triple equals, no scale/zoom, no ne
 test("one set of quotes on Home: slim strip on mobile and tablet, market boxes on desktop tiers", function(){
   var app = fs.readFileSync("src/App.jsx", "utf8");
   assert.equal((app.match(/<MarketTicker /g) || []).length, 0, "App must not render a second strip above the desktop market boxes");
-  ["Mobile", "Tablet"].forEach(function(d){
+  ["Mobile", "Tablet", "Desktop", "Laptop"].forEach(function(d){
     var h = fs.readFileSync("src/screens/home/EquityHome" + d + ".jsx", "utf8");
-    assert.equal((h.match(/<MarketTicker /g) || []).length, 1, d);
-    assert.ok(h.indexOf("tiles={true}") < 0, d + " must not also show the boxes");
-  });
-  ["Desktop", "Laptop"].forEach(function(d){
-    var h = fs.readFileSync("src/screens/home/EquityHome" + d + ".jsx", "utf8");
-    assert.ok(h.indexOf("<MarketTicker") < 0, d);
-    assert.ok(h.indexOf("tiles={true}") >= 0, d + " lost the market boxes");
+    assert.ok(h.indexOf("<MarketTicker") < 0, d + " must not add a second strip above the index cards");
+    assert.ok(h.indexOf("<HomeHub") >= 0 && h.indexOf("mm=") >= 0, d + " renders the hub with the shared payload");
   });
   var hub = fs.readFileSync("src/screens/home/HomeHub.jsx", "utf8");
   assert.ok(hub.indexOf("<HomeMarketTiles") >= 0);

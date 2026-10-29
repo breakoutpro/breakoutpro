@@ -258,9 +258,9 @@ test("files in the Phase 1 scope contain no hardcoded hex colours (except docume
   });
 });
 
-test("Home still reaches Next Move, Range, Live Breakouts, Smart Alerts, Scan and Learn through the hub cards", function(){
+test("Home reaches Live Breakouts, OI + PCR, VWAP + 9EMA and Smart Option Alerts through the hub cards", function(){
   var hub = read("src/screens/home/HomeHub.jsx");
-  var dest = { "home.mood_title":"marketmood", "home.range_title":"rangeintel", "home.live_breakouts":"breakoutscan", "home.hub_alerts":"alerts", "home.qa.scan":"scanner", "home.qa.learn":"learn" };
+  var dest = { "home.live_breakouts":"breakoutscan", "home.card_oi":"oi", "home.card_vwap":"scalper", "home.card_alerts":"alerts" };
   var app = read("src/App.jsx");
   Object.keys(dest).forEach(function(k){
     assert.ok(hub.indexOf('key:"' + k + '"') >= 0, "hub lost card " + k);

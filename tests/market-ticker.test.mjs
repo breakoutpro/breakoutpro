@@ -96,7 +96,7 @@ test("source hygiene: ASCII, no backtick, no triple equals, no scale/zoom, no ne
     assert.ok(s.indexOf("===") < 0, f + " triple"); assert.ok(!/fetch\(|XMLHttpRequest|transform:\s*"?scale|zoom:/.test(s), f + " forbidden");
   });
 });
-test("one set of quotes on Home: slim strip on mobile and tablet, market boxes on desktop tiers", function(){
+test("one set of quotes on Home: one slim HomeTicker on every tier, no big index cards", function(){
   var app = fs.readFileSync("src/App.jsx", "utf8");
   assert.equal((app.match(/<MarketTicker /g) || []).length, 0, "App must not render a second strip above the desktop market boxes");
   ["Mobile", "Tablet", "Desktop", "Laptop"].forEach(function(d){
@@ -105,10 +105,10 @@ test("one set of quotes on Home: slim strip on mobile and tablet, market boxes o
     assert.ok(h.indexOf("<HomeHub") >= 0 && h.indexOf("mm=") >= 0, d + " renders the hub with the shared payload");
   });
   var hub = fs.readFileSync("src/screens/home/HomeHub.jsx", "utf8");
-  assert.ok(hub.indexOf("<HomeMarketTiles") >= 0);
+  assert.ok(hub.indexOf("<HomeTicker") >= 0 && hub.indexOf("HomeMarketTiles") < 0 && hub.indexOf("HomeCalculator") < 0 && hub.indexOf("<HomeSetups") >= 0);
 });
-test("market boxes use the ticker model: same five instruments, GIFT NIFTY unavailable, no invented value", function(){
-  var tiles = fs.readFileSync("src/screens/home/HomeMarketTiles.jsx", "utf8");
+test("slim ticker uses the ticker model: GIFT NIFTY unavailable and not shown, no invented value", function(){
+  var tiles = fs.readFileSync("src/screens/home/HomeTicker.jsx", "utf8");
   assert.ok(tiles.indexOf("buildTickerItems") >= 0 && tiles.indexOf("fetch(") < 0);
   assert.ok(tiles.indexOf('t("c.unavailable")') >= 0);
   var items = buildTickerItems(null, { loadFailed:true });

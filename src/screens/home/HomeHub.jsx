@@ -1,26 +1,25 @@
 import { useTheme } from "../../theme/ThemeProvider";
 import { t, useLang } from "../../i18n/translations";
-import HomeMarketTiles from "./HomeMarketTiles";
-import { MarketStrip, NewsTicker } from "./HomeStrips";
-import HomeCalculator from "./HomeCalculator";
+import HomeTicker from "./HomeTicker";
+import { NewsTicker } from "./HomeStrips";
+import HomeSetups from "./HomeSetups";
 
 // BreakoutPro - HomeHub.jsx
-// The Home dashboard body for every layout, top to bottom: four index cards (NIFTY 50, BANK NIFTY,
-// SENSEX, INDIA VIX), the Crude / Nat Gas / Flash News strip, the Sector Momentum strip, four core
-// feature cards, the Position Size Calculator and the educational disclaimer.
-//   size  "lg" (tablet / laptop / desktop: cards in one row of four) or "sm" (mobile: 2 x 2 grids)
+// Intelligence-first Home body for every layout, top to bottom: slim market ticker, JUST IN news ticker,
+// hero Today's Breakout Setups, four quick-access buttons and the educational footer. The position-size
+// tool lives in the Tools screen, not here.
+//   size  "lg" (tablet / laptop / desktop: terminal layout, setups beside the quick grid) or "sm" (mobile)
 //   mm    shared market payload from App / useHomeData
-// All numbers come from real feeds or from the trader's own inputs (see HomeMarketTiles, HomeStrips,
-// HomeCalculator); this file holds layout and the feature-card links only.
+// All numbers come from real feeds (see HomeTicker, HomeStrips, HomeSetups); this file holds layout and links.
 // Colours: navy text, one blue accent; red and green only for market meaning.
 // Rules: no backtick, no triple-equals, ASCII only.
 
-// Card list: id, title key, destination tab (all exist in App.jsx), icon name.
+// Quick-access grid: id, title key, destination tab (all exist in App.jsx), icon name, honest sub-label.
 export var HOME_CARDS = [
-  { id:"breakouts", key:"home.live_breakouts", fb:"Live Breakouts", tab:"breakoutscan", icon:"bolt" },
-  { id:"oi", key:"home.card_oi", fb:"OI + PCR Dashboard", tab:"oi", icon:"bars" },
-  { id:"vwap", key:"home.card_vwap", fb:"VWAP + 9EMA Momentum", tab:"scalper", icon:"wave" },
-  { id:"alerts", key:"home.card_alerts", fb:"Smart Option Alerts", tab:"alerts", icon:"bell" }
+  { id:"breakouts", key:"home.live_breakouts", fb:"Live Breakouts", tab:"breakoutscan", icon:"bolt", sub:"" },
+  { id:"oi", key:"home.qa_oi", fb:"OI + PCR Sentiment", tab:"oi", icon:"bars", sub:"" },
+  { id:"vwap", key:"home.qa_vwap", fb:"VWAP + 9EMA Signals", tab:"scalper", icon:"wave", sub:"Practice mode (simulated data)" },
+  { id:"movers", key:"home.qa_movers", fb:"Top Gainers & Losers \u2014 Large Cap", tab:"movers", icon:"trend", sub:"" }
 ];
 
 function Icon(props){
@@ -74,25 +73,27 @@ export default function HomeHub(props){
   return (
     <div data-testid="home-hub" style={{position:"relative",width:"100%",boxSizing:"border-box",background:bg,overflow:"hidden",paddingBottom:big ? 24 : 12,minHeight:big ? "64vh" : undefined}}>
       <Wave light={light} h={big ? 420 : 240}/>
-      <div style={{position:"relative",maxWidth:big ? 1180 : 520,margin:"0 auto",padding:big ? "16px 24px 0" : "10px 12px 0",boxSizing:"border-box",display:"grid",gridTemplateColumns:"minmax(0, 1fr)",gap:gap}}>
+      <div style={{position:"relative",maxWidth:big ? 1400 : 520,margin:"0 auto",padding:big ? "16px 16px 0" : "10px 12px 0",boxSizing:"border-box",display:"grid",gridTemplateColumns:"minmax(0, 1fr)",gap:gap}}>
         <h1 data-testid="home-hub-title" style={{position:"absolute",width:1,height:1,margin:-1,padding:0,overflow:"hidden",clip:"rect(0 0 0 0)",whiteSpace:"nowrap",border:0}}>Breakout Pro</h1>
-        <HomeMarketTiles mm={props.mm} setTab={go} onOpenIndex={props.onOpenIndex} compact={!big}/>
-        <MarketStrip mm={props.mm} setTab={go} compact={!big}/>
+        <HomeTicker big={big} mm={props.mm} setTab={go} onOpenIndex={props.onOpenIndex}/>
         <NewsTicker news={props.liveNews} setTab={go} compact={!big}/>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(" + (big ? 4 : 2) + ", minmax(0, 1fr))",gap:gap}}>
+        <HomeSetups setTab={go} big={big}/>
+        <div data-testid="home-quick-grid" style={{display:"grid",gridTemplateColumns:"repeat(" + (big ? 4 : 2) + ", minmax(0, 1fr))",gap:gap}}>
           {HOME_CARDS.map(function(cd){
             var label = t(cd.key, cd.fb);
             return (
               <button key={cd.id} type="button" data-testid={"home-card-" + cd.id} data-tab={cd.tab} onClick={function(){ go(cd.tab); }}
                 style={{display:"flex",alignItems:"center",gap:big ? 12 : 8,textAlign:"left",width:"100%",boxSizing:"border-box",minHeight:big ? 62 : 54,padding:big ? "10px 14px" : "8px 10px",background:cardBg,border:cardBd,borderRadius:big ? 14 : 12,boxShadow:shadow,cursor:"pointer",color:c.text1,fontFamily:"inherit",backdropFilter:"blur(8px)",WebkitBackdropFilter:"blur(8px)"}}>
-                <Icon name={cd.icon} size={big ? 28 : 22} color={c.blue}/>
-                <span style={{flex:"1 1 0",minWidth:0,fontSize:big ? 15 : 12,fontWeight:700,lineHeight:1.25,overflowWrap:"anywhere"}}>{label}</span>
+                <Icon name={cd.icon} size={big ? 26 : 20} color={c.blue}/>
+                <span style={{flex:"1 1 0",minWidth:0}}>
+                  <span style={{display:"block",fontSize:big ? 14 : 12,fontWeight:700,lineHeight:1.25,overflowWrap:"anywhere"}}>{label}</span>
+                  {cd.sub ? <span style={{display:"block",fontSize:10,fontWeight:600,color:c.text3,lineHeight:1.2,marginTop:2}}>{cd.sub}</span> : null}
+                </span>
                 <Chevron color={c.blue}/>
               </button>
             );
           })}
         </div>
-        <HomeCalculator setTab={go} compact={!big}/>
         {big ? <div data-testid="home-edu-footer" style={{marginTop:big ? 6 : 2,textAlign:"center",fontSize:10,lineHeight:big ? 1.4 : 1.3,color:c.text3,paddingInline:16,paddingBottom:8,boxSizing:"border-box",overflowWrap:"break-word",whiteSpace:"normal"}}>{t("c.edu_footer")}</div> : null}
       </div>
     </div>

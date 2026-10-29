@@ -1,6 +1,7 @@
 import React from "react";
 
 import { useTheme } from "../theme/ThemeProvider";
+import RiskTargetCalc from "./RiskTargetCalc";
 var DB = "#0A0E1A";
 var CB = "#0F1629";
 var BD = "#1E2D4A";
@@ -46,7 +47,7 @@ export function ToolsScreen() {
       <div style={{background:CB,padding:"12px 16px",borderBottom:"1px solid "+BD}}>
         <div style={{fontSize:18,fontWeight:900,color:T1}}>Trading <span style={{color:BLUE}}>Tools</span></div>
         <div style={{display:"flex",gap:8,marginTop:12}}>
-          {[["rr","R:R Calc"],["pos","Position Size"],["brok","Brokerage"]].map(function(t){
+          {[["rr","R:R Calc"],["pos","Position Size"],["rt","Risk & Target"],["brok","Brokerage"]].map(function(t){
             var act=tool==t[0];
             return <button key={t[0]} style={{background:act?BLUE:"rgba(255,255,255,0.06)",border:"1px solid "+(act?BLUE:BD),borderRadius:20,padding:"8px 16px",color:act?"#fff":T2,fontSize:12,fontWeight:act?700:500,cursor:"pointer",fontFamily:"inherit"}} onClick={function(){setTool(t[0]);}}>{t[1]}</button>;
           })}
@@ -91,6 +92,7 @@ export function ToolsScreen() {
             ) : null}
           </div>
         ) : null}
+        {tool=="rt" ? (<RiskTargetCalc compact hideOpen/>) : null}
         {tool=="brok" ? (
           <div style={{textAlign:"center",padding:"40px 0"}}>
             <div style={{fontSize:14,fontWeight:700,color:T1,marginBottom:8}}>Brokerage Calculator</div>

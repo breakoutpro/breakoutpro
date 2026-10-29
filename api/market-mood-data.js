@@ -197,7 +197,7 @@ function buildGroup(symMap, quoteMap){
       var fresh = classifyGeneric(ts);
       if(SEVERITY[fresh] > SEVERITY[worst]) worst = fresh;
       var chg = raw.regularMarketChangePercent!=null ? Math.round(raw.regularMarketChangePercent*100)/100 : null;
-      items.push({ name:name, chgPct:chg, up: chg!=null ? chg>=0 : null, freshness:fresh, ts:ts });
+      items.push({ name:name, ltp:Math.round(raw.regularMarketPrice*100)/100, chgPct:chg, up: chg!=null ? chg>=0 : null, freshness:fresh, ts:ts });
     }
   }
   var status;
@@ -371,7 +371,7 @@ export default async function handler(req, res){
     var ngq = (CACHE.global || {})[MACRO_SYMS.natGas];
     if(ngq && ngq.regularMarketPrice!=null){
       var ngTs = ngq.regularMarketTime ? ngq.regularMarketTime*1000 : null;
-      macro.natGas = { chgPct: ngq.regularMarketChangePercent!=null ? Math.round(ngq.regularMarketChangePercent*100)/100 : null, ts:ngTs, freshness:classifyGeneric(ngTs) };
+      macro.natGas = { ltp: Math.round(ngq.regularMarketPrice*100)/100, chgPct: ngq.regularMarketChangePercent!=null ? Math.round(ngq.regularMarketChangePercent*100)/100 : null, ts:ngTs, freshness:classifyGeneric(ngTs) };
     }
   }catch(e){ macro.natGas = null; }
   // Crude Oil realized volatility: stdev of the last 10 daily % returns, from

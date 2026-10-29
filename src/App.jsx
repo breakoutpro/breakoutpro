@@ -340,6 +340,7 @@ function AppInner() {
   // (authMode picks the Login / Register tab) and returns to the page they wanted afterwards.
   var [authMode,setAuthMode] = useState(null);
   var [afterLogin,setAfterLogin] = useState(null);
+  var [indexDeepLink,setIndexDeepLink] = useState(null); // Home index card -> existing index detail page inside Markets
   useEffect(function(){
     if(!user && tab!="home"){ setAfterLogin(tab); setAuthMode("login"); setTab("home"); }
   },[user,tab]);
@@ -488,8 +489,8 @@ function AppInner() {
       <ErrorBoundary key={tab}>
       <Suspense fallback={<Loader/>}>
         <AlertBanner/>
-        {tab=="home"     ? <HomeScreen mm={mm} nifty={hp.nifty} sensex={hp.sensex} bankNifty={hp.bankNifty} midcap={hp.midcap} stocks={hp.stocks} news={hp.news} briefing={hp.briefing} briefingLoading={hp.briefingLoading} onBriefing={hp.onBriefing} user={hp.user} setTab={hp.setTab} onAuth={function(m){ setAuthMode(m); }} onLogout={logout} onSelectStock={function(st){ setSelectedStock(st); goTo("stockprofile"); }} glTab={hp.glTab} setGlTab={hp.setGlTab} isPrem={isPrem} onMenu={function(){setSidebar(true);}} onOpenAcademy={function(moduleId){ setAcademyDeepLink(moduleId); setTab("academy"); }} initialLearnTopic={learnTopicDeepLink} onLearnTopicConsumed={function(){setLearnTopicDeepLink(null);}}/> : null}
-        {tab=="markets"  ? <MarketsScreen stocks={STOCKS}/> : null}
+        {tab=="home"     ? <HomeScreen mm={mm} nifty={hp.nifty} sensex={hp.sensex} bankNifty={hp.bankNifty} midcap={hp.midcap} stocks={hp.stocks} news={hp.news} briefing={hp.briefing} briefingLoading={hp.briefingLoading} onBriefing={hp.onBriefing} user={hp.user} setTab={hp.setTab} onAuth={function(m){ setAuthMode(m); }} onLogout={logout} onOpenIndex={function(ix){ setIndexDeepLink(ix); goTo("markets"); }} liveNews={liveNewsData} onSelectStock={function(st){ setSelectedStock(st); goTo("stockprofile"); }} glTab={hp.glTab} setGlTab={hp.setGlTab} isPrem={isPrem} onMenu={function(){setSidebar(true);}} onOpenAcademy={function(moduleId){ setAcademyDeepLink(moduleId); setTab("academy"); }} initialLearnTopic={learnTopicDeepLink} onLearnTopicConsumed={function(){setLearnTopicDeepLink(null);}}/> : null}
+        {tab=="markets"  ? <MarketsScreen stocks={STOCKS} openIndex={indexDeepLink} onIndexOpened={function(){ setIndexDeepLink(null); }}/> : null}
         {tab=="scan"     ? <ScannerScreen stocks={STOCKS}/> : null}
         {tab=="portfolio"? <PortfolioAnalyticsHome onBack={function(){setTab("home");}} /> : null}
         {tab=="voice"    ? <VoiceAssistant  setTab={setTab} onBack={function(){setTab("home");}} /> : null}
@@ -600,7 +601,7 @@ function AppInner() {
 
   // The mobile app column (unchanged on mobile).
   var appColumn = (
-    <div style={{position:"relative",width:"100%",maxWidth:centerMaxW,margin:"0 auto",height:isDesktop?"100%":"100vh",boxSizing:"border-box",paddingBottom:(!isDesktop && tab=="home")?"calc(61px + env(safe-area-inset-bottom))":0,fontFamily:"Inter,Arial,sans-serif",background:theme.c.bg,filter:brightness!=100?"brightness("+(brightness/100)+")":"none",display:"flex",flexDirection:"column"}}>
+    <div style={{position:"relative",width:"100%",maxWidth:centerMaxW,margin:"0 auto",height:isDesktop?"100%":((tab=="home" && typeof CSS!="undefined" && CSS.supports && CSS.supports("height","100dvh"))?"100dvh":"100vh"),boxSizing:"border-box",paddingBottom:(!isDesktop && tab=="home")?"calc(61px + env(safe-area-inset-bottom))":0,fontFamily:"Inter,Arial,sans-serif",background:theme.c.bg,filter:brightness!=100?"brightness("+(brightness/100)+")":"none",display:"flex",flexDirection:"column"}}>
       {/* Market ticker: Home only. Mobile and tablet render it inside the Home header block (EquityHomeMobile / EquityHomeTablet). */}
       <div style={{flex:1,minHeight:0,overflowY:"auto",overflowX:"hidden"}}>
         {!isDesktop && tab!="home"&&tab!="alerts"&&tab!="scan"&&tab!="guardian"&&tab!="optsell"&&tab!="optsellhub"&&tab!="signals"&&tab!="settings"&&tab!="search"&&tab!="rangeintel" ? <TopBar isPrem={isPrem} trialDays={trialDays} setTab={setTab} onMenu={function(){setSidebar(true);}} onSub={function(){setTab("sub");}}/> : null}
@@ -609,7 +610,7 @@ function AppInner() {
         {renderScreen()}
       </div>
       {/* BUILD FIX: ExpiryAlertPopup render removed with its import above. */}
-      <DisclaimerTicker/>
+      <DisclaimerTicker wrap={!isDesktop && !isTablet && tab=="home"}/>
       {!isDesktop ? <TabBar tab={tab} setTab={goTo}/> : null}
       {sidebar && user ?(
         <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,zIndex:200,display:"flex"}}>
@@ -696,14 +697,14 @@ function GlobalHeader(props){
         <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke={theme.c.blue} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="M3 26l7-8 6 5 12-15"/><path d="M20 8h8v8"/></svg>
         <span><span style={{color:T1}}>Breakout</span><span style={{color:theme.c.brand}}>Pro</span></span>
       </div>
-      <div style={{position:"relative",flex:1,maxWidth:300}}>
+      <div style={{position:"relative",flex:"1 1 300px",minWidth:280,maxWidth:340}}>
         <input
           value={query}
           onChange={function(e){setQuery(e.target.value);}}
           onFocus={function(){setOpen(true);}}
           onBlur={function(){setTimeout(function(){setOpen(false);},150);}}
           placeholder={t("gh.search")}
-          style={{width:"100%",boxSizing:"border-box",background:theme.c.card,border:"1px solid "+BD,borderRadius:999,padding:"9px 18px",color:T1,fontSize:13,fontFamily:"inherit"}}
+          style={{width:"100%",boxSizing:"border-box",background:theme.c.card,border:"1px solid "+BD,borderRadius:999,padding:"9px 16px",color:T1,fontSize:13,fontFamily:"inherit",textOverflow:"ellipsis"}}
         />
         {open && results.length>0 ? (
           <div style={{position:"absolute",top:"110%",left:0,right:0,background:theme.c.card,border:"1px solid "+BD,borderRadius:10,overflow:"hidden",zIndex:30,boxShadow:"0 8px 24px rgba(0,0,0,0.4)"}}>

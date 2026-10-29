@@ -1,13 +1,8 @@
-# Mobile overflow fix + combined market strip + Breaking News ticker
-src/screens/home/HomeHub.jsx        ROOT CAUSE of the clipping: the hub's grid had no column template, so its single implicit column grew to the widest nowrap child; now gridTemplateColumns minmax(0,1fr). Uses MarketStrip + NewsTicker.
-src/screens/home/HomeStrips.jsx     MarketStrip (Crude, Nat Gas, Sector Top/Weakest in ONE row; scrolls inside itself on mobile) and NewsTicker (separate slim Breaking News row, 10 s rotation, pause on hover/focus/touch-hold, hidden when no verified headline). Old CommodityNewsStrip/SectorStrip removed. News comes from the hook App already runs (no extra request).
-src/screens/home/HomeCalculator.jsx Mobile: Long/Short toggle on its own full-width row, shrinkable shell (min-width 0); desktop unchanged.
-src/App.jsx                         passes liveNews (existing hook result) to Home.
-src/screens/home/EquityHome{Mobile,Tablet,Desktop,Laptop}.jsx  pass liveNews to HomeHub.
-## Results
-- node --test: 651/651 pass; esbuild bundle of src/main.jsx OK; vite build NOT run (npm install offline).
-- Real App in Chromium (mocked APIs), 360x800, 390x844, 430x932, 1366x768, 1440x900 (100% zoom): all checks pass, including a per-element check that nothing in Home extends past the viewport (the earlier test only looked at document scroll width, which missed clipping inside the app's scroll box).
-- News rotates in ~10 s, hover / keyboard focus / touch-hold pause it, tap opens News, empty news hides the ticker, calculator results unchanged (975 / 854), dark theme fits.
-## Notes
-- The mobile market strip is wider than the screen on purpose (Crude + Gas + sector); it scrolls sideways inside its own box and the page does not move.
-- Live APIs and a real phone not tested.
+# Intelligence-First Homepage Redesign - MANIFEST
+
+Added: src/screens/home/HomeTicker.jsx, src/screens/home/HomeSetups.jsx, src/screens/LargeCapMovers.jsx, src/screens/RiskTargetCalc.jsx, src/screens/riskTargetMath.js, src/hooks/useBreakoutSetups.js, src/hooks/breakoutSetupsModel.js, tests/home-intelligence.test.mjs
+Changed: src/App.jsx (movers tab/route, KNOWN_TABS, desktop More menu "Risk Calculator"), src/i18n/lang/en.js, src/screens/InlineScreens.jsx (Tools: "Risk & Target" pill), src/screens/home/HomeHub.jsx, src/screens/home/HomeStrips.jsx (JUST IN label, MarketStrip removed), tests/home-ui-fixes.test.mjs, tests/market-ticker.test.mjs, tests/theme.test.mjs
+DELETE from repo: src/screens/home/HomeMarketTiles.jsx, src/screens/home/HomeCalculator.jsx (calculator moved to src/screens/RiskTargetCalc.jsx, math unchanged in riskTargetMath.js)
+
+Data: ticker = /api/market-mood-data (NIFTY/BANKNIFTY NSE, SENSEX BSE, VIX, Crude WTI and Nat Gas NYMEX USD). Setups = existing /api/scanner-data (Yahoo daily candles, prior 15-session high/low): Daily (1D) only, labelled delayed, Unconfirmed while market open, Confirmed after close. VWAP+9EMA button opens the existing simulated practice screen and says so. Movers = NIFTY 50 via shared quote store.
+Tests: node --test tests/*.test.mjs = 656 pass, 0 fail. esbuild bundle OK. vite build NOT run (offline). Browser tests (Playwright, mocked /api) 113 pass, 0 fail at 360/390/430/1366/1440. No real API verification was possible.

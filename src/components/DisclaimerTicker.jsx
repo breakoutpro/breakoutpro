@@ -9,12 +9,18 @@ import { t, useLang } from "../i18n/translations";
 
 var DISCLAIMER_EN = "Breakout Pro provides educational market analysis only. We do not provide investment advice or guaranteed returns. All information is for learning and research purposes only. Please consult a SEBI-registered investment adviser before making investment decisions.";
 
-export default function DisclaimerTicker(){
+export default function DisclaimerTicker(props){
   useLang();
   var DISCLAIMER_TEXT = t("c.disclaimer_ticker", DISCLAIMER_EN);
   var theme = useTheme(); // reuses the existing ThemeProvider - no new theme system
   var BG = theme.c.card2, BD = theme.c.border, T3 = theme.c.text3;
 
+  // props.wrap (mobile Home): the full disclaimer as static, centred, wrapping text so none of it is clipped. Everywhere else the scrolling strip is unchanged.
+  if(props.wrap){
+    return (
+      <div data-testid="disclaimer-wrap" style={{background:BG,borderTop:"1px solid "+BD,padding:"6px 16px 8px",boxSizing:"border-box",flexShrink:0,textAlign:"center",fontSize:10,lineHeight:1.3,color:T3,overflowWrap:"break-word",whiteSpace:"normal"}}>{DISCLAIMER_TEXT}</div>
+    );
+  }
   return (
     <div style={{background:BG,borderTop:"1px solid "+BD,padding:"6px 0",overflow:"hidden",whiteSpace:"nowrap",flexShrink:0}}>
       <style>{"@keyframes bpTickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }"}</style>

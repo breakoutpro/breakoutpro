@@ -63,7 +63,7 @@ export default function EquityHomeMobile(props){
         </div>
       </div>
 
-      <HomeHub size="sm" mm={mm} setTab={setTab}/>
+      <HomeHub size="sm" mm={mm} setTab={setTab} onOpenIndex={props.onOpenIndex}/>
 
       <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}@keyframes ticker-fade{from{opacity:0}to{opacity:1}}"}</style>
     </div>

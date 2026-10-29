@@ -50,12 +50,17 @@ export default function HomeMarketTiles(props){
     <div data-testid="home-tiles" style={{display:"grid",gridTemplateColumns:compact ? "repeat(2, minmax(0, 1fr))" : "repeat(4, minmax(0, 1fr))",gap:compact ? 8 : 12}}>
       {items.map(function(it){
         var has = typeof it.value=="number" && isFinite(it.value) && it.state!="unavailable" && it.state!="loading";
-        var dir = has ? pctDir(it.chgPct) : "neutral";
+        // Direction (text and sparkline colour) = the day change: percent when present, else the absolute change; never the shape of the chart.
+        var chgBasis = (typeof it.chgPct == "number" && isFinite(it.chgPct)) ? it.chgPct : ((typeof it.chgAbs == "number" && isFinite(it.chgAbs)) ? it.chgAbs : null);
+        var dir = (has && chgBasis != null) ? pctDir(chgBasis) : "neutral";
         var col = dir=="up" ? c.up : (dir=="down" ? c.down : c.text2);
         var pct = has ? formatTickerPct(it.chgPct) : null;
         var arrow = dir=="up" ? "\u25B2" : (dir=="down" ? "\u25BC" : "");
         var route = has ? it.route : null;
-        var stateTag = has && it.state!="live" ? stateLabel(it.state) : "";
+        var openIdx = (has && (it.key=="NIFTY" || it.key=="BANKNIFTY" || it.key=="SENSEX") && props.onOpenIndex) ? function(){ props.onOpenIndex({ key:it.key, label:it.label, val:formatTickerValue(it.value), ltp:formatTickerValue(it.value), up:dir!="down", pct:(typeof it.chgPct == "number" && isFinite(it.chgPct)) ? it.chgPct : undefined }); } : null;
+        // Compact status: LIVE only when the quote is verified live; otherwise the quote time (IST) in a neutral colour.
+        var stateTag = has ? (it.state=="live" ? "LIVE" : (it.asOf || "")) : "";
+        var stateTip = has ? ("Status: " + stateLabel(it.state) + (it.asOf ? ", as of " + it.asOf + " IST" : "")) : "";
         var pts = has ? sparkPoints(mm.data, it.key) : null;
         var pc = (has && (it.key=="NIFTY" || it.key=="BANKNIFTY")) ? pcrs[it.key] : null;
         var vixTag = "";
@@ -77,7 +82,7 @@ export default function HomeMarketTiles(props){
           <div style={{minWidth:0}}>
             <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:6}}>
               <span style={{fontSize:fs.label,fontWeight:800,color:c.text1,letterSpacing:0.2,minWidth:0,overflowWrap:"anywhere"}}>{it.label}</span>
-              {stateTag ? <span style={{fontSize:8,fontWeight:800,color:c.text3,whiteSpace:"nowrap"}}>{stateTag}</span> : null}
+              {stateTag ? <span title={stateTip} aria-label={stateTip} style={{fontSize:9,fontWeight:600,color:c.text3,whiteSpace:"nowrap"}}>{stateTag}</span> : null}
             </div>
             {has ? (
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:6,marginTop:2}}>
@@ -94,7 +99,7 @@ export default function HomeMarketTiles(props){
           </div>
         );
         var box = { textAlign:"left",width:"100%",boxSizing:"border-box",minWidth:0,padding:compact ? "8px 10px" : "10px 14px",minHeight:compact ? 78 : 92,background:light ? "rgba(255,255,255,0.92)" : c.card,border:"1px solid " + (light ? "rgba(255,255,255,0.95)" : c.border),borderRadius:compact ? 12 : 14,boxShadow:light ? "0 4px 14px rgba(37,99,235,0.08), 0 1px 2px rgba(15,23,42,0.05)" : "0 3px 10px rgba(0,0,0,0.22)",fontFamily:"inherit",color:c.text1 };
-        if(route) return <button key={it.key} type="button" data-testid={"home-tile-" + it.key} onClick={function(){ go(route); }} style={Object.assign({cursor:"pointer"}, box)}>{body}</button>;
+        if(route) return <button key={it.key} type="button" data-testid={"home-tile-" + it.key} onClick={openIdx || function(){ go(route); }} style={Object.assign({cursor:"pointer"}, box)}>{body}</button>;
         return <div key={it.key} data-testid={"home-tile-" + it.key} style={box}>{body}</div>;
       })}
     </div>

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useTheme } from "../../theme/ThemeProvider";
 import { t, useLang } from "../../i18n/translations";
 import { useLiveNews } from "../../hooks/useLiveNews";
+import { istStamp } from "../../state/marketTickerModel";
 
 // BreakoutPro - HomeStrips.jsx
 // Home strips under the index cards.
@@ -39,7 +40,7 @@ function findGlobal(data, name){
 
 function commodity(label, full, q){
   if(!q || !isNum(q.chgPct) || q.freshness == "UNAVAILABLE") return { label:label, full:full, ok:false };
-  return { label:label, full:full, ok:true, ltp:isNum(q.ltp) ? q.ltp : null, chg:q.chgPct, tag:q.freshness == "LIVE" ? "" : (q.freshness == "STALE" ? "stale" : "delayed") };
+  return { label:label, full:full, ok:true, ltp:isNum(q.ltp) ? q.ltp : null, chg:q.chgPct, tag:q.freshness == "LIVE" ? "" : ((q.freshness == "STALE" ? "stale" : "delayed") + (isNum(q.ts) ? " " + istStamp(q.ts) : "")) };
 }
 
 function CommodityItem(props){
@@ -62,13 +63,12 @@ function CommodityItem(props){
 
 function NewsRow(props){
   var c = props.c;
-  var news = useLiveNews();
   var is = useState(0);
   var idx = is[0], setIdx = is[1];
   var ps = useState(false);
   var paused = ps[0], setPaused = ps[1];
   var touchT = useRef(null);
-  var list = news.status == "ok" ? news.news.slice(0, MAX_NEWS) : [];
+  var list = props.list || [];
   useEffect(function(){
     if(paused || list.length < 2) return undefined;
     var id = setInterval(function(){ setIdx(function(i){ return i + 1; }); }, ROTATE_MS);
@@ -78,18 +78,11 @@ function NewsRow(props){
   function onTouchStart(){ if(touchT.current) clearTimeout(touchT.current); setPaused(true); }
   function onTouchEnd(){ if(touchT.current) clearTimeout(touchT.current); touchT.current = setTimeout(function(){ setPaused(false); }, 4000); }
   var cur = list.length ? list[idx % list.length] : null;
-  var loading = news.status == "loading";
   var chip = (<span style={{flexShrink:0,display:"inline-flex",alignItems:"center",gap:4,background:"#DC2626",color:"#FFFFFF",borderRadius:999,padding:"2px 8px",fontSize:10,fontWeight:800,whiteSpace:"nowrap"}}><Svg n="bolt" color="#FFFFFF" s={10}/>{t("home.tk_news", "Flash News")}</span>);
   var txt = { flex:"1 1 0",minWidth:0,fontSize:12,fontWeight:600,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",color:c.text1,textAlign:"left" };
   var wrapStyle = { display:"flex",alignItems:"center",gap:8,minWidth:0,flex:"1 1 0",height:"100%" };
   var evs = { onMouseEnter:function(){ setPaused(true); }, onMouseLeave:function(){ setPaused(false); }, onFocus:function(){ setPaused(true); }, onBlur:function(){ setPaused(false); }, onTouchStart:onTouchStart, onTouchEnd:onTouchEnd };
-  if(!cur){
-    return (
-      <div data-testid="home-news" data-state={loading ? "loading" : "unavailable"} style={wrapStyle}>
-        {chip}<span style={Object.assign({}, txt, {color:c.text3,fontWeight:500})}>{loading ? "--" : t("home.tk_none", "News unavailable")}</span>
-      </div>
-    );
-  }
+  if(!cur) return null; // no verified headline: the news row is not rendered at all
   return (
     <button type="button" data-testid="home-news" data-state="news" aria-label={t("home.tk_news", "Flash News") + ": " + cur.title} onClick={function(){ props.go("news"); }}
       style={Object.assign({}, wrapStyle, {background:"none",border:"none",padding:0,margin:0,cursor:"pointer",fontFamily:"inherit"})} {...evs}>
@@ -104,9 +97,12 @@ export function CommodityNewsStrip(props){
   var c = useTheme().c;
   var light = c.scheme == "light";
   var data = props.mm && props.mm.data;
+  var news = useLiveNews();
+  var list = news.status == "ok" ? news.news.slice(0, MAX_NEWS) : [];
+  var hasNews = list.length > 0;
   var cmp = !!props.compact;
-  var crude = commodity(cmp ? "Crude" : "Crude (WTI)", "Crude Oil (WTI), USD", findGlobal(data, "Crude Oil (WTI)"));
-  var gas = commodity(cmp ? "Gas" : "Nat Gas (NYMEX)", "Natural Gas (NYMEX), USD", data && data.macro ? data.macro.natGas : null);
+  var crude = commodity(cmp ? "Crude WTI" : "Crude (WTI)", "Crude Oil WTI, NYMEX futures, USD", findGlobal(data, "Crude Oil (WTI)"));
+  var gas = commodity(cmp ? "Gas NYMEX" : "Nat Gas (NYMEX)", "Natural Gas, NYMEX futures, USD (no verified MCX INR source)", data && data.macro ? data.macro.natGas : null);
   var go = props.setTab || function(){};
   var pill = { boxSizing:"border-box",display:"flex",alignItems:"center",gap:12,height:40,padding:"0 14px",background:light ? "rgba(255,255,255,0.92)" : c.card,border:"1px solid " + (light ? "rgba(255,255,255,0.95)" : c.border),borderRadius:12,boxShadow:light ? "0 3px 10px rgba(37,99,235,0.07)" : "0 3px 10px rgba(0,0,0,0.2)",overflow:"hidden" };
   var divider = (<span aria-hidden="true" style={{width:1,height:18,background:c.border,flexShrink:0}}/>);
@@ -116,14 +112,15 @@ export function CommodityNewsStrip(props){
         <div style={Object.assign({}, pill, {height:"auto",minHeight:36,padding:"4px 10px",gap:"2px 10px",flexWrap:"wrap",justifyContent:"space-between"})}>
           <CommodityItem k="crude" it={crude} c={c} compact={true}/><CommodityItem k="gas" it={gas} c={c} compact={true}/>
         </div>
-        <div style={Object.assign({}, pill, {height:36,padding:"0 10px",gap:8})} data-testid="home-news-row"><NewsRow c={c} go={go}/></div>
+        {hasNews ? <div style={Object.assign({}, pill, {height:36,padding:"0 10px",gap:8})} data-testid="home-news-row"><NewsRow c={c} go={go} list={list}/></div> : null}
       </div>
     );
   }
   return (
     <div style={pill}>
-      <CommodityItem k="crude" it={crude} c={c}/>{divider}<CommodityItem k="gas" it={gas} c={c}/>{divider}
-      <div data-testid="home-news-row" style={{display:"flex",flex:"1 1 0",minWidth:0,height:"100%"}}><NewsRow c={c} go={go}/></div>
+      <CommodityItem k="crude" it={crude} c={c}/>{divider}<CommodityItem k="gas" it={gas} c={c}/>
+      {hasNews ? divider : null}
+      {hasNews ? <div data-testid="home-news-row" style={{display:"flex",flex:"1 1 0",minWidth:0,height:"100%"}}><NewsRow c={c} go={go} list={list}/></div> : null}
     </div>
   );
 }

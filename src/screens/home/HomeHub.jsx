@@ -76,7 +76,7 @@ export default function HomeHub(props){
       <Wave light={light} h={big ? 420 : 240}/>
       <div style={{position:"relative",maxWidth:big ? 1180 : 520,margin:"0 auto",padding:big ? "16px 24px 0" : "10px 12px 0",boxSizing:"border-box",display:"grid",gap:gap}}>
         <h1 data-testid="home-hub-title" style={{position:"absolute",width:1,height:1,margin:-1,padding:0,overflow:"hidden",clip:"rect(0 0 0 0)",whiteSpace:"nowrap",border:0}}>Breakout Pro</h1>
-        <HomeMarketTiles mm={props.mm} setTab={go} compact={!big}/>
+        <HomeMarketTiles mm={props.mm} setTab={go} onOpenIndex={props.onOpenIndex} compact={!big}/>
         <CommodityNewsStrip mm={props.mm} setTab={go} compact={!big}/>
         <SectorStrip mm={props.mm} setTab={go} compact={!big}/>
         <div style={{display:"grid",gridTemplateColumns:"repeat(" + (big ? 4 : 2) + ", minmax(0, 1fr))",gap:gap}}>
@@ -93,7 +93,7 @@ export default function HomeHub(props){
           })}
         </div>
         <HomeCalculator setTab={go} compact={!big}/>
-        <div data-testid="home-edu-footer" style={{marginTop:big ? 6 : 2,textAlign:"center",fontSize:10,lineHeight:big ? 1.4 : 1.3,color:c.text3,paddingInline:16,paddingBottom:8,boxSizing:"border-box",overflowWrap:"break-word",whiteSpace:"normal"}}>{t("c.edu_footer")}</div>
+        {big ? <div data-testid="home-edu-footer" style={{marginTop:big ? 6 : 2,textAlign:"center",fontSize:10,lineHeight:big ? 1.4 : 1.3,color:c.text3,paddingInline:16,paddingBottom:8,boxSizing:"border-box",overflowWrap:"break-word",whiteSpace:"normal"}}>{t("c.edu_footer")}</div> : null}
       </div>
     </div>
   );

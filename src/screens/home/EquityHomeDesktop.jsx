@@ -13,7 +13,7 @@ export default function EquityHomeDesktop(props){
   var setTab = props.setTab || function(){};
   return (
     <div style={{background:theme.c.bg,width:"100%",boxSizing:"border-box",fontFamily:"'Inter',Arial,sans-serif",color:theme.c.text1,overflowX:"hidden"}}>
-      <HomeHub size="lg" mm={props.mm} setTab={setTab} onOpenIndex={props.onOpenIndex}/>
+      <HomeHub size="lg" mm={props.mm} setTab={setTab} onOpenIndex={props.onOpenIndex} liveNews={props.liveNews}/>
     </div>
   );
 }

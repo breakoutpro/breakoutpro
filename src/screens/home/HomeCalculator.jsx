@@ -83,10 +83,10 @@ export default function HomeCalculator(props){
   }
   function seg(id, label){
     var on = dir == id;
-    return (<button type="button" role="radio" aria-checked={on} data-testid={"home-calc-" + id} onClick={function(){ setDir(id); }} style={{height:compact ? 30 : 28,padding:"0 12px",border:"none",cursor:"pointer",fontFamily:"inherit",fontSize:12,fontWeight:800,background:on ? c.blue : "transparent",color:on ? "#FFFFFF" : c.text2,borderRadius:8}}>{label}</button>);
+    return (<button type="button" role="radio" aria-checked={on} data-testid={"home-calc-" + id} onClick={function(){ setDir(id); }} style={{flex:compact ? "1 1 0" : "0 0 auto",minWidth:0,height:compact ? 30 : 28,padding:"0 12px",border:"none",cursor:"pointer",fontFamily:"inherit",fontSize:12,fontWeight:800,background:on ? c.blue : "transparent",color:on ? "#FFFFFF" : c.text2,borderRadius:8}}>{label}</button>);
   }
-  var toggle = (<div role="radiogroup" aria-label="Trade direction" style={{display:"inline-flex",flexShrink:0,padding:2,borderRadius:10,border:"1px solid " + c.border,background:light ? "#F1F5FB" : c.card2}}>{seg("long", "Long")}{seg("short", "Short")}</div>);
-  var shell = { boxSizing:"border-box",background:light ? "rgba(255,255,255,0.92)" : c.card,border:"1px solid " + (light ? "rgba(255,255,255,0.95)" : c.border),borderRadius:14,boxShadow:light ? "0 4px 14px rgba(37,99,235,0.08), 0 1px 2px rgba(15,23,42,0.05)" : "0 3px 10px rgba(0,0,0,0.22)",color:c.text1 };
+  var toggle = (<div role="radiogroup" aria-label="Trade direction" style={{display:compact ? "flex" : "inline-flex",flexShrink:0,boxSizing:"border-box",width:compact ? "100%" : "auto",padding:2,borderRadius:10,border:"1px solid " + c.border,background:light ? "#F1F5FB" : c.card2}}>{seg("long", "Long")}{seg("short", "Short")}</div>);
+  var shell = { boxSizing:"border-box",width:"100%",maxWidth:"100%",minWidth:0,background:light ? "rgba(255,255,255,0.92)" : c.card,border:"1px solid " + (light ? "rgba(255,255,255,0.95)" : c.border),borderRadius:14,boxShadow:light ? "0 4px 14px rgba(37,99,235,0.08), 0 1px 2px rgba(15,23,42,0.05)" : "0 3px 10px rgba(0,0,0,0.22)",color:c.text1 };
   function pill(testid, label, txt, col, bgc){
     return (
       <div data-testid={testid} aria-live="polite" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,flex:compact ? "1 1 0" : "0 0 auto",minWidth:0,height:compact ? 34 : 36,padding:"0 10px",borderRadius:10,background:bgc,whiteSpace:"nowrap"}}>
@@ -109,9 +109,10 @@ export default function HomeCalculator(props){
   if(compact){
     return (
       <div data-testid="home-calc" style={Object.assign({}, shell, {padding:"10px 12px"})}>
-        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><CalcIcon color={c.blue}/><span style={{flex:"1 1 0",minWidth:0}}>{title}</span>{toggle}{open}</div>
-        <div style={{display:"flex",gap:8,marginBottom:8}}>{field("Entry", e, setE, "0")}{field("SL", s, setS, "0")}{field("Qty", q, setQ, "0")}</div>
-        <div style={{display:"flex",gap:8}}>{riskPill}{targetPill}</div>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,minWidth:0}}><CalcIcon color={c.blue}/><span style={{flex:"1 1 0",minWidth:0}}>{title}</span>{open}</div>
+        <div style={{marginBottom:8}}>{toggle}</div>
+        <div style={{display:"flex",gap:8,marginBottom:8,minWidth:0}}>{field("Entry", e, setE, "0")}{field("SL", s, setS, "0")}{field("Qty", q, setQ, "0")}</div>
+        <div style={{display:"flex",gap:8,minWidth:0}}>{riskPill}{targetPill}</div>
         {note}
       </div>
     );

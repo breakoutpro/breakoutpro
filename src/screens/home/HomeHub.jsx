@@ -1,7 +1,7 @@
 import { useTheme } from "../../theme/ThemeProvider";
 import { t, useLang } from "../../i18n/translations";
 import HomeMarketTiles from "./HomeMarketTiles";
-import { CommodityNewsStrip, SectorStrip } from "./HomeStrips";
+import { MarketStrip, NewsTicker } from "./HomeStrips";
 import HomeCalculator from "./HomeCalculator";
 
 // BreakoutPro - HomeHub.jsx
@@ -74,11 +74,11 @@ export default function HomeHub(props){
   return (
     <div data-testid="home-hub" style={{position:"relative",width:"100%",boxSizing:"border-box",background:bg,overflow:"hidden",paddingBottom:big ? 24 : 12,minHeight:big ? "64vh" : undefined}}>
       <Wave light={light} h={big ? 420 : 240}/>
-      <div style={{position:"relative",maxWidth:big ? 1180 : 520,margin:"0 auto",padding:big ? "16px 24px 0" : "10px 12px 0",boxSizing:"border-box",display:"grid",gap:gap}}>
+      <div style={{position:"relative",maxWidth:big ? 1180 : 520,margin:"0 auto",padding:big ? "16px 24px 0" : "10px 12px 0",boxSizing:"border-box",display:"grid",gridTemplateColumns:"minmax(0, 1fr)",gap:gap}}>
         <h1 data-testid="home-hub-title" style={{position:"absolute",width:1,height:1,margin:-1,padding:0,overflow:"hidden",clip:"rect(0 0 0 0)",whiteSpace:"nowrap",border:0}}>Breakout Pro</h1>
         <HomeMarketTiles mm={props.mm} setTab={go} onOpenIndex={props.onOpenIndex} compact={!big}/>
-        <CommodityNewsStrip mm={props.mm} setTab={go} compact={!big}/>
-        <SectorStrip mm={props.mm} setTab={go} compact={!big}/>
+        <MarketStrip mm={props.mm} setTab={go} compact={!big}/>
+        <NewsTicker news={props.liveNews} setTab={go} compact={!big}/>
         <div style={{display:"grid",gridTemplateColumns:"repeat(" + (big ? 4 : 2) + ", minmax(0, 1fr))",gap:gap}}>
           {HOME_CARDS.map(function(cd){
             var label = t(cd.key, cd.fb);

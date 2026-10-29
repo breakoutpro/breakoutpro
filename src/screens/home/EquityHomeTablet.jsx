@@ -46,7 +46,7 @@ export default function EquityHomeTablet(props){
         </div>
       </div>
 
-      <HomeHub size="lg" mm={mm} setTab={setTab} onOpenIndex={props.onOpenIndex}/>
+      <HomeHub size="lg" mm={mm} setTab={setTab} onOpenIndex={props.onOpenIndex} liveNews={props.liveNews}/>
       <div style={{height:8}}></div>
       <style>{"@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}"}</style>
     </div>

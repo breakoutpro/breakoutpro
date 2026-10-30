@@ -1,30 +1,34 @@
-# BreakoutPro - Complete Intelligence Home (reference-image upgrade) - MANIFEST
+# BreakoutPro - Live Intraday Scalping Radar (informational) - MANIFEST
+(Cumulative ZIP: includes the earlier Intelligence Home files this feature builds on.)
 
 ## Files
-Added: src/screens/home/HomeTicker.jsx (slim market ticker), HomeSetups.jsx (hero setups), HomeAudioBrief.jsx (1-min audio brief), HomePanels.jsx (desktop NIFTY / sentiment / sector panels), src/state/audioBriefModel.js, src/hooks/useBreakoutSetups.js, src/hooks/breakoutSetupsModel.js, src/screens/LargeCapMovers.jsx (Top Gainers & Losers), src/screens/RiskTargetCalc.jsx + riskTargetMath.js (calculator moved from Home to Tools, math unchanged), tests/home-intelligence.test.mjs
-Changed: src/screens/home/HomeHub.jsx (new Home layout, 8-button grid), HomeStrips.jsx (JUST IN, pause control, source/time), src/App.jsx (movers route/KNOWN_TABS, desktop More menu "Risk Calculator"), src/screens/InlineScreens.jsx (Tools "Risk & Target" pill), src/i18n/lang/en.js, tests/home-ui-fixes.test.mjs, market-ticker.test.mjs, theme.test.mjs
+New - radar: src/market/intradayRadar.js (all calculations, pure), src/hooks/useIntradayRadar.js (fetch, settings, sound), src/screens/home/HomeRadar.jsx (4 sections + controls), src/state/pcrModel.js, tests/intraday-radar.test.mjs
+Changed - radar: api/market.js (new action=radar, reuses feed.getCandles 5m), src/screens/home/HomeHub.jsx (order, official disclaimer), HomeSetups.jsx (factual labels: 15-Day High/Low Cross, Daily close / Candle in progress, Delayed / EOD, Last Updated), HomePanels.jsx + src/hooks/useHomePcr.js (PCR Live / Delayed / Last EOD with time; last real value kept in localStorage bp_pcr_last), tests/home-intelligence.test.mjs
+Earlier Home work (unchanged here): HomeTicker, HomeStrips, HomeAudioBrief, LargeCapMovers, RiskTargetCalc, riskTargetMath, audioBriefModel, breakoutSetupsModel, useBreakoutSetups, App.jsx, InlineScreens.jsx, en.js, 3 older test files.
 DELETE from repo: src/screens/home/HomeMarketTiles.jsx, src/screens/home/HomeCalculator.jsx
 
-## Feature inventory
-Already working (reused, unchanged): breakout scanner (/api/scanner-data), OI chain + PCR (dataService), Options Intelligence Pro, Chart Pattern Scanner, Stock Research Pro, Strategy Builder, Backtesting, News (/api/news), market-mood data (/api/market-mood-data), Tools, Next Move, themes, auth, routing.
-Needs UI integration (done): Home ticker, JUST IN, setups, quick grid, side panels, calculator in Tools.
-New implementation (done): audio brief (browser speechSynthesis), Top Gainers & Losers (shared quote store, NIFTY 50), news pause/resume control.
-Needs data provider / NOT implemented (no verified source in repo; not faked): MCX Crude/Nat Gas in INR (Home shows WTI and NYMEX in USD, labelled), GIFT NIFTY, intraday (15m/1h) setups on Home, Conflicting setup state (classifier has none), TradingView-style interactive chart on Home (Home shows daily-close line only, labelled), order-flow/footprint, bulk/block deals, Screener/Tijori/Trendlyne-style fundamentals, results calendar on Home, live broker execution (intentionally absent).
+## Implemented
+1 Informational language: factual event labels only (Volume Surge, Day High/Low Cross, Above/Below/Near VWAP, CPR Narrow/Normal/Wide, 15-Day High/Low Cross). Freshness: Live (only if provider status LIVE and session open) / Delayed / Last Updated HH:MM IST / EOD / Unavailable. Official disclaimer on Home. No buy/sell wording (tested).
+3 OI + PCR: Home sentiment panel shows Live / Delayed / Last EOD + time; after close shows the provider value or the last stored real response; nothing invented.
+4 INTRADAY VOLUME SHOCKERS: latest completed 5m bar volume vs mean of the same time-of-day bar in earlier sessions (min 3 sessions), thresholds 2x/3x/5x, duplicate suppression per stock+type+candle, optional sound.
+5 DAY HIGH & DAY LOW CROSSERS: completed 5m bars, crossing = new session high/low after 3 bars, shows bar time, fresh vs earlier, "Near" shown separately and not as a crossing, session status.
+6 VWAP PROXIMITY RADAR: session VWAP from 5m typical price x volume, IST session boundaries, stale/EOD handling, proximity +-0.10/0.20(default)/0.50%.
+7 DAILY CPR & PIVOT LEVELS: P, BC, TC, R1, S1, top/bottom, width%, Narrow (<0.25%) / Normal / Wide (>0.50%) from the last full completed session; labelled calculated reference levels.
+8 Home order: ticker, JUST IN, setups, shockers, crossers, VWAP, CPR, audio brief, quick grid (desktop: side panels on the right).
+9 Controls: volume multiple, universe (NIFTY 50 / Bank Nifty / My Watchlist), VWAP proximity, sound on/off (off by default; turning it on is the permission step), Pause, Resume, Refresh. Refresh every 60 s open / 5 min closed, only while the page is open.
 
-## Preserved / improved / added
-Preserved: all routes and screens (VWAP+9EMA scalper, OI, alerts, etc. stay reachable from More), calculations, auth, themes (light/dark/AMOLED), language. Improved: Home. Added: items above.
-Home states: setups are Confirmed (after close), Waiting (market open, candle forming) or Unavailable (request failed); empty = "No confirmed setups right now."; data labelled "Daily candles, delayed, not live".
-Audio brief: hidden unless the browser supports speech AND there is verified text; uses device TTS (voice and availability depend on the device).
+## Providers actually reused
+Yahoo Finance 5m candles + quote through the existing api/_lib/marketFeed.js (cache, circuit breaker, completed-bar flags), /api/market-mood-data, /api/news, /api/scanner-data, option-chain service (Dhan, via dataService). No new dependency, secret, scheduler or database.
 
-## APIs reused
-/api/market-mood-data, /api/news (single request via App hook), /api/scanner-data, option-chain service (dataService.getExpiryList/getOptionChain), shared quote store (useQuotes). No new API, dependency or secret.
+## NOT implemented / missing provider
+- MCX Crude and MCX Natural Gas in INR: NOT shown. The repo has no verified MCX feed (IndianAPI /commodities is unverified and keyed; the CommodityHome screen's "MCX LIVE" prices are hard-coded demo values - it was not changed and should be reviewed). Ticker keeps WTI and NYMEX in USD, labelled.
+- Background notifications: not claimed. Alerts and sound work only while the page is open (the repo's scheduled push system is for Smart Alerts rules, not for the radar).
+- F&O stock universe: the repo has no F&O list; the universe is NIFTY 50, Bank Nifty or the user's watchlist.
+- Real-time: Yahoo does not state delay, so data is shown Delayed (never Live) unless the provider status says LIVE. Resolution is the 5-minute bar, not ticks. Yahoo returns about 5 sessions of 5m bars, so the volume baseline is at most 4 earlier sessions (min 3 required). CPR close = last 5m close (can differ slightly from the official close).
+- Cost note: one radar request fetches up to ~52 symbols from Yahoo (cached 30 s open / 10 min closed, 8 in parallel). Real-world rate limits were not tested.
 
 ## Tests run
-- node --test tests/*.test.mjs : 658 pass, 0 fail (logic + source-structure tests).
-- esbuild bundle of src/App.jsx: OK. `vite build`: NOT run (npm install is offline here).
-- Playwright against the bundled real App with MOCKED /api (and a stubbed speechSynthesis) at 360x800, 390x844, 430x932, 768x1024, 1366x768, 1440x900, 1920x1080: 187 checks, 0 fail (overflow per element, ticker one line/scroll, JUST IN rotation/pause/resume/hover/focus/touch/navigation, setup states, 8-button navigation, audio play/pause/resume/stop, no-speech hide, side panels, Tools calculator, missing news/commodities, delayed not LIVE, dark theme, no page errors).
-- AMOLED theme and the 3 other languages were not browser-tested here.
-- NOT verified against real providers (no network access to them from this workspace): every value above came from mocks.
-
-## Limitations
-Setups are daily-candle only (20 NIFTY large caps), so no 15m timeframe like the reference image. Mobile Home shows up to 3 setup cards, so the quick grid sits below the first screen. Browser speech quality varies by device.
+- node --test tests/*.test.mjs : 667 pass, 0 fail (includes 9 new radar tests: 5m volume baseline, crossing logic, VWAP and session boundaries, CPR formulas, open/closed/weekend, missing/malformed data, duplicate suppression, freshness wording, PCR freshness, source/wording checks). All inputs are synthetic.
+- esbuild bundle of src/App.jsx: OK. `vite build` NOT run (npm install is offline here).
+- Playwright on the bundled real App with MOCKED /api (radar responses are produced by the real intradayRadar.js from synthetic candles) at 360, 390, 430, 768, 1366, 1440, 1920 px: 270 checks, 0 fail (section order, content, thresholds, universe requests, pause/resume/refresh, sound opt-in/mute/dedupe with a stubbed AudioContext, provider failure, missing history, market closed EOD, PCR Live/Delayed/Last EOD and stored fallback, overflow, themes dark, regressions of earlier Home).
+- NOT verified against real providers: this workspace cannot reach Yahoo/Dhan. First deploy check: GET /api/market?action=radar&symbols=RELIANCE,TCS,NIFTY and confirm results have vol/cross/vwap/cpr populated during market hours. AMOLED theme and the other 4 languages were not browser-tested.

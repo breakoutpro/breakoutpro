@@ -55,7 +55,10 @@ export function NewsTicker(props){
   var is = useState(0);
   var idx = is[0], setIdx = is[1];
   var ps = useState(false);
-  var paused = ps[0], setPaused = ps[1];
+  var paused0 = ps[0], setPaused = ps[1];
+  var ms = useState(false);
+  var manual = ms[0], setManual = ms[1];
+  var paused = paused0 || manual;
   var go = props.setTab || function(){};
   useEffect(function(){
     if(paused || list.length < 2) return undefined;
@@ -66,12 +69,21 @@ export function NewsTicker(props){
   var cur = list[idx % list.length];
   var label = t("home.tk_justin", "JUST IN");
   var evs = { onMouseEnter:function(){ setPaused(true); }, onMouseLeave:function(){ setPaused(false); }, onFocus:function(){ setPaused(true); }, onBlur:function(){ setPaused(false); }, onTouchStart:function(){ setPaused(true); }, onTouchEnd:function(){ setPaused(false); }, onTouchCancel:function(){ setPaused(false); } };
+  var meta = props.compact ? "" : [cur.source, cur.time].filter(function(x){ return x; }).join(" - ");
   return (
-    <button type="button" data-testid="home-news" data-state="news" aria-label={label + ": " + cur.title} onClick={function(){ go("news"); }}
-      style={{boxSizing:"border-box",display:"flex",alignItems:"center",gap:8,width:"100%",maxWidth:"100%",minWidth:0,height:props.compact ? 34 : 38,padding:props.compact ? "0 10px" : "0 14px",background:light ? "rgba(255,255,255,0.92)" : c.card,border:"1px solid " + (light ? "rgba(255,255,255,0.95)" : c.border),borderRadius:12,boxShadow:light ? "0 3px 10px rgba(37,99,235,0.07)" : "0 3px 10px rgba(0,0,0,0.2)",cursor:"pointer",fontFamily:"inherit",color:c.text1,textAlign:"left",overflow:"hidden"}} {...evs}>
+    <div data-testid="home-news" data-state="news" data-held={manual ? "paused" : "running"}
+      style={{boxSizing:"border-box",display:"flex",alignItems:"center",gap:8,width:"100%",maxWidth:"100%",minWidth:0,height:props.compact ? 34 : 38,padding:props.compact ? "0 6px 0 10px" : "0 8px 0 14px",background:light ? "rgba(255,255,255,0.92)" : c.card,border:"1px solid " + (light ? "rgba(255,255,255,0.95)" : c.border),borderRadius:12,boxShadow:light ? "0 3px 10px rgba(37,99,235,0.07)" : "0 3px 10px rgba(0,0,0,0.2)",color:c.text1,overflow:"hidden"}} {...evs}>
       <span style={{flexShrink:0,display:"inline-flex",alignItems:"center",gap:4,background:"#DC2626",color:"#FFFFFF",borderRadius:999,padding:"2px 8px",fontSize:10,fontWeight:800,whiteSpace:"nowrap"}}><Svg n="bolt" color="#FFFFFF" s={10}/>{label}</span>
-      <span style={{flex:"1 1 0",minWidth:0,fontSize:12,fontWeight:600,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{cur.title}</span>
-      <span aria-hidden="true" style={{flexShrink:0,color:c.blue,fontWeight:800}}>{">"}</span>
-    </button>
+      <button type="button" data-testid="home-news-open" aria-label={label + ": " + cur.title} onClick={function(){ go("news"); }} style={{flex:"1 1 0",minWidth:0,display:"flex",alignItems:"center",gap:8,height:"100%",background:"none",border:"none",padding:0,margin:0,cursor:"pointer",fontFamily:"inherit",color:c.text1,textAlign:"left"}}>
+        <span style={{flex:"1 1 0",minWidth:0,fontSize:12,fontWeight:600,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{cur.title}</span>
+        {meta ? <span style={{flexShrink:0,fontSize:10,fontWeight:600,color:c.text3,whiteSpace:"nowrap"}}>{meta}</span> : null}
+        <span aria-hidden="true" style={{flexShrink:0,color:c.blue,fontWeight:800}}>{">"}</span>
+      </button>
+      {list.length > 1 ? (
+        <button type="button" data-testid="home-news-pause" aria-pressed={manual} aria-label={manual ? "Resume headline rotation" : "Pause headline rotation"} onClick={function(){ setManual(function(m){ return !m; }); }} style={{flexShrink:0,width:28,height:28,borderRadius:999,border:"none",background:"none",cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
+          {manual ? (<svg width="12" height="12" viewBox="0 0 16 16" fill={c.blue} aria-hidden="true" focusable="false"><path d="M4 2l10 6-10 6z"/></svg>) : (<svg width="12" height="12" viewBox="0 0 16 16" fill={c.blue} aria-hidden="true" focusable="false"><rect x="3" y="2" width="4" height="12" rx="1"/><rect x="9" y="2" width="4" height="12" rx="1"/></svg>)}
+        </button>
+      ) : null}
+    </div>
   );
 }

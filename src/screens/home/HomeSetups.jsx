@@ -8,8 +8,8 @@ import { istStamp } from "../../state/marketTickerModel";
 // BreakoutPro - HomeSetups.jsx
 // Hero: Today's Breakout Setups (up to 3 compact cards) from the existing /api/scanner-data classifier.
 // Timeframe is Daily (1D): the classifier compares the latest daily close with the prior 15-session high / low.
-// Confirmation: while the market is open the daily candle is still forming, so the setup is UNCONFIRMED;
-// after the close it is CONFIRMED. Key level and volume are shown only when the API returned them.
+// States: while the market is open the daily candle is still forming, so the setup is WAITING;
+// after the close it is CONFIRMED. Unavailable = the scanner request failed. (No Conflicting state: the classifier has none.) Key level and volume are shown only when the API returned them.
 // The data is Yahoo daily candles, so it is labelled delayed, never LIVE. Nothing is predicted or rated; no examples.
 // Rules: no backtick, no triple-equals, ASCII only.
 
@@ -49,13 +49,13 @@ export default function HomeSetups(props){
           {d.status == "ok" && stamp ? <div style={{marginTop:4,fontSize:10,fontWeight:600,color:c.text3}}>{"Checked " + stamp + " IST - daily candles, delayed, not live"}</div> : null}
         </div>
       ) : (
-        <div style={{display:"grid",gridTemplateColumns:big ? "repeat(" + d.setups.length + ", minmax(0, 1fr))" : "minmax(0, 1fr)",gap:big ? 12 : 8}}>
+        <div style={{display:"grid",gridTemplateColumns:big ? "repeat(auto-fit, minmax(230px, 1fr))" : "minmax(0, 1fr)",gap:big ? 12 : 8}}>
           {d.setups.map(function(s){
             var up = s.type == "breakout";
             var dirCol = up ? c.up : c.down;
-            var chip = open ? "Unconfirmed" : "Confirmed";
+            var chip = open ? "Waiting" : "Confirmed";
             var why = open
-              ? "Price is " + (up ? "above" : "below") + " the prior 15-session " + (up ? "high" : "low") + ", but today's daily candle is still forming."
+              ? "Waiting: price is " + (up ? "above" : "below") + " the prior 15-session " + (up ? "high" : "low") + ", but today's daily candle is still forming."
               : "Daily close " + (up ? "above" : "below") + " the prior 15-session " + (up ? "high" : "low") + ".";
             return (
               <button key={s.sym} type="button" data-testid={"home-setup-" + s.sym} data-conf={open ? "unconfirmed" : "confirmed"} onClick={function(){ go("breakoutscan"); }}
@@ -71,7 +71,8 @@ export default function HomeSetups(props){
                 </div>
                 <div style={{display:"flex",flexWrap:"wrap",gap:"2px 12px",marginTop:6,fontSize:12,fontWeight:700,fontVariantNumeric:"tabular-nums"}}>
                   <span>{(up ? "Prior high " : "Prior low ") + fmt(s.level)}</span>
-                  {typeof s.ltp == "number" ? <span>{"Close " + fmt(s.ltp)}</span> : null}
+                  {typeof s.ltp == "number" ? <span>{(open ? "Last " : "Close ") + fmt(s.ltp)}</span> : null}
+                  {s.chgPct != null ? <span style={{color:s.chgPct >= 0 ? c.up : c.down}}>{(s.chgPct >= 0 ? "+" : "") + s.chgPct.toFixed(2) + "%"}</span> : null}
                   {s.volRatio != null ? <span style={{color:c.text2}}>{"Volume " + s.volRatio.toFixed(2) + "x 15-day avg"}</span> : null}
                 </div>
                 <div style={{marginTop:6,fontSize:11,lineHeight:1.35,color:c.text2}}>{why}</div>

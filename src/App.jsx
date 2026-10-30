@@ -44,6 +44,7 @@ var RangeIntelligence = lazy(function(){ return import("./screens/home/RangeInte
 var ChartPatternScanner = lazy(function(){ return import("./screens/ChartPatternScanner"); });
 var BreakoutTimeframe = lazy(function(){ return import("./screens/BreakoutTimeframe"); });
 var MarketMood = lazy(function(){ return import("./screens/MarketMood"); });
+var LargeCapMovers = lazy(function(){ return import("./screens/LargeCapMovers"); });
 var BreakoutScanner = lazy(function(){ return import("./screens/BreakoutScanner"); });
 var AlertsScreen = lazy(function(){ return import("./screens/SmartAlertsPro"); });
 var ExpiryAlerts = lazy(function(){ return import("./screens/ExpiryAlerts"); });
@@ -250,7 +251,7 @@ function MoreScreen(props) {
       {id:"backtest", label:"Backtesting",          sub:"Test strategies on historical data"},
       {id:"strategy", label:"Strategy Builder",     sub:"Create custom buy/sell rules"},
       {id:"journal",  label:"Trading Journal",      sub:"Track trades and P&L history"},
-      {id:"tools",    label:"Risk Calculator",      sub:"R:R ratio, position size, Greeks"},
+      {id:"tools",    label:"Risk Calculator",      sub:"R:R ratio, position size, risk & target"},
     ]},
     {title:"Account & Settings", sk:"account", items:[
       {id:"profile",    label:"Profile",            sub:"Personal info, KYC, preferences"},
@@ -402,7 +403,7 @@ function AppInner() {
   },[]);
 
   // Browser back button support
-  var MORE_SCREENS = ["global","heatmap","fiidii","journal","challenges","sub","tools","candle","chart","detector","analysis","scalper","quiz","briefing","oi","alerts","settings","patterns","paper","share","morning","watchlist","chartscanner","breakouttf"];
+  var MORE_SCREENS = ["global","movers","heatmap","fiidii","journal","challenges","sub","tools","candle","chart","detector","analysis","scalper","quiz","briefing","oi","alerts","settings","patterns","paper","share","morning","watchlist","chartscanner","breakouttf"];
   useEffect(function(){
     function onBack(e){
       e.preventDefault();
@@ -482,7 +483,7 @@ function AppInner() {
     stocks:STOCKS,news:LIVE_NEWS,briefing:briefing,briefingLoading:briefingLoading,
     onBriefing:loadBriefing,user:user,setTab:goTo,glTab:glTab,setGlTab:setGlTab};
 
-  var KNOWN_TABS = ["home","markets","scan","scanner","learn","ai","briefing","alerts","settings","share","morning","commodity","watchlist","patterns","paper","news","candle","chart","detector","analysis","scalper","more","quiz","global","heatmap","fiidii","journal","challenges","sub","oi","tools","breakdown","volspike","gap","rsiscan","macdscan","supertrend","orb","mf","portfolio","voice","backtest","strategy","profile","referral","datahub","marketclose","search","stockprofile","ipo","signals","optsell","optsellhub","guardian","expiryalerts","alerthistory","studio","newsstudio","academy","aimentor","optionsintelpro","stockresearchpro","marketreplay","econcalendar","fiidiipro","marketheatmap","dividendtracker","globalmarketspro","alertcenterpro","rangeintel","marketmood","chartscanner","breakouttf","breakoutscan"];
+  var KNOWN_TABS = ["home","movers","markets","scan","scanner","learn","ai","briefing","alerts","settings","share","morning","commodity","watchlist","patterns","paper","news","candle","chart","detector","analysis","scalper","more","quiz","global","heatmap","fiidii","journal","challenges","sub","oi","tools","breakdown","volspike","gap","rsiscan","macdscan","supertrend","orb","mf","portfolio","voice","backtest","strategy","profile","referral","datahub","marketclose","search","stockprofile","ipo","signals","optsell","optsellhub","guardian","expiryalerts","alerthistory","studio","newsstudio","academy","aimentor","optionsintelpro","stockresearchpro","marketreplay","econcalendar","fiidiipro","marketheatmap","dividendtracker","globalmarketspro","alertcenterpro","rangeintel","marketmood","chartscanner","breakouttf","breakoutscan"];
 
   function renderScreen(){
     return (
@@ -555,6 +556,7 @@ function AppInner() {
         {tab=="breakouttf" ? <BreakoutTimeframe onBack={goBack}/> : null}
         {tab=="marketmood" ? <MarketMood mm={mm} onClose={goBack}/> : null}
         {tab=="breakoutscan" ? <BreakoutScanner onBack={goBack}/> : null}
+        {tab=="movers" ? <LargeCapMovers/> : null}
         {tab=="tools"    ? <ToolsScreen/> : null}
         {KNOWN_TABS.indexOf(tab)==-1 ? <MoreScreen setTab={setTab}/> : null}
       </Suspense>
@@ -743,6 +745,7 @@ function GlobalHeader(props){
                 {label:"Portfolio Analytics",id:"portfolio",k:"gh.m.portfolio"},
                 {label:"Trading Journal",id:"journal",k:"gh.m.journal"},
                 {label:"Economic Calendar Pro",id:"econcalendar",k:"gh.m.econcalendar"},
+                {label:"Risk Calculator",id:"tools",k:"gh.m.tools"},
                 {label:"Settings",id:"settings",k:"gh.m.settings"}
               ].map(function(n){
                 return <button key={n.id} onMouseDown={function(){props.setTab(n.id);}} style={{width:"100%",boxSizing:"border-box",background:"none",border:"none",textAlign:"left",padding:"9px 14px",color:T2,fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>{t(n.k,n.label)}</button>;

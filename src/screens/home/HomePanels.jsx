@@ -2,6 +2,8 @@ import { useTheme } from "../../theme/ThemeProvider";
 import { useLang } from "../../i18n/translations";
 import Spark from "../../components/Spark";
 import { useHomePcr, pcrLabel } from "../../hooks/useHomePcr";
+import { pcrFreshness } from "../../state/pcrModel";
+import { isClockOpen } from "../DirectionEngine";
 import { buildTickerItems, formatTickerValue, formatTickerPct, pctDir } from "../../state/marketTickerModel";
 
 // BreakoutPro - HomePanels.jsx
@@ -56,6 +58,7 @@ export function SentimentPanel(props){
   var vix = items.filter(function(i){ return i.key == "VIX"; })[0];
   var vixOk = vix && isNum(vix.value) && vix.state != "unavailable" && vix.state != "loading";
   var n = pcrs.NIFTY;
+  var fr = pcrFreshness(n, isClockOpen(Date.now()), Date.now());
   var lab = n ? pcrLabel(n.pcr) : null;
   var lc = lab == "Bullish" ? c.up : (lab == "Bearish" ? c.down : c.text2);
   var pos = n ? Math.max(0, Math.min(1, (n.pcr - 0.4) / 1.2)) * 100 : 50;
@@ -64,7 +67,7 @@ export function SentimentPanel(props){
     <Card c={c} id="home-panel-sentiment" title="Market Sentiment (OI + PCR)">
       {n ? (
         <div>
-          <div style={{display:"flex",alignItems:"baseline",gap:8}}><span style={{fontSize:20,fontWeight:800,color:lc}}>{lab}</span><span style={{fontSize:13,fontWeight:700}}>{n.pcr.toFixed(2)}</span>{n.stale ? <span style={{fontSize:10,color:c.text3}}>(delayed)</span> : null}</div>
+          <div style={{display:"flex",alignItems:"baseline",gap:8}}><span style={{fontSize:20,fontWeight:800,color:lc}}>{lab}</span><span style={{fontSize:13,fontWeight:700}}>{n.pcr.toFixed(2)}</span><span data-testid="pcr-fresh" style={{fontSize:10,fontWeight:700,color:fr && fr.label == "Live" ? c.blue : c.text3}}>{fr ? fr.label + (fr.stamp ? " - " + fr.stamp : "") : ""}</span></div>
           <div aria-hidden="true" style={{position:"relative",height:6,borderRadius:3,background:c.border,margin:"8px 0 4px"}}><span style={{position:"absolute",left:pos + "%",top:-3,width:4,height:12,borderRadius:2,background:c.blue,transform:"translateX(-2px)"}}/></div>
           <div style={{display:"flex",justifyContent:"space-between",fontSize:9,color:c.text3}}><span>Bearish below 0.8</span><span>Bullish above 1.2</span></div>
         </div>

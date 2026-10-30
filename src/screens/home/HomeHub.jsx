@@ -4,6 +4,7 @@ import HomeTicker from "./HomeTicker";
 import { NewsTicker } from "./HomeStrips";
 import HomeSetups from "./HomeSetups";
 import HomeAudioBrief from "./HomeAudioBrief";
+import HomeRadar from "./HomeRadar";
 import { IndexPanel, SentimentPanel, SectorPanel } from "./HomePanels";
 
 // BreakoutPro - HomeHub.jsx
@@ -92,6 +93,7 @@ export default function HomeHub(props){
         <div className="bpHomeCols" data-testid="home-cols">
           <div style={{display:"grid",gridTemplateColumns:"minmax(0, 1fr)",gap:gap,minWidth:0}}>
             <HomeSetups setTab={go} big={big}/>
+            <HomeRadar/>
             <HomeAudioBrief mm={props.mm} liveNews={props.liveNews}/>
             <div className="bpQuick" data-testid="home-quick-grid">
               {HOME_CARDS.map(function(cd){
@@ -117,6 +119,7 @@ export default function HomeHub(props){
             </div>
           ) : null}
         </div>
+        <div data-testid="home-info-disclaimer" style={{marginTop:big ? 6 : 2,textAlign:"center",fontSize:10,lineHeight:1.35,color:c.text3,paddingInline:big ? 16 : 4,paddingBottom:big ? 8 : 4,boxSizing:"border-box",overflowWrap:"break-word",whiteSpace:"normal"}}>BreakoutPro provides mathematical market activity indicators and market data for informational and educational purposes only. These indicators are not investment advice or recommendations to buy or sell securities.</div>
         {big ? <div data-testid="home-edu-footer" style={{marginTop:big ? 6 : 2,textAlign:"center",fontSize:10,lineHeight:big ? 1.4 : 1.3,color:c.text3,paddingInline:16,paddingBottom:8,boxSizing:"border-box",overflowWrap:"break-word",whiteSpace:"normal"}}>{t("c.edu_footer")}</div> : null}
       </div>
     </div>

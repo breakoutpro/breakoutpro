@@ -36,7 +36,7 @@ export default function HomeSetups(props){
   var note = null;
   if(d.status == "loading") note = "Loading setups...";
   else if(d.status == "error") note = "Breakout data unavailable right now.";
-  else if(d.setups.length == 0) note = "No confirmed setups right now.";
+  else if(d.setups.length == 0) note = "No 15-day range crossings right now.";
   return (
     <section data-testid="home-setups" aria-label="Today's Breakout Setups" style={{minWidth:0}}>
       <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:8,marginBottom:6,minWidth:0}}>
@@ -46,16 +46,16 @@ export default function HomeSetups(props){
       {note ? (
         <div data-testid="home-setups-empty" data-state={d.status == "ok" ? "empty" : d.status} role="status" style={Object.assign({}, shell, {padding:"14px 14px",fontSize:13,fontWeight:600,color:c.text2})}>
           {note}
-          {d.status == "ok" && stamp ? <div style={{marginTop:4,fontSize:10,fontWeight:600,color:c.text3}}>{"Checked " + stamp + " IST - daily candles, delayed, not live"}</div> : null}
+          {d.status == "ok" && stamp ? <div style={{marginTop:4,fontSize:10,fontWeight:600,color:c.text3}}>{"Last Updated " + stamp + " IST - " + (open ? "Delayed" : "EOD") + " - daily candles"}</div> : null}
         </div>
       ) : (
         <div style={{display:"grid",gridTemplateColumns:big ? "repeat(auto-fit, minmax(230px, 1fr))" : "minmax(0, 1fr)",gap:big ? 12 : 8}}>
           {d.setups.map(function(s){
             var up = s.type == "breakout";
             var dirCol = up ? c.up : c.down;
-            var chip = open ? "Waiting" : "Confirmed";
+            var chip = open ? "Candle in progress" : "Daily close";
             var why = open
-              ? "Waiting: price is " + (up ? "above" : "below") + " the prior 15-session " + (up ? "high" : "low") + ", but today's daily candle is still forming."
+              ? "Price is " + (up ? "above" : "below") + " the prior 15-session " + (up ? "high" : "low") + "; today's daily candle is still forming."
               : "Daily close " + (up ? "above" : "below") + " the prior 15-session " + (up ? "high" : "low") + ".";
             return (
               <button key={s.sym} type="button" data-testid={"home-setup-" + s.sym} data-conf={open ? "unconfirmed" : "confirmed"} onClick={function(){ go("breakoutscan"); }}
@@ -63,7 +63,7 @@ export default function HomeSetups(props){
                 <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
                   <span style={{fontSize:15,fontWeight:800,minWidth:0,overflowWrap:"anywhere"}}>{s.sym}</span>
                   <span style={{fontSize:10,fontWeight:600,color:c.text3}}>NSE</span>
-                  <span style={{marginLeft:"auto",fontSize:11,fontWeight:800,color:dirCol,whiteSpace:"nowrap"}}>{(up ? "Breakout " : "Breakdown ") + (up ? "\u25B2" : "\u25BC")}</span>
+                  <span style={{marginLeft:"auto",fontSize:11,fontWeight:800,color:dirCol,whiteSpace:"nowrap"}}>{(up ? "15-Day High Cross " : "15-Day Low Cross ") + (up ? "\u25B2" : "\u25BC")}</span>
                 </div>
                 <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",gap:6,marginTop:6}}>
                   <span style={{fontSize:10,fontWeight:700,color:c.text2,border:"1px solid " + c.border,borderRadius:999,padding:"1px 7px"}}>Daily (1D)</span>
@@ -76,7 +76,7 @@ export default function HomeSetups(props){
                   {s.volRatio != null ? <span style={{color:c.text2}}>{"Volume " + s.volRatio.toFixed(2) + "x 15-day avg"}</span> : null}
                 </div>
                 <div style={{marginTop:6,fontSize:11,lineHeight:1.35,color:c.text2}}>{why}</div>
-                <div style={{marginTop:6,fontSize:10,fontWeight:600,color:c.text3}}>{(stamp ? "Updated " + stamp + " IST - " : "") + "Daily candles, delayed, not live"}</div>
+                <div style={{marginTop:6,fontSize:10,fontWeight:600,color:c.text3}}>{(stamp ? "Last Updated " + stamp + " IST - " : "") + (open ? "Delayed" : "EOD") + " - daily candles"}</div>
               </button>
             );
           })}

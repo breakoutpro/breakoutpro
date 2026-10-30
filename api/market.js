@@ -15,6 +15,7 @@ import * as dhan from "./_lib/providers/dhan.js";
 import * as feed from "./_lib/marketFeed.js";
 import { sessionAt } from "../src/alerts/alertEngine.js";
 import { toYahooSymbol, fromYahooSymbol } from "../src/market/marketData.js";
+import { analyzeSymbol } from "../src/market/intradayRadar.js";
 
 export default async function handler(req, res){
   res.setHeader("Cache-Control", "s-maxage=15, stale-while-revalidate=60");
@@ -27,7 +28,7 @@ export default async function handler(req, res){
   // candles  : OHLCV for one symbol and frame (1m, 5m, 15m, 1H, 1D) with status and volumeAvailable.
   // yahoo    : legacy /api/yahoo response shape (rewritten from the old route), plus bp* status fields.
   // history  : legacy /api/history response shape (rewritten from the old route), plus status fields.
-  if(action == "snapshot" || action == "candles" || action == "yahoo" || action == "history"){
+  if(action == "snapshot" || action == "candles" || action == "yahoo" || action == "history" || action == "radar"){
     try{
       return await unifiedAction(action, q, res);
     }catch(e){
@@ -432,6 +433,26 @@ async function unifiedAction(action, q, res){
         marketState:session == "OPEN" ? "REGULAR" : "CLOSED", bpStatus:x.status, bpAsOf:x.asOf, bpDelayedBySec:x.delayedBySec, bpSource:x.source });
     });
     return res.status(200).json({ quoteResponse:{ result:rows, error:rows.length ? null : "No symbols resolved" } });
+  }
+  if(action == "radar"){
+    // Live Intraday Scalping Radar: real 5-minute candles per symbol from the shared feed (cached, circuit-breaker
+    // protected), reduced by the pure rules in src/market/intradayRadar.js. Max 60 symbols, each validated.
+    var rsyms = String(q.symbols || "").split(",").map(function(x){ return x.trim().toUpperCase(); }).filter(function(x){ return x && toYahooSymbol(x); });
+    rsyms = rsyms.filter(function(x, i){ return rsyms.indexOf(x) == i; }).slice(0, 60);
+    if(!rsyms.length){ cacheHeader(res, false); return res.status(400).json({ ok:false, reason:"missing_symbols" }); }
+    var rsession = sessionAt(now), rresults = [], rfailed = [];
+    for(var bi = 0; bi < rsyms.length; bi += 8){
+      var batch = rsyms.slice(bi, bi + 8);
+      var got = await Promise.all(batch.map(function(sy){ return feed.getCandles(sy, "5m", { now:now }).then(function(cc){ return { sy:sy, cc:cc }; }, function(){ return { sy:sy, cc:null }; }); }));
+      got.forEach(function(g){
+        if(!g.cc || !g.cc.candles || !g.cc.candles.length){ rfailed.push(g.sy); return; }
+        var a = analyzeSymbol(g.sy, g.cc, { now:now, session:rsession });
+        if(a.state == "ok") rresults.push(a); else rfailed.push(g.sy);
+      });
+    }
+    cacheHeader(res, rresults.length > 0, rsession == "OPEN" ? 30 : 300);
+    if(!rresults.length) return res.status(200).json({ ok:false, reason:"no_intraday_data", data:{ session:rsession, failed:rfailed } });
+    return res.status(200).json({ ok:true, data:{ results:rresults, failed:rfailed, session:rsession, generatedAt:now, source:"yahoo", interval:"5m" } });
   }
   if(action == "candles"){
     var c = await feed.getCandles(String(q.symbol || "").toUpperCase(), q.frame || q.interval, { now:now });

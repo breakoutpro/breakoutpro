@@ -258,9 +258,9 @@ test("files in the Phase 1 scope contain no hardcoded hex colours (except docume
   });
 });
 
-test("Home reaches Live Breakouts, OI + PCR, VWAP + 9EMA and Top Gainers & Losers through the quick grid", function(){
+test("Home reaches Live Breakouts, Options Intelligence, Scanners, Research, Algo, News, Tools and Top Gainers & Losers through the eight-button quick grid", function(){
   var hub = read("src/screens/home/HomeHub.jsx");
-  var dest = { "home.live_breakouts":"breakoutscan", "home.qa_oi":"oi", "home.qa_vwap":"scalper", "home.qa_movers":"movers" };
+  var dest = { "home.live_breakouts":"breakoutscan", "home.qa_options":"optionsintelpro", "home.qa_scanners":"chartscanner", "home.qa_research":"stockresearchpro", "home.qa_algo":"strategy", "home.qa_news":"news", "home.qa_tools":"tools", "home.qa_movers":"movers" };
   var app = read("src/App.jsx");
   Object.keys(dest).forEach(function(k){
     assert.ok(hub.indexOf('key:"' + k + '"') >= 0, "hub lost card " + k);

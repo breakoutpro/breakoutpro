@@ -33,7 +33,7 @@ test("Next Move card opens on tap, no View Full Analysis link", function(){
   assert.ok(root.indexOf("stopPropagation") < 0, "card root must let taps reach the card");
   assert.ok(/onClick=\{function\(e\)\{ e.stopPropagation\(\); \}\}>\s*<DetailedAnalysis/.test(c), "expandable section keeps its own taps");
   var hubSrc = read("src/screens/home/HomeHub.jsx");
-  ["breakoutscan","oi","scalper","movers"].forEach(function(d){ assert.ok(hubSrc.indexOf('tab:"' + d + '"') >= 0, "hub card must open " + d); });
+  ["breakoutscan","optionsintelpro","chartscanner","stockresearchpro","strategy","news","tools","movers"].forEach(function(d){ assert.ok(hubSrc.indexOf('tab:"' + d + '"') >= 0, "hub card must open " + d); });
   ["Mobile","Tablet","Laptop","Desktop"].forEach(function(n){
     assert.ok(read("src/screens/home/EquityHome" + n + ".jsx").indexOf("<HomeHub") >= 0, n + " renders the hub");
   });

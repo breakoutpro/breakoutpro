@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { pickSetups, MAX_SETUPS } from "../src/hooks/breakoutSetupsModel.js";
+import { buildBrief } from "../src/state/audioBriefModel.js";
 import { calcRisk, calcTarget, calcMessage } from "../src/screens/riskTargetMath.js";
 
 // Intelligence-first Home. Mocked inputs only; no real API is called here.
@@ -24,20 +25,20 @@ test("pickSetups keeps only breakout / breakdown with a key level, sorted by vol
   assert.equal(pickSetups([{ sym:"D", tags:["breakout"], priorHigh:50, ltp:51 }])[0].volRatio, null);
 });
 
-test("Home hub: no calculator, no big index cards, four quick buttons in order, JUST IN label", function(){
+test("Home hub: no calculator, no big index cards, eight quick buttons in order, JUST IN label", function(){
   var hub = read("src/screens/home/HomeHub.jsx");
   assert.ok(hub.indexOf("Calculator") < 0 && hub.indexOf("RiskTargetCalc") < 0);
-  var order = ["home.live_breakouts", "home.qa_oi", "home.qa_vwap", "home.qa_movers"].map(function(k){ return hub.indexOf('key:"' + k + '"'); });
+  var order = ["home.live_breakouts", "home.qa_options", "home.qa_scanners", "home.qa_research", "home.qa_algo", "home.qa_news", "home.qa_tools", "home.qa_movers"].map(function(k){ return hub.indexOf('key:"' + k + '"'); });
   assert.ok(order.every(function(i){ return i > 0; }) && order.slice().sort(function(a, b){ return a - b; }).join() == order.join());
-  assert.ok(hub.indexOf("Practice mode (simulated data)") >= 0);
+  assert.ok(hub.indexOf("no broker execution") >= 0);
   assert.ok(read("src/screens/home/HomeStrips.jsx").indexOf('"JUST IN"') >= 0);
   assert.ok(!fs.existsSync("src/screens/home/HomeMarketTiles.jsx") && !fs.existsSync("src/screens/home/HomeCalculator.jsx"));
 });
 
 test("setups never invent data and are never labelled live", function(){
   var s = read("src/screens/home/HomeSetups.jsx");
-  assert.ok(s.indexOf("No confirmed setups right now.") >= 0 && s.indexOf("Breakout data unavailable") >= 0);
-  assert.ok(s.indexOf("isClockOpen") >= 0 && s.indexOf("delayed, not live") >= 0);
+  assert.ok(s.indexOf("No 15-day range crossings right now.") >= 0 && s.indexOf("Breakout data unavailable") >= 0);
+  assert.ok(s.indexOf("15-Day High Cross") >= 0 && s.indexOf("isClockOpen") >= 0 && s.indexOf("EOD") >= 0 && s.indexOf("Delayed") >= 0 && !/Waiting|Confirmed/.test(s.replace(/No confirmed/g, "")));
   assert.ok(!/target|confidence|score/i.test(s.replace(/Today's/g, "")));
 });
 
@@ -56,8 +57,31 @@ test("calculator lives in Tools with its calculations and validation intact", fu
 });
 
 test("new files are ASCII, no backtick, no triple-equals", function(){
-  ["src/screens/home/HomeTicker.jsx", "src/screens/home/HomeSetups.jsx", "src/screens/home/HomeHub.jsx", "src/screens/home/HomeStrips.jsx", "src/screens/LargeCapMovers.jsx", "src/screens/RiskTargetCalc.jsx", "src/screens/riskTargetMath.js", "src/hooks/useBreakoutSetups.js", "src/hooks/breakoutSetupsModel.js"].forEach(function(f){
+  ["src/screens/home/HomeTicker.jsx", "src/screens/home/HomeSetups.jsx", "src/screens/home/HomeAudioBrief.jsx", "src/screens/home/HomePanels.jsx", "src/state/audioBriefModel.js", "src/screens/home/HomeHub.jsx", "src/screens/home/HomeStrips.jsx", "src/screens/LargeCapMovers.jsx", "src/screens/RiskTargetCalc.jsx", "src/screens/riskTargetMath.js", "src/hooks/useBreakoutSetups.js", "src/hooks/breakoutSetupsModel.js"].forEach(function(f){
     var s = read(f);
     assert.ok(!/[^\x00-\x7F]/.test(s), f + " non-ascii"); assert.ok(s.indexOf("`") < 0, f); assert.ok(s.indexOf("===") < 0, f);
   });
+});
+
+test("audio brief text uses only verified inputs and is hidden when there is nothing to say", function(){
+  assert.equal(buildBrief({}), null);
+  assert.equal(buildBrief({ indices:[], headlines:[] }), null);
+  var b = buildBrief({ indices:[{ label:"NIFTY 50", value:24500, chgPct:-0.22, live:true }, { label:"INDIA VIX", value:14.2, chgPct:0.5, live:false }], commodities:[{ label:"Crude WTI", chgPct:1.38, tag:"delayed" }], headlines:["RBI keeps repo rate unchanged", "  Markets   end higher  "] });
+  assert.ok(b.text.indexOf("Nifty 50 at 24,500, down 0.22 percent.") >= 0);
+  assert.ok(b.text.indexOf("not all live") >= 0 && b.text.indexOf("Crude WTI, up 1.38 percent, delayed") >= 0);
+  assert.ok(b.text.indexOf("RBI keeps repo rate unchanged.") >= 0 && b.text.indexOf("Markets end higher.") >= 0);
+  assert.ok(b.text.indexOf("not investment advice") >= 0 && b.words <= 150 && b.seconds >= 10);
+  var only = buildBrief({ indices:[], headlines:["One headline"] });
+  assert.ok(only.text.indexOf("Index quotes are unavailable") >= 0);
+  var long = buildBrief({ indices:[], headlines:[new Array(400).join("word ")] });
+  assert.ok(long.words == 150);
+});
+
+test("audio brief renders only with real speech support; news ticker has pause control; desktop panels exist", function(){
+  var a = read("src/screens/home/HomeAudioBrief.jsx");
+  assert.ok(a.indexOf("speechSynthesis") >= 0 && a.indexOf("if(!supported() || !brief) return null;") >= 0 && a.indexOf("fetch(") < 0);
+  var n = read("src/screens/home/HomeStrips.jsx");
+  assert.ok(n.indexOf("home-news-pause") >= 0 && n.indexOf("Pause headline rotation") >= 0);
+  var p = read("src/screens/home/HomePanels.jsx");
+  assert.ok(p.indexOf("Unavailable") >= 0 && p.indexOf("fetch(") < 0 && p.indexOf("Math.random") < 0);
 });

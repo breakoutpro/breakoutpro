@@ -18,9 +18,25 @@ function loadOne(sym){
     return dataService.getOptionChain(sym, ex.expiries[0], 1).then(function(oc){
       if(!oc || (oc.status != "LIVE" && oc.status != "STALE")) return null;
       if(typeof oc.pcrOi != "number" || !isFinite(oc.pcrOi)) return null;
-      return { pcr: oc.pcrOi, stale: oc.status != "LIVE" };
+      var upd = oc.updated ? Date.parse(oc.updated) : NaN;
+      var rec = { pcr: oc.pcrOi, stale: oc.status != "LIVE", updated: isFinite(upd) ? upd : null, fromStore: false };
+      saveLast(sym, rec);
+      return rec;
     });
   }).catch(function(){ return null; });
+}
+
+// The last real value this browser received is kept (key bp_pcr_last) so the value after the close can still be
+// shown as "Last EOD". It is only ever a stored provider response, never computed or invented.
+var STORE_KEY = "bp_pcr_last";
+function readStore(){ try{ var o = JSON.parse(localStorage.getItem(STORE_KEY) || "{}"); return (o && typeof o == "object") ? o : {}; }catch(e){ return {}; } }
+function saveLast(sym, rec){
+  try{ var o = readStore(); o[sym] = { pcr:rec.pcr, updated:rec.updated }; localStorage.setItem(STORE_KEY, JSON.stringify(o)); }catch(e){}
+}
+export function loadLast(sym){
+  var r = readStore()[sym];
+  if(!r || typeof r.pcr != "number" || !isFinite(r.pcr) || typeof r.updated != "number" || !isFinite(r.updated)) return null;
+  return { pcr:r.pcr, stale:true, updated:r.updated, fromStore:true };
 }
 
 export function useHomePcr(){
@@ -31,7 +47,7 @@ export function useHomePcr(){
     function run(){
       Promise.all(SYMS.map(loadOne)).then(function(r){
         if(!alive) return;
-        setVal({ NIFTY:r[0], BANKNIFTY:r[1] });
+        setVal({ NIFTY:r[0] || loadLast("NIFTY"), BANKNIFTY:r[1] || loadLast("BANKNIFTY") });
       });
     }
     run();

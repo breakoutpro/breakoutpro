@@ -24,6 +24,7 @@ import TE from "./lang/te";
 import HI from "./lang/hi";
 import KN from "./lang/kn";
 import TA from "./lang/ta";
+import { ALERT_PACKS } from "../alerts/alertLang";
 
 // Only languages that actually have a translation pack are offered.
 // (ml, gu, mr, bn, pa, or, as were listed before with ZERO strings behind
@@ -42,6 +43,11 @@ export var LANGUAGES = [
 ];
 
 var PACKS = { en:EN.strings, te:TE.strings, hi:HI.strings, kn:KN.strings, ta:TA.strings };
+var ks = Object.keys(PACKS);
+for(var i = 0; i < ks.length; i++){
+  var src = ALERT_PACKS[ks[i]] || {};
+  for(var k in src){ PACKS[ks[i]][k] = src[k]; }
+}
 var GLOSS = { en:EN.terms,   te:TE.terms,   hi:HI.terms,   kn:KN.terms,   ta:TA.terms };
 var STORE_KEY = "bp_lang";
 

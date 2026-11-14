@@ -1,6 +1,20 @@
 // BreakoutPro - i18n/lang/en.js (generated language pack; ASCII-escaped).
 // Keys missing here fall back to English at runtime; raw keys are never shown.
 var strings = {
+  "scalper.title":"Scalper Mode",
+  "scalper.sub":"Intraday rapid scalping intelligence & confluence signals",
+  "scalper.timeframe":"Timeframe",
+  "scalper.signal":"Scalping Signal",
+  "scalper.entry":"Entry",
+  "scalper.target1":"Target 1",
+  "scalper.target2":"Target 2",
+  "scalper.stop_loss":"Stop Loss",
+  "scalper.rr_ratio":"Risk : Reward",
+  "scalper.confluence":"Confluence Score",
+  "scalper.pillars":"4-Pillar Confluence Checklist",
+  "scalper.risk_sizer":"Scalp Position & Risk Calculator",
+  "scalper.scanner_title":"Active Scalp Signals Scanner",
+  "scalper.disclaimer":"Strict stop-loss adherence is mandatory. Never average a losing scalping position. Maximum 3 high-probability setups per trading session.",
   "mw.title":"Global & Indian Market Watch",
   "mw.sub":"Real-time & session benchmarks across indices, commodities and FX",
   "mw.view_all":"View All Markets",

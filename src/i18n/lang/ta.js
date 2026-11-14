@@ -1,6 +1,20 @@
 // BreakoutPro - i18n/lang/ta.js (generated language pack; ASCII-escaped).
 // Keys missing here fall back to English at runtime; raw keys are never shown.
 var strings = {
+  "scalper.title":"ಸ್ಕಾಲ್ಪರ್ ಮೋಡ್",
+  "scalper.sub":"இண்ட்ராடே ஸ்கால்பிங் சிக்னல்கள்",
+  "scalper.timeframe":"காலிடைவெளி",
+  "scalper.signal":"ஸ்கால்பிங் சிக்னல்",
+  "scalper.entry":"நுழைவு",
+  "scalper.target1":"இலக்கு 1",
+  "scalper.target2":"இலக்கு 2",
+  "scalper.stop_loss":"இழப்புத் தடுப்பு",
+  "scalper.rr_ratio":"அபாயம் : வெற்றி",
+  "scalper.confluence":"ஒற்றுமை மதிப்பு",
+  "scalper.pillars":"4-தூண் சரிபார்ப்பு",
+  "scalper.risk_sizer":"அபாயக் கணக்கீட்டாளர்",
+  "scalper.scanner_title":"நேரடி ஸ்கால்ப் சிக்னல் ஸ்கேனர்",
+  "scalper.disclaimer":"இழப்புத் தடுப்பை கட்டாயம் பின்பற்றவும். கற்பிக்கும் பயிற்சிக்காக மட்டுமே.",
   "mw.title":"\u0b95\u0bc1\u0bb3\u0bcb\u0baa\u0bb2\u0bcd & \u0b87\u0ba8\u0bcd\u0ba4\u0bbf\u0baf \u0b9a\u0ba8\u0bcd\u0ba4\u0bc8 \u0b95\u0ba3\u0bcd\u0b95\u0bbe\u0ba3\u0bbf\u0baa\u0bcd\u0baa\u0bc1",
   "mw.sub":"\u0b95\u0bc1\u0bb1\u0bbf\u0baf\u0bc0\u0b9f\u0bc1\u0b95\u0bb3\u0bcd, \u0b95\u0bae\u0bbe\u0b9f\u0bbf\u0b9f\u0bcd\u0b9f\u0bbf\u0b95\u0bb3\u0bcd \u0bae\u0bb1\u0bcd\u0bb1\u0bc1\u0bae\u0bcd \u0ba8\u0bbe\u0ba3\u0baf\u0b99\u0bcd\u0b95\u0bb3\u0bbf\u0ba9\u0bcd \u0bb5\u0bbf\u0bb0\u0bbf\u0bb5\u0bbe\u0ba9 \u0ba4\u0b95\u0bb5\u0bb2\u0bcd",
   "mw.view_all":"\u0b85\u0ba9\u0bc8\u0ba4\u0bcd\u0ba4\u0bc1 \u0b9a\u0ba8\u0bcd\u0ba4\u0bc8\u0b95\u0bb3\u0bc8\u0baf\u0bc1\u0bae\u0bcd \u0baa\u0bbe\u0bb0\u0bcd\u0b95\u0bcd\u0b95\u0bb5\u0bc1\u0bae\u0bcd",

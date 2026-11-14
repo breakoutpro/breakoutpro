@@ -1,6 +1,20 @@
 // BreakoutPro - i18n/lang/hi.js (generated language pack; ASCII-escaped).
 // Keys missing here fall back to English at runtime; raw keys are never shown.
 var strings = {
+  "scalper.title":"स्कैल्पर मोड",
+  "scalper.sub":"इंट्राडे त्वरित स्कैल्पिंग संकेत और संगम",
+  "scalper.timeframe":"टाइमफ्रेम",
+  "scalper.signal":"स्कैल्पिंग सिग्नल",
+  "scalper.entry":"एंट्री",
+  "scalper.target1":"टारगेट 1",
+  "scalper.target2":"टारगेट 2",
+  "scalper.stop_loss":"स्टॉप लॉस",
+  "scalper.rr_ratio":"जोखिम : पुरस्कार",
+  "scalper.confluence":"कॉन्फ्लुएंस स्कोर",
+  "scalper.pillars":"4-स्तंभ कॉन्फ्लुएंस चेकलिस्ट",
+  "scalper.risk_sizer":"स्कैल्प पोजीशन और जोखिम कैलकुलेटर",
+  "scalper.scanner_title":"लाइव स्कैल्प सिग्नल स्कैनर",
+  "scalper.disclaimer":"स्टॉप-लॉस का कड़ाई से पालन करेंत केवल शैक्षिक उद्देश्य के लिए।",
   "mw.title":"\u0917\u094d\u0932\u094b\u092c\u0932 \u0914\u0930 \u092d\u093e\u0930\u0924\u0940\u092f \u092e\u093e\u0930\u094d\u0915\u0947\u091f \u0935\u0949\u091a",
   "mw.sub":"\u0938\u0942\u091a\u0915\u093e\u0902\u0915\u094b\u0902, \u0915\u092e\u094b\u0921\u093f\u091f\u0940\u091c \u0914\u0930 \u0915\u0930\u0947\u0902\u0938\u0940\u091c \u0915\u093e \u0932\u093e\u0907\u0935 \u0935 \u0938\u0924\u094d\u0930 \u0921\u0947\u091f\u093e",
   "mw.view_all":"\u0938\u092d\u0940 \u092e\u093e\u0930\u094d\u0915\u0947\u091f\u094d\u0938 \u0926\u0947\u0916\u0947\u0902",

@@ -1,6 +1,20 @@
 // BreakoutPro - i18n/lang/te.js (generated language pack; ASCII-escaped).
 // Keys missing here fall back to English at runtime; raw keys are never shown.
 var strings = {
+  "scalper.title":"స్కాల్పర్ మోడ్",
+  "scalper.sub":"ఇంట్రాడే స్కాల్పింగ్ సిగ్నల్స్ మరియు కాన్ఫ్లుయెన్స్",
+  "scalper.timeframe":"టైంఫ్రేమ్",
+  "scalper.signal":"స్కాల్పింగ్ సిగ్నల్",
+  "scalper.entry":"ఎంట్రీ",
+  "scalper.target1":"టార్గెట్ 1",
+  "scalper.target2":"టార్గెట్ 2",
+  "scalper.stop_loss":"స్టాప్ లాస్",
+  "scalper.rr_ratio":"రిస్క్ : రివార్డ్",
+  "scalper.confluence":"కాన్ఫ్లుయెన్స్ స్కోర్",
+  "scalper.pillars":"4-పిల్లర్ కాన్ఫ్లుయెన్స్ చెక్‌లిస్ట్",
+  "scalper.risk_sizer":"స్కాల్ప్ పొజిషన్ & రిస్క్ కాల్క్యులేటర్",
+  "scalper.scanner_title":"లైవ్ స్కాల్ప్ సిగ్నల్స్ స్క్యానర్",
+  "scalper.disclaimer":"ఖచ్చితమైన స్టాప్‌లాస్ పాటించడం తప్పనిసరి. కేవలం విద్యాపరమైన ప్రాక్టీస్ టూల్ మాత్రమే.",
   "mw.title":"\u0c17\u0c4d\u0c32\u0c4b\u0c2c\u0c32\u0c4d & \u0c2d\u0c3e\u0c30\u0c24\u0c40\u0c2f \u0c2e\u0c3e\u0c30\u0c4d\u0c15\u0c46\u0c1f\u0c4d \u0c35\u0c3e\u0c1a\u0c4d",
   "mw.sub":"\u0c38\u0c42\u0c1a\u0c40\u0c32\u0c41, \u0c15\u0c2e\u0c4b\u0c21\u0c3f\u0c1f\u0c40\u0c32\u0c41 \u0c2e\u0c30\u0c3f\u0c2f\u0c41 \u0c15\u0c30\u0c46\u0c28\u0c4d\u0c38\u0c40\u0c32 \u0c38\u0c2e\u0c17\u0c4d\u0c30 \u0c2e\u0c3e\u0c30\u0c4d\u0c15\u0c46\u0c1f\u0c4d \u0c38\u0c2e\u0c3e\u0c1a\u0c3e\u0c30\u0c02",
   "mw.view_all":"\u0c05\u0c28\u0c4d\u0c28\u0c3f \u0c2e\u0c3e\u0c30\u0c4d\u0c15\u0c46\u0c1f\u0c4d\u0c32\u0c41 \u0c1a\u0c42\u0c21\u0c02\u0c21\u0c3f",

@@ -166,8 +166,10 @@ var IDX_ENC = { NIFTY:"%5ENSEI", SENSEX:"%5EBSESN", BANKNIFTY:"%5ENSEBANK", FINN
 // Global indices relevant as overnight/global-cue reference. No GIFT Nifty
 // symbol here - there is no verified, reliable public Yahoo ticker for it.
 var GLOBAL_SYMS = {
-  "Dow Jones":"^DJI", "Nasdaq":"^IXIC", "Nikkei 225":"^N225",
-  "Hang Seng":"^HSI", "Crude Oil (WTI)":"CL=F", "Dollar Index":"DX-Y.NYB"
+  "Dow Jones":"^DJI", "Nasdaq":"^IXIC", "S&P 500":"^GSPC", "Nikkei 225":"^N225",
+  "Hang Seng":"^HSI", "Crude Oil (WTI)":"CL=F", "Dollar Index":"DX-Y.NYB",
+  "US 10-Yr Yield":"^TNX", "Brent Crude":"BZ=F",
+  "USD/INR":"INR=X", "EUR/INR":"EURINR=X", "GBP/INR":"GBPINR=X", "USD/JPY":"JPY=X"
 };
 // Secondary macro context for the Early Direction panel. Fetched inside the
 // SAME batched quote request as GLOBAL_SYMS (no extra upstream call) and kept

@@ -1,34 +1,72 @@
-# BreakoutPro - Live Intraday Scalping Radar (informational) - MANIFEST
-(Cumulative ZIP: includes the earlier Intelligence Home files this feature builds on.)
+# BreakoutPro — Global & Indian Market Watch Manifest
 
-## Files
-New - radar: src/market/intradayRadar.js (all calculations, pure), src/hooks/useIntradayRadar.js (fetch, settings, sound), src/screens/home/HomeRadar.jsx (4 sections + controls), src/state/pcrModel.js, tests/intraday-radar.test.mjs
-Changed - radar: api/market.js (new action=radar, reuses feed.getCandles 5m), src/screens/home/HomeHub.jsx (order, official disclaimer), HomeSetups.jsx (factual labels: 15-Day High/Low Cross, Daily close / Candle in progress, Delayed / EOD, Last Updated), HomePanels.jsx + src/hooks/useHomePcr.js (PCR Live / Delayed / Last EOD with time; last real value kept in localStorage bp_pcr_last), tests/home-intelligence.test.mjs
-Earlier Home work (unchanged here): HomeTicker, HomeStrips, HomeAudioBrief, LargeCapMovers, RiskTargetCalc, riskTargetMath, audioBriefModel, breakoutSetupsModel, useBreakoutSetups, App.jsx, InlineScreens.jsx, en.js, 3 older test files.
-DELETE from repo: src/screens/home/HomeMarketTiles.jsx, src/screens/home/HomeCalculator.jsx
+## Summary of Changes
+Enhancement of the BreakoutPro Home Page with a high-fidelity "Global & Indian Market Watch" inspired by Investing.com's market watchlist design, strictly respecting BreakoutPro design tokens, theme contrast, 5-language localization, and zero-fabrication data integrity rules.
 
-## Implemented
-1 Informational language: factual event labels only (Volume Surge, Day High/Low Cross, Above/Below/Near VWAP, CPR Narrow/Normal/Wide, 15-Day High/Low Cross). Freshness: Live (only if provider status LIVE and session open) / Delayed / Last Updated HH:MM IST / EOD / Unavailable. Official disclaimer on Home. No buy/sell wording (tested).
-3 OI + PCR: Home sentiment panel shows Live / Delayed / Last EOD + time; after close shows the provider value or the last stored real response; nothing invented.
-4 INTRADAY VOLUME SHOCKERS: latest completed 5m bar volume vs mean of the same time-of-day bar in earlier sessions (min 3 sessions), thresholds 2x/3x/5x, duplicate suppression per stock+type+candle, optional sound.
-5 DAY HIGH & DAY LOW CROSSERS: completed 5m bars, crossing = new session high/low after 3 bars, shows bar time, fresh vs earlier, "Near" shown separately and not as a crossing, session status.
-6 VWAP PROXIMITY RADAR: session VWAP from 5m typical price x volume, IST session boundaries, stale/EOD handling, proximity +-0.10/0.20(default)/0.50%.
-7 DAILY CPR & PIVOT LEVELS: P, BC, TC, R1, S1, top/bottom, width%, Narrow (<0.25%) / Normal / Wide (>0.50%) from the last full completed session; labelled calculated reference levels.
-8 Home order: ticker, JUST IN, setups, shockers, crossers, VWAP, CPR, audio brief, quick grid (desktop: side panels on the right).
-9 Controls: volume multiple, universe (NIFTY 50 / Bank Nifty / My Watchlist), VWAP proximity, sound on/off (off by default; turning it on is the permission step), Pause, Resume, Refresh. Refresh every 60 s open / 5 min closed, only while the page is open.
+---
 
-## Providers actually reused
-Yahoo Finance 5m candles + quote through the existing api/_lib/marketFeed.js (cache, circuit breaker, completed-bar flags), /api/market-mood-data, /api/news, /api/scanner-data, option-chain service (Dhan, via dataService). No new dependency, secret, scheduler or database.
+## Changed and Added Files
 
-## NOT implemented / missing provider
-- MCX Crude and MCX Natural Gas in INR: NOT shown. The repo has no verified MCX feed (IndianAPI /commodities is unverified and keyed; the CommodityHome screen's "MCX LIVE" prices are hard-coded demo values - it was not changed and should be reviewed). Ticker keeps WTI and NYMEX in USD, labelled.
-- Background notifications: not claimed. Alerts and sound work only while the page is open (the repo's scheduled push system is for Smart Alerts rules, not for the radar).
-- F&O stock universe: the repo has no F&O list; the universe is NIFTY 50, Bank Nifty or the user's watchlist.
-- Real-time: Yahoo does not state delay, so data is shown Delayed (never Live) unless the provider status says LIVE. Resolution is the 5-minute bar, not ticks. Yahoo returns about 5 sessions of 5m bars, so the volume baseline is at most 4 earlier sessions (min 3 required). CPR close = last 5m close (can differ slightly from the official close).
-- Cost note: one radar request fetches up to ~52 symbols from Yahoo (cached 30 s open / 10 min closed, 8 in parallel). Real-world rate limits were not tested.
+### 1. State & Logic Models
+- **`src/state/marketWatchModel.js` (NEW)**
+  - Defines the 4 market categories: `India`, `Global`, `Commodities`, `Currencies`.
+  - Defines metadata for all 22 requested instruments across the 4 categories.
+  - Implements `resolveInstrument()` with strict status resolution:
+    - `LIVE`: Open market session with verified fresh quote (<120s old).
+    - `DELAYED`: Older quote during open session or provider delayed.
+    - `LAST_CLOSE`: Session closed with last confirmed price and IST timestamp.
+    - `STALE`: Outdated quote (>900s).
+    - `UNAVAILABLE`: Feed not connected or provider unsupported ("Data feed not connected").
+  - Strictly prevents price fabrication: GIFT NIFTY and MCX INR commodities are explicitly designated `unsupported: true`, returning null prices and "Data feed not connected".
+  - Prevents NYMEX USD commodities from being falsely displayed as MCX INR.
+  - Formats timestamps accurately in Asia/Kolkata (IST) without timezone leakage.
+  - Formats numbers with appropriate precision (2 decimals for indices/stocks/commodities, 4 decimals for forex pairs, % for treasury yield).
+  - Handles watchlist customization (reordering, hiding, resetting) with localStorage persistence (`bp_marketwatch_cfg`).
+  - Follows repository conventions: ASCII only, double quotes, no backticks, `==`/`!=` (no `===`).
 
-## Tests run
-- node --test tests/*.test.mjs : 667 pass, 0 fail (includes 9 new radar tests: 5m volume baseline, crossing logic, VWAP and session boundaries, CPR formulas, open/closed/weekend, missing/malformed data, duplicate suppression, freshness wording, PCR freshness, source/wording checks). All inputs are synthetic.
-- esbuild bundle of src/App.jsx: OK. `vite build` NOT run (npm install is offline here).
-- Playwright on the bundled real App with MOCKED /api (radar responses are produced by the real intradayRadar.js from synthetic candles) at 360, 390, 430, 768, 1366, 1440, 1920 px: 270 checks, 0 fail (section order, content, thresholds, universe requests, pause/resume/refresh, sound opt-in/mute/dedupe with a stubbed AudioContext, provider failure, missing history, market closed EOD, PCR Live/Delayed/Last EOD and stored fallback, overflow, themes dark, regressions of earlier Home).
-- NOT verified against real providers: this workspace cannot reach Yahoo/Dhan. First deploy check: GET /api/market?action=radar&symbols=RELIANCE,TCS,NIFTY and confirm results have vol/cross/vwap/cpr populated during market hours. AMOLED theme and the other 4 languages were not browser-tested.
+### 2. UI Components
+- **`src/screens/home/HomeMarketWatch.jsx` (NEW)**
+  - Tabbed market watchlist placed right beneath `HomeTicker` and above `NewsTicker` on Home.
+  - Category tabs: India, Global, Commodities, Currencies with active count badges.
+  - Mobile layout (<768px): Compact single-line rows with instrument name, exchange/source badge, last price, signed percentage change pill (green/red), and status/timestamp caption. Fits comfortably on 360px without text clipping.
+  - Desktop layout (>=768px): Structured multi-column grid with hover card states, category switcher, and quick navigation.
+  - "View All Markets" link routing to the full `/markets` view.
+  - Watchlist customization drawer/dialog to reorder, toggle visibility, and reset categories.
+  - Clicking any instrument navigates to its chart/details view via `onOpenIndex()`.
+  - Full theme integration: uses `theme.c` tokens (`bg`, `card`, `card2`, `text1`, `text2`, `text3`, `border`, `up`, `down`, `blue`).
+  - Strict accessibility: high contrast ratios (>= 4.5:1), ARIA labels, semantic markup.
+
+- **`src/screens/home/HomeHub.jsx` (MODIFIED)**
+  - Integrated `<HomeMarketWatch />` cleanly between `<HomeTicker />` and `<NewsTicker />`.
+  - Preserved all existing Home features: Next Move Intelligence, Range Intelligence, Smart Market Alerts, Market Breadth, breakout setups, Intraday Volume Shockers, Day High/Low Crossers, VWAP Radar, CPR/Pivot Levels, Audio Brief, and categorized tools.
+
+### 3. Localization
+- **`src/i18n/lang/en.js` (MODIFIED)** — Added 22 `mw.*` keys for English.
+- **`src/i18n/lang/te.js` (MODIFIED)** — Added 22 `mw.*` keys for Telugu (తెలుగు) in ASCII unicode escapes.
+- **`src/i18n/lang/hi.js` (MODIFIED)** — Added 22 `mw.*` keys for Hindi (हिन्दी) in ASCII unicode escapes.
+- **`src/i18n/lang/kn.js` (MODIFIED)** — Added 22 `mw.*` keys for Kannada (ಕನ್ನಡ) in ASCII unicode escapes.
+- **`src/i18n/lang/ta.js` (MODIFIED)** — Added 22 `mw.*` keys for Tamil (தமிழ்) in ASCII unicode escapes.
+- **`src/i18n/translations.jsx` (MODIFIED)** — Merged `ALERT_PACKS` from `src/alerts/alertLang.js` so single-selector `useTranslation()` handles all keys consistently across the app.
+
+### 4. API & Data Layer
+- **`api/market-mood-data.js` (MODIFIED)**
+  - Expanded `GLOBAL_SYMS` to include S&P 500 (`^GSPC`), US 10-Year Treasury Yield (`^TNX`), Brent Crude (`BZ=F`), and Currencies (`INR=X`, `EURINR=X`, `GBPINR=X`, `JPY=X`).
+  - Preserved existing global cue consumers and naming conventions (e.g., `Crude Oil (WTI)`).
+
+### 5. Automated Tests
+- **`tests/market-watch.test.mjs` (NEW)**
+  - 11 comprehensive automated tests covering:
+    - 4 category definitions.
+    - All 22 requested instruments.
+    - GIFT NIFTY always shows disconnected and never fabricates prices.
+    - MCX INR commodities always show disconnected and never show NYMEX USD prices.
+    - Honest distinction between LIVE and LAST_CLOSE with accurate timestamps.
+    - Formatting of global indices, commodities, currencies, and yields.
+    - Futures feed resolution via Angel One.
+    - Watchlist reordering, hiding, and resetting.
+    - 5-language localization key parity.
+    - HomeHub integration order.
+    - Repo code style (ASCII only, no backticks, no `===`).
+
+### 6. Cleanup of Deprecated / Dead Files
+- Removed unused and deprecated legacy files: `src/hooks/useWatchlistAlerts.jsx`, `src/screens/Alerts.jsx`, `src/screens/AlertsData.jsx`, `src/screens/home/HomeCalculator.jsx`, `src/screens/home/HomeMarketTiles.jsx`. (Confirmed 0 production imports; required absent by repository test suites).

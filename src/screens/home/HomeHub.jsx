@@ -1,6 +1,7 @@
 import { useTheme } from "../../theme/ThemeProvider";
 import { t, useLang } from "../../i18n/translations";
 import HomeTicker from "./HomeTicker";
+import HomeMarketWatch from "./HomeMarketWatch";
 import { NewsTicker } from "./HomeStrips";
 import HomeSetups from "./HomeSetups";
 import HomeAudioBrief from "./HomeAudioBrief";
@@ -89,6 +90,7 @@ export default function HomeHub(props){
         <h1 data-testid="home-hub-title" style={{position:"absolute",width:1,height:1,margin:-1,padding:0,overflow:"hidden",clip:"rect(0 0 0 0)",whiteSpace:"nowrap",border:0}}>Breakout Pro</h1>
         <style>{".bpHomeCols{display:grid;grid-template-columns:minmax(0,1fr);gap:" + gap + "px}@media (min-width:1100px){.bpHomeCols{grid-template-columns:minmax(0,1fr) 330px;align-items:start}}.bpQuick{display:grid;gap:" + gap + "px;grid-template-columns:repeat(4,minmax(0,1fr))}"}</style>
         <HomeTicker big={big} mm={props.mm} setTab={go} onOpenIndex={props.onOpenIndex}/>
+        <HomeMarketWatch big={big} mm={props.mm} setTab={go} onOpenIndex={props.onOpenIndex}/>
         <NewsTicker news={props.liveNews} setTab={go} compact={!big}/>
         <div className="bpHomeCols" data-testid="home-cols">
           <div style={{display:"grid",gridTemplateColumns:"minmax(0, 1fr)",gap:gap,minWidth:0}}>
